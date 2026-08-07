@@ -231,87 +231,23 @@
     text-shadow: 0 clamp(4px, 1vw, 8px) 0 rgba(31, 42, 60, 0.18);
   }
 
-  /* Les glyphes +/−/×/÷ de la police sont trop fins pour le contour épais
-     (la barre du moins se réduisait à une pastille) : on dessine donc les
-     4 symboles en CSS - des barres à coins arrondis - pour un trait net et
-     un poids visuel identique quelle que soit la police du navigateur. */
   .problem .op,
   .mode-card .op-icon {
-    position: relative;
-    display: inline-flex;
-    flex: none;
-    width: 0.62em;
-    height: 0.62em;
-    overflow: hidden;
+    display: inline-block;
     font-size: var(--fs-op);
-    color: transparent;
+    font-weight: 900;
+    line-height: 1;
   }
 
-  .problem .op[data-op="mul"],
-  .mode-card .op-icon[data-op="mul"] { transform: rotate(45deg); }
+  .problem .op[data-op="add"] { color: var(--green-add); }
+  .problem .op[data-op="sub"] { color: var(--orange-sub); }
+  .problem .op[data-op="mul"] { color: var(--candy-blue); }
+  .problem .op[data-op="div"] { color: var(--candy-pink); }
 
-  .problem .op::before,
-  .problem .op[data-op="add"]::after,
-  .problem .op[data-op="mul"]::after,
-  .mode-card .op-icon::before,
-  .mode-card .op-icon[data-op="add"]::after,
-  .mode-card .op-icon[data-op="mul"]::after {
-    content: "";
-    position: absolute;
-    border-radius: 999px;
-    background: var(--bar-color);
-    box-shadow: 0 0 0 clamp(2px, 0.5vw, 4px) var(--ink);
-  }
-
-  .problem .op::before,
-  .mode-card .op-icon::before {
-    left: 0;
-    right: 0;
-    top: 50%;
-    height: 0.16em;
-    transform: translateY(-50%);
-  }
-
-  .problem .op[data-op="add"]::after,
-  .problem .op[data-op="mul"]::after,
-  .mode-card .op-icon[data-op="add"]::after,
-  .mode-card .op-icon[data-op="mul"]::after {
-    top: 0;
-    bottom: 0;
-    left: 50%;
-    width: 0.16em;
-    transform: translateX(-50%);
-  }
-
-  .problem .op .dot,
-  .mode-card .op-icon .dot {
-    display: none;
-    position: absolute;
-    left: 50%;
-    width: 0.15em;
-    height: 0.15em;
-    border-radius: 50%;
-    background: var(--bar-color);
-    box-shadow: 0 0 0 clamp(2px, 0.4vw, 3px) var(--ink);
-    transform: translateX(-50%);
-  }
-
-  .problem .op[data-op="div"] .dot,
-  .mode-card .op-icon[data-op="div"] .dot { display: block; }
-  .problem .op .dot-a,
-  .mode-card .op-icon .dot-a { top: 10%; }
-  .problem .op .dot-b,
-  .mode-card .op-icon .dot-b { bottom: 10%; }
-
-  .problem .op[data-op="add"] { --bar-color: var(--green-add); }
-  .problem .op[data-op="sub"] { --bar-color: var(--orange-sub); }
-  .problem .op[data-op="mul"] { --bar-color: var(--candy-blue); }
-  .problem .op[data-op="div"] { --bar-color: var(--candy-pink); }
-
-  .mode-card .op-icon[data-op="add"] { --bar-color: var(--green-add-light); }
-  .mode-card .op-icon[data-op="sub"] { --bar-color: var(--orange-sub-light); }
-  .mode-card .op-icon[data-op="mul"] { --bar-color: var(--candy-blue-light); }
-  .mode-card .op-icon[data-op="div"] { --bar-color: var(--candy-pink-light); }
+  .mode-card .op-icon[data-op="add"] { color: var(--green-add-light); }
+  .mode-card .op-icon[data-op="sub"] { color: var(--orange-sub-light); }
+  .mode-card .op-icon[data-op="mul"] { color: var(--candy-blue-light); }
+  .mode-card .op-icon[data-op="div"] { color: var(--candy-pink-light); }
 
   .problem .eq {
     color: var(--ink);
@@ -614,10 +550,7 @@
   <main class="problem-zone">
     <div class="problem" id="problem">
       <span class="num" id="termA">4</span>
-      <span class="op" id="op" data-op="add">
-        <span class="dot dot-a"></span>
-        <span class="dot dot-b"></span>
-      </span>
+      <span class="op" id="op" data-op="add">+</span>
       <span class="num" id="termB">3</span>
       <span class="eq">=</span>
       <span class="q">?</span>
@@ -637,16 +570,16 @@
       <h1 class="menu-title">Choisis ton jeu !</h1>
       <div class="mode-grid">
         <button class="mode-card" type="button" data-mode="add">
-          <span class="op-icon" data-op="add"><span class="dot dot-a"></span><span class="dot dot-b"></span></span>Addition
+          <span class="op-icon" data-op="add">+</span>Addition
         </button>
         <button class="mode-card" type="button" data-mode="sub">
-          <span class="op-icon" data-op="sub"><span class="dot dot-a"></span><span class="dot dot-b"></span></span>Soustraction
+          <span class="op-icon" data-op="sub">−</span>Soustraction
         </button>
         <button class="mode-card" type="button" data-mode="mul">
-          <span class="op-icon" data-op="mul"><span class="dot dot-a"></span><span class="dot dot-b"></span></span>Multiplication
+          <span class="op-icon" data-op="mul">×</span>Multiplication
         </button>
         <button class="mode-card" type="button" data-mode="div">
-          <span class="op-icon" data-op="div"><span class="dot dot-a"></span><span class="dot dot-b"></span></span>Division
+          <span class="op-icon" data-op="div">÷</span>Division
         </button>
       </div>
       <button class="mode-card mode-costaud" type="button" data-mode="costaud">
@@ -665,6 +598,7 @@
     var MAX_LEVEL = 5;
     var CANDY_COLORS = ["candy-pink", "candy-teal", "candy-blue", "candy-tangerine"];
     var OP_KEYS = ["add", "sub", "mul", "div"];
+    var OP_SYMBOL = { add: "+", sub: "−", mul: "×", div: "÷" };
     var OP_ARIA_LABEL = { add: "plus", sub: "moins", mul: "fois", div: "divisé par" };
 
     var BASE_LEVELS = {
@@ -844,6 +778,7 @@
       var p = state.problem;
       els.termA.textContent = String(p.termA);
       els.termB.textContent = String(p.termB);
+      els.op.textContent = OP_SYMBOL[p.opKey];
       els.op.setAttribute("data-op", p.opKey);
       els.op.setAttribute("aria-label", OP_ARIA_LABEL[p.opKey]);
       els.problem.classList.remove("pop");
