@@ -722,22 +722,22 @@
 
     function generateSubtraction(maxTerm) {
       var a = randInt(1, maxTerm);
-      var b = randInt(0, a);
+      var b = randTermRareZero(a);
       return { a: a, b: b };
     }
 
     function generateMultiplication(maxFactor) {
       var a, b;
       do {
-        a = randInt(0, maxFactor);
-        b = randInt(0, maxFactor);
+        a = randTermRareZero(maxFactor);
+        b = randTermRareZero(maxFactor);
       } while (a === 0 && b === 0);
       return { a: a, b: b };
     }
 
     function generateDivision(maxFactor) {
       var divisor = randInt(1, maxFactor);
-      var quotient = randInt(0, maxFactor);
+      var quotient = randTermRareZero(maxFactor);
       return { a: divisor * quotient, b: divisor };
     }
 
