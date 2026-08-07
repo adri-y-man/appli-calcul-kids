@@ -216,7 +216,9 @@
 
   .problem {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
+    justify-content: center;
     gap: clamp(0.3rem, 2vw, 0.7rem);
     font-size: var(--fs-problem);
     font-weight: 900;
@@ -548,13 +550,7 @@
   </header>
 
   <main class="problem-zone">
-    <div class="problem" id="problem">
-      <span class="num" id="termA">4</span>
-      <span class="op" id="op" data-op="add">+</span>
-      <span class="num" id="termB">3</span>
-      <span class="eq">=</span>
-      <span class="q">?</span>
-    </div>
+    <div class="problem" id="problem"></div>
   </main>
 
   <p class="feedback" id="feedback" aria-live="polite">
@@ -608,11 +604,15 @@
       div: { param: [3, 5, 7, 9, 10] }
     };
 
-    var COSTAUD_LEVELS = {
-      add: { param: [15, 25, 40, 55, 70], maxResult: 100 },
-      sub: { param: [15, 25, 40, 55, 70] },
-      mul: { param: [6, 8, 10, 12, 12] },
-      div: { param: [6, 8, 10, 12, 12] }
+    // Calcul costaud : 3 termes, 2 opérations tirées indépendamment (donc
+    // potentiellement différentes) parmi +, −, ×, ÷, enchaînées de gauche à
+    // droite. Chaque étape est bornée pour rester positive, entière, et sous
+    // overallMax.
+    var COSTAUD3_LEVELS = {
+      overallMax: [20, 30, 45, 60, 80],
+      addSubRange: [5, 7, 10, 12, 15],
+      mulRange: [3, 4, 5, 6, 7],
+      divRange: [3, 4, 5, 6, 7]
     };
 
     var state = {
@@ -682,8 +682,8 @@
       return b === 0 ? 0 : a / b;
     }
 
-    function buildTerms(opKey, levelIdx, useCostaud) {
-      var table = (useCostaud ? COSTAUD_LEVELS : BASE_LEVELS)[opKey];
+    function buildTerms(opKey, levelIdx) {
+      var table = BASE_LEVELS[opKey];
       var param = table.param[levelIdx];
       if (opKey === "add") {
         var t = generateAddition(param, table.maxResult);
@@ -717,18 +717,73 @@
       return shuffle(Array.from(choices));
     }
 
+    function applyCostaudStep(opKey, current, table) {
+      if (opKey === "add") {
+        var maxAddTerm = Math.max(0, Math.min(table.addSubRange, table.overallMax - current));
+        var addTerm = randTermRareZero(maxAddTerm);
+        return { term: addTerm, value: current + addTerm };
+      }
+      if (opKey === "sub") {
+        var maxSubTerm = Math.min(table.addSubRange, current);
+        var subTerm = randTermRareZero(maxSubTerm);
+        return { term: subTerm, value: current - subTerm };
+      }
+      if (opKey === "mul") {
+        if (current === 0) {
+          var factorAtZero = randInt(1, table.mulRange);
+          return { term: factorAtZero, value: 0 };
+        }
+        var maxFactor = Math.max(1, Math.min(table.mulRange, Math.floor(table.overallMax / current)));
+        var factor = randInt(1, maxFactor);
+        return { term: factor, value: current * factor };
+      }
+      // div
+      if (current === 0) {
+        var divisorAtZero = randInt(1, table.divRange);
+        return { term: divisorAtZero, value: 0 };
+      }
+      var maxDivisor = Math.min(table.divRange, current);
+      var divisors = [];
+      for (var d = 1; d <= maxDivisor; d++) {
+        if (current % d === 0) divisors.push(d);
+      }
+      var divisor = divisors[randInt(0, divisors.length - 1)];
+      return { term: divisor, value: current / divisor };
+    }
+
+    function generateCostaudProblem(levelIdx) {
+      var table = {
+        overallMax: COSTAUD3_LEVELS.overallMax[levelIdx],
+        addSubRange: COSTAUD3_LEVELS.addSubRange[levelIdx],
+        mulRange: COSTAUD3_LEVELS.mulRange[levelIdx],
+        divRange: COSTAUD3_LEVELS.divRange[levelIdx]
+      };
+      var op1 = OP_KEYS[randInt(0, OP_KEYS.length - 1)];
+      var op2 = OP_KEYS[randInt(0, OP_KEYS.length - 1)];
+      var t1 = randTermRareZero(table.addSubRange);
+      var step1 = applyCostaudStep(op1, t1, table);
+      var step2 = applyCostaudStep(op2, step1.value, table);
+      return {
+        terms: [t1, step1.term, step2.term],
+        ops: [op1, op2],
+        answer: step2.value,
+        choices: generateChoices(step2.value, table.overallMax)
+      };
+    }
+
     function generateProblem() {
       var levelIdx = Math.min(Math.max(state.level, MIN_LEVEL), MAX_LEVEL) - 1;
-      var useCostaud = state.mode === "costaud";
-      var opKey = useCostaud ? OP_KEYS[randInt(0, OP_KEYS.length - 1)] : state.mode;
-      var terms = buildTerms(opKey, levelIdx, useCostaud);
-      var answer = computeAnswer(opKey, terms.a, terms.b);
+      if (state.mode === "costaud") {
+        return generateCostaudProblem(levelIdx);
+      }
+      var opKey = state.mode;
+      var t = buildTerms(opKey, levelIdx);
+      var answer = computeAnswer(opKey, t.a, t.b);
       return {
-        opKey: opKey,
-        termA: terms.a,
-        termB: terms.b,
+        terms: [t.a, t.b],
+        ops: [opKey],
         answer: answer,
-        choices: generateChoices(answer, terms.upperBound)
+        choices: generateChoices(answer, t.upperBound)
       };
     }
 
@@ -743,9 +798,6 @@
       stars: document.getElementById("stars"),
       maxBadge: document.getElementById("maxBadge"),
       problem: document.getElementById("problem"),
-      termA: document.getElementById("termA"),
-      termB: document.getElementById("termB"),
-      op: document.getElementById("op"),
       feedback: document.getElementById("feedback"),
       feedbackLine1: document.getElementById("feedbackLine1"),
       feedbackLine2: document.getElementById("feedbackLine2"),
@@ -776,11 +828,34 @@
 
     function renderProblem() {
       var p = state.problem;
-      els.termA.textContent = String(p.termA);
-      els.termB.textContent = String(p.termB);
-      els.op.textContent = OP_SYMBOL[p.opKey];
-      els.op.setAttribute("data-op", p.opKey);
-      els.op.setAttribute("aria-label", OP_ARIA_LABEL[p.opKey]);
+      els.problem.innerHTML = "";
+      p.terms.forEach(function (term, idx) {
+        var numEl = document.createElement("span");
+        numEl.className = "num";
+        numEl.textContent = String(term);
+        els.problem.appendChild(numEl);
+
+        if (idx < p.ops.length) {
+          var opKey = p.ops[idx];
+          var opEl = document.createElement("span");
+          opEl.className = "op";
+          opEl.setAttribute("data-op", opKey);
+          opEl.setAttribute("aria-label", OP_ARIA_LABEL[opKey]);
+          opEl.textContent = OP_SYMBOL[opKey];
+          els.problem.appendChild(opEl);
+        }
+      });
+
+      var eqEl = document.createElement("span");
+      eqEl.className = "eq";
+      eqEl.textContent = "=";
+      els.problem.appendChild(eqEl);
+
+      var qEl = document.createElement("span");
+      qEl.className = "q";
+      qEl.textContent = "?";
+      els.problem.appendChild(qEl);
+
       els.problem.classList.remove("pop");
       void els.problem.offsetWidth;
       els.problem.classList.add("pop");
