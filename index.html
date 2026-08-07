@@ -580,6 +580,22 @@
 
   .menu-close[hidden] { display: none; }
 
+  .menu-brand {
+    position: absolute;
+    top: max(0.8rem, env(safe-area-inset-top));
+    left: max(0.9rem, env(safe-area-inset-left));
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .menu-brand-text {
+    font-size: clamp(1.05rem, 4vw, 1.35rem);
+    font-weight: 900;
+    color: var(--white);
+    text-shadow: 0 2px 0 rgba(31, 42, 60, 0.25);
+  }
+
   .menu-panel {
     width: 100%;
     max-width: 32rem;
@@ -590,9 +606,10 @@
   }
 
   .menu-logo {
-    width: clamp(4rem, 14vw, 5.5rem);
-    height: clamp(4rem, 14vw, 5.5rem);
-    filter: drop-shadow(0 8px 14px rgba(31, 42, 60, 0.25));
+    width: clamp(2.2rem, 7vw, 2.8rem);
+    height: clamp(2.2rem, 7vw, 2.8rem);
+    flex: none;
+    filter: drop-shadow(0 4px 8px rgba(31, 42, 60, 0.25));
   }
 
   .menu-title {
@@ -711,7 +728,7 @@
 
   <div class="menu-overlay" id="menuOverlay">
     <button class="menu-close" id="menuCloseBtn" type="button" aria-label="Fermer le menu" hidden>✕</button>
-    <div class="menu-panel">
+    <div class="menu-brand">
       <svg class="menu-logo" viewBox="0 0 120 120" aria-hidden="true">
         <rect x="4" y="4" width="112" height="112" rx="30" fill="#fff8ee" stroke="#1f2a3c" stroke-width="5" />
         <rect x="12" y="12" width="46" height="46" rx="16" fill="#43b98a" />
@@ -729,6 +746,9 @@
         <circle cx="86" cy="72" r="4" fill="#fff" />
         <circle cx="86" cy="98" r="4" fill="#fff" />
       </svg>
+      <span class="menu-brand-text">Calcul Malin</span>
+    </div>
+    <div class="menu-panel">
       <h1 class="menu-title">Choisis ton jeu !</h1>
       <div class="mode-grid">
         <button class="mode-card" type="button" data-mode="add">
