@@ -4,22 +4,22 @@
 <meta name="color-scheme" content="light" />
 <style>
   :root {
-    --sky-top: #3fc6f1;
-    --sky-bottom: #ffd766;
+    --sky-top: #4fb3e8;
+    --sky-bottom: #c9d9f5;
     --ground: #4bd07a;
     --ink: #1f2a3c;
     --white: #ffffff;
 
-    --green-add: #14a35a;
-    --orange-sub: #e8650a;
-    --correct: #26b85f;
+    --green-add: #43b98a;
+    --orange-sub: #f2994a;
+    --correct: #2fbf71;
     --wrong: #ff4d5e;
     --gold: #ffc93c;
 
-    --candy-pink: #ff5d8f;
-    --candy-teal: #0fb8a6;
-    --candy-purple: #8c6fe6;
-    --candy-tangerine: #ff8a3d;
+    --candy-pink: #ef5da8;
+    --candy-teal: #33c2c2;
+    --candy-blue: #2f6fe0;
+    --candy-tangerine: #ffb648;
 
     --fs-eyebrow: clamp(0.9rem, 3.2vw, 1.1rem);
     --fs-problem: clamp(3.8rem, 20vw, 8rem);
@@ -157,7 +157,7 @@
     width: var(--pill-num-size);
     height: var(--pill-num-size);
     border-radius: 50%;
-    background: var(--candy-purple);
+    background: var(--candy-blue);
     color: var(--white);
     font-weight: 800;
     font-size: var(--pill-num-fs);
@@ -288,8 +288,8 @@
 
   .problem .op[data-op="add"] { --bar-color: var(--green-add); }
   .problem .op[data-op="sub"] { --bar-color: var(--orange-sub); }
-  .problem .op[data-op="mul"] { --bar-color: var(--candy-purple); }
-  .problem .op[data-op="div"] { --bar-color: var(--candy-teal); }
+  .problem .op[data-op="mul"] { --bar-color: var(--candy-blue); }
+  .problem .op[data-op="div"] { --bar-color: var(--candy-pink); }
 
   .problem .eq {
     color: var(--ink);
@@ -381,6 +381,11 @@
 
   .answer-btn:disabled { cursor: default; }
 
+  .answer-btn.candy-pink { background: var(--candy-pink); }
+  .answer-btn.candy-teal { background: var(--candy-teal); }
+  .answer-btn.candy-blue { background: var(--candy-blue); }
+  .answer-btn.candy-tangerine { background: var(--candy-tangerine); }
+
   .answer-btn.is-correct {
     background: var(--correct);
     border-bottom-color: rgba(0, 0, 0, 0.28);
@@ -439,7 +444,7 @@
   .menu-btn svg rect { fill: var(--ink); }
 
   .menu-btn:focus-visible {
-    outline: 3px solid var(--candy-purple);
+    outline: 3px solid var(--candy-blue);
     outline-offset: 2px;
   }
 
@@ -531,13 +536,13 @@
 
   .mode-card[data-mode="add"] { background: var(--green-add); }
   .mode-card[data-mode="sub"] { background: var(--orange-sub); }
-  .mode-card[data-mode="mul"] { background: var(--candy-purple); }
-  .mode-card[data-mode="div"] { background: var(--candy-teal); }
+  .mode-card[data-mode="mul"] { background: var(--candy-blue); }
+  .mode-card[data-mode="div"] { background: var(--candy-pink); }
 
   .mode-costaud {
     width: 100%;
     flex-direction: row;
-    background: linear-gradient(135deg, #ff8a3d, #ff4d5e);
+    background: linear-gradient(135deg, #ff7a59, #ff3d77);
   }
 
   .mode-costaud .icon { font-size: clamp(1.8rem, 6.5vw, 2.3rem); }
@@ -635,7 +640,7 @@
 
     var MIN_LEVEL = 1;
     var MAX_LEVEL = 5;
-    var CANDY_COLORS = ["candy-pink", "candy-teal", "candy-purple", "candy-tangerine"];
+    var CANDY_COLORS = ["candy-pink", "candy-teal", "candy-blue", "candy-tangerine"];
     var OP_KEYS = ["add", "sub", "mul", "div"];
     var OP_ARIA_LABEL = { add: "plus", sub: "moins", mul: "fois", div: "divisé par" };
 
