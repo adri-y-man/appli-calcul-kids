@@ -333,12 +333,19 @@
       --star-size: clamp(1.85rem, 7vw, 2.4rem);
     }
 
+    /* addition / soustraction / multiplication / division : 2 termes,
+       un peu plus petit que la taille de base pour aérer l'écran. */
+    .problem[data-terms="2"] {
+      --fs-problem: clamp(4.1rem, 22vw, 6.3rem);
+      --fs-op: clamp(3.1rem, 17vw, 4.9rem);
+    }
+
     /* calcul costaud (3 termes, parfois avec parenthèses) : la ligne est
        trop longue pour garder la même taille que les calculs à 2 termes
        sans déborder ou passer à la ligne. */
     .problem[data-terms="3"] {
-      --fs-problem: clamp(2.8rem, 15.5vw, 4.2rem);
-      --fs-op: clamp(2.1rem, 11vw, 3.2rem);
+      --fs-problem: clamp(3.1rem, 17.4vw, 4.7rem);
+      --fs-op: clamp(2.35rem, 12.3vw, 3.6rem);
       gap: clamp(0.08rem, 0.5vw, 0.2rem);
     }
   }
