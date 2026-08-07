@@ -1015,8 +1015,19 @@
       };
     }
 
-    function generateProblem() {
-      var levelIdx = Math.min(Math.max(state.level, MIN_LEVEL), MAX_LEVEL) - 1;
+    function sameProblem(p1, p2) {
+      if (!p1 || !p2) return false;
+      if (p1.ops.length !== p2.ops.length || p1.terms.length !== p2.terms.length) return false;
+      for (var i = 0; i < p1.ops.length; i++) {
+        if (p1.ops[i] !== p2.ops[i]) return false;
+      }
+      for (var j = 0; j < p1.terms.length; j++) {
+        if (p1.terms[j] !== p2.terms[j]) return false;
+      }
+      return true;
+    }
+
+    function buildOneProblem(levelIdx) {
       if (state.mode === "costaud") {
         return generateCostaudProblem(levelIdx);
       }
@@ -1029,6 +1040,19 @@
         answer: answer,
         choices: generateChoices(answer, t.upperBound)
       };
+    }
+
+    // Régénère tant que le calcul tiré est identique au précédent, pour
+    // éviter d'afficher deux fois de suite exactement le même calcul.
+    function generateProblem(previous) {
+      var levelIdx = Math.min(Math.max(state.level, MIN_LEVEL), MAX_LEVEL) - 1;
+      var problem;
+      var tries = 0;
+      do {
+        problem = buildOneProblem(levelIdx);
+        tries++;
+      } while (previous && sameProblem(problem, previous) && tries < 30);
+      return problem;
     }
 
     var els = {
@@ -1224,7 +1248,7 @@
     }
 
     function nextProblem() {
-      state.problem = generateProblem();
+      state.problem = generateProblem(state.problem);
       state.locked = false;
       setFeedback("", "", "");
       renderProblem();
