@@ -844,6 +844,30 @@
       locked: false
     };
 
+    var PROGRESS_KEY = "calculMalinProgress";
+
+    function loadProgress() {
+      try {
+        var raw = window.localStorage.getItem(PROGRESS_KEY);
+        if (!raw) return {};
+        var data = JSON.parse(raw);
+        return data && typeof data === "object" ? data : {};
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function saveProgress() {
+      if (!state.mode) return;
+      try {
+        var data = loadProgress();
+        data[state.mode] = state.level;
+        window.localStorage.setItem(PROGRESS_KEY, JSON.stringify(data));
+      } catch (e) {
+        // localStorage indisponible (navigation privée, quota...) : on ignore.
+      }
+    }
+
     function randInt(minInclusive, maxInclusive) {
       return Math.floor(Math.random() * (maxInclusive - minInclusive + 1)) + minInclusive;
     }
@@ -1188,6 +1212,7 @@
       }
 
       renderLevel();
+      saveProgress();
 
       if (leveledUp) {
         window.setTimeout(function () { showLevelUp(state.level); }, 1100);
@@ -1244,7 +1269,8 @@
 
     function selectMode(mode) {
       state.mode = mode;
-      state.level = MIN_LEVEL;
+      var saved = loadProgress()[mode];
+      state.level = (typeof saved === "number" && saved >= MIN_LEVEL && saved <= MAX_LEVEL) ? saved : MIN_LEVEL;
       state.correctStreak = 0;
       state.wrongStreak = 0;
       state.locked = false;
@@ -1270,6 +1296,7 @@
       state.correctStreak = 0;
       state.wrongStreak = 0;
       renderLevel();
+      saveProgress();
       nextProblem();
     });
 
