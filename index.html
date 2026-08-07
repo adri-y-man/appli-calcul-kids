@@ -18,8 +18,13 @@
 
     --candy-pink: #ef5da8;
     --candy-teal: #33c2c2;
-    --candy-blue: #2f6fe0;
+    --candy-blue: #598ce6;
     --candy-tangerine: #ffb648;
+
+    --green-add-light: #a1dcc4;
+    --orange-sub-light: #f9cca5;
+    --candy-blue-light: #c1d6f5;
+    --candy-pink-light: #f7aed4;
 
     --fs-eyebrow: clamp(0.9rem, 3.2vw, 1.1rem);
     --fs-problem: clamp(3.8rem, 20vw, 8rem);
@@ -230,7 +235,8 @@
      (la barre du moins se réduisait à une pastille) : on dessine donc les
      4 symboles en CSS - des barres à coins arrondis - pour un trait net et
      un poids visuel identique quelle que soit la police du navigateur. */
-  .problem .op {
+  .problem .op,
+  .mode-card .op-icon {
     position: relative;
     display: inline-flex;
     flex: none;
@@ -241,11 +247,15 @@
     color: transparent;
   }
 
-  .problem .op[data-op="mul"] { transform: rotate(45deg); }
+  .problem .op[data-op="mul"],
+  .mode-card .op-icon[data-op="mul"] { transform: rotate(45deg); }
 
   .problem .op::before,
   .problem .op[data-op="add"]::after,
-  .problem .op[data-op="mul"]::after {
+  .problem .op[data-op="mul"]::after,
+  .mode-card .op-icon::before,
+  .mode-card .op-icon[data-op="add"]::after,
+  .mode-card .op-icon[data-op="mul"]::after {
     content: "";
     position: absolute;
     border-radius: 999px;
@@ -253,7 +263,8 @@
     box-shadow: 0 0 0 clamp(2px, 0.5vw, 4px) var(--ink);
   }
 
-  .problem .op::before {
+  .problem .op::before,
+  .mode-card .op-icon::before {
     left: 0;
     right: 0;
     top: 50%;
@@ -262,7 +273,9 @@
   }
 
   .problem .op[data-op="add"]::after,
-  .problem .op[data-op="mul"]::after {
+  .problem .op[data-op="mul"]::after,
+  .mode-card .op-icon[data-op="add"]::after,
+  .mode-card .op-icon[data-op="mul"]::after {
     top: 0;
     bottom: 0;
     left: 50%;
@@ -270,7 +283,8 @@
     transform: translateX(-50%);
   }
 
-  .problem .op .dot {
+  .problem .op .dot,
+  .mode-card .op-icon .dot {
     display: none;
     position: absolute;
     left: 50%;
@@ -282,14 +296,22 @@
     transform: translateX(-50%);
   }
 
-  .problem .op[data-op="div"] .dot { display: block; }
-  .problem .op .dot-a { top: 10%; }
-  .problem .op .dot-b { bottom: 10%; }
+  .problem .op[data-op="div"] .dot,
+  .mode-card .op-icon[data-op="div"] .dot { display: block; }
+  .problem .op .dot-a,
+  .mode-card .op-icon .dot-a { top: 10%; }
+  .problem .op .dot-b,
+  .mode-card .op-icon .dot-b { bottom: 10%; }
 
   .problem .op[data-op="add"] { --bar-color: var(--green-add); }
   .problem .op[data-op="sub"] { --bar-color: var(--orange-sub); }
   .problem .op[data-op="mul"] { --bar-color: var(--candy-blue); }
   .problem .op[data-op="div"] { --bar-color: var(--candy-pink); }
+
+  .mode-card .op-icon[data-op="add"] { --bar-color: var(--green-add-light); }
+  .mode-card .op-icon[data-op="sub"] { --bar-color: var(--orange-sub-light); }
+  .mode-card .op-icon[data-op="mul"] { --bar-color: var(--candy-blue-light); }
+  .mode-card .op-icon[data-op="div"] { --bar-color: var(--candy-pink-light); }
 
   .problem .eq {
     color: var(--ink);
@@ -455,7 +477,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: clamp(1rem, 4vw, 2rem);
+    padding: clamp(1rem, 4vw, 2rem) clamp(1rem, 4vw, 2rem) clamp(5rem, 16vh, 8rem);
     background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 100%);
   }
 
@@ -533,6 +555,7 @@
   }
 
   .mode-card .icon { font-size: clamp(2rem, 7.5vw, 2.7rem); }
+  .mode-card .op-icon { font-size: clamp(2.1rem, 8vw, 2.9rem); }
 
   .mode-card[data-mode="add"] { background: var(--green-add); }
   .mode-card[data-mode="sub"] { background: var(--orange-sub); }
@@ -614,16 +637,16 @@
       <h1 class="menu-title">Choisis ton jeu !</h1>
       <div class="mode-grid">
         <button class="mode-card" type="button" data-mode="add">
-          <span class="icon emoji">➕</span>Addition
+          <span class="op-icon" data-op="add"><span class="dot dot-a"></span><span class="dot dot-b"></span></span>Addition
         </button>
         <button class="mode-card" type="button" data-mode="sub">
-          <span class="icon emoji">➖</span>Soustraction
+          <span class="op-icon" data-op="sub"><span class="dot dot-a"></span><span class="dot dot-b"></span></span>Soustraction
         </button>
         <button class="mode-card" type="button" data-mode="mul">
-          <span class="icon emoji">✖️</span>Multiplication
+          <span class="op-icon" data-op="mul"><span class="dot dot-a"></span><span class="dot dot-b"></span></span>Multiplication
         </button>
         <button class="mode-card" type="button" data-mode="div">
-          <span class="icon emoji">➗</span>Division
+          <span class="op-icon" data-op="div"><span class="dot dot-a"></span><span class="dot dot-b"></span></span>Division
         </button>
       </div>
       <button class="mode-card mode-costaud" type="button" data-mode="costaud">
