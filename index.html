@@ -694,6 +694,14 @@
       return Math.floor(Math.random() * (maxInclusive - minInclusive + 1)) + minInclusive;
     }
 
+    // Tire un terme entre 0 et maxInclusive, mais le 0 ne sort que ~6% du
+    // temps au lieu d'être aussi probable que n'importe quel autre chiffre.
+    function randTermRareZero(maxInclusive) {
+      if (maxInclusive <= 0) return 0;
+      if (Math.random() < 0.06) return 0;
+      return randInt(1, maxInclusive);
+    }
+
     function shuffle(arr) {
       for (var i = arr.length - 1; i > 0; i--) {
         var j = Math.floor(Math.random() * (i + 1));
@@ -705,9 +713,9 @@
     function generateAddition(maxTerm, maxResult) {
       var a, b, maxB;
       do {
-        a = randInt(0, maxTerm);
+        a = randTermRareZero(maxTerm);
         maxB = Math.min(maxTerm, maxResult - a);
-        b = randInt(0, maxB);
+        b = randTermRareZero(maxB);
       } while (a === 0 && b === 0);
       return { a: a, b: b };
     }
