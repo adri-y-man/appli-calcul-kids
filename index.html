@@ -34,7 +34,7 @@
     --fs-feedback: clamp(1.2rem, 4.6vw, 1.9rem);
     --pill-num-size: clamp(1.9rem, 6vw, 2.5rem);
     --pill-num-fs: clamp(1rem, 3.4vw, 1.3rem);
-    --star-size: clamp(1.35rem, 4.6vw, 1.9rem);
+    --star-size: clamp(1.6rem, 5.4vw, 2.2rem);
 
     --font-hand: ui-rounded, "SF Pro Rounded", "Segoe UI Rounded", system-ui,
       -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif,
@@ -66,7 +66,7 @@
     min-height: 100dvh;
     display: flex;
     flex-direction: column;
-    padding: max(0.75rem, env(safe-area-inset-top)) max(0.9rem, env(safe-area-inset-right)) max(0.9rem, env(safe-area-inset-bottom)) max(0.9rem, env(safe-area-inset-left));
+    padding: max(0.75rem, env(safe-area-inset-top)) max(0.9rem, env(safe-area-inset-right)) max(1.8rem, calc(env(safe-area-inset-bottom) + 1.2rem)) max(0.9rem, env(safe-area-inset-left));
     gap: clamp(0.5rem, 2vw, 0.9rem);
     isolation: isolate;
   }
@@ -322,7 +322,7 @@
       --fs-button: clamp(2.8rem, 15vw, 4.2rem);
       --pill-num-size: clamp(2.4rem, 9vw, 3rem);
       --pill-num-fs: clamp(1.3rem, 4.8vw, 1.6rem);
-      --star-size: clamp(1.6rem, 6.2vw, 2.1rem);
+      --star-size: clamp(1.85rem, 7vw, 2.4rem);
     }
 
     /* calcul costaud (3 termes, parfois avec parenthèses) : la ligne est
