@@ -259,6 +259,11 @@
     paint-order: stroke fill;
   }
 
+  .problem .paren {
+    color: var(--ink);
+    font-size: var(--fs-op);
+  }
+
   /* ---------- feedback ---------- */
 
   .feedback {
@@ -307,6 +312,15 @@
       --pill-num-size: clamp(2.4rem, 9vw, 3rem);
       --pill-num-fs: clamp(1.3rem, 4.8vw, 1.6rem);
       --star-size: clamp(1.7rem, 6.6vw, 2.2rem);
+    }
+
+    /* calcul costaud (3 termes, parfois avec parenthèses) : la ligne est
+       trop longue pour garder la même taille que les calculs à 2 termes
+       sans déborder ou passer à la ligne. */
+    .problem[data-terms="3"] {
+      --fs-problem: clamp(1.9rem, 11.5vw, 3.2rem);
+      --fs-op: clamp(1.5rem, 8vw, 2.4rem);
+      gap: clamp(0.15rem, 1vw, 0.35rem);
     }
   }
 
@@ -823,25 +837,53 @@
       els.maxBadge.hidden = state.level !== MAX_LEVEL;
     }
 
+    // Multiplication/division sont prioritaires sur addition/soustraction :
+    // si l'enchaînement gauche-à-droite du calcul costaud commence par un
+    // +/− suivi d'un ×/÷, il faut des parenthèses autour des 2 premiers
+    // termes pour que l'écriture mathématique reste correcte.
+    function opTier(opKey) {
+      return (opKey === "mul" || opKey === "div") ? 2 : 1;
+    }
+
     function renderProblem() {
       var p = state.problem;
       els.problem.innerHTML = "";
-      p.terms.forEach(function (term, idx) {
-        var numEl = document.createElement("span");
-        numEl.className = "num";
-        numEl.textContent = String(term);
-        els.problem.appendChild(numEl);
+      els.problem.setAttribute("data-terms", String(p.terms.length));
 
-        if (idx < p.ops.length) {
-          var opKey = p.ops[idx];
-          var opEl = document.createElement("span");
-          opEl.className = "op";
-          opEl.setAttribute("data-op", opKey);
-          opEl.setAttribute("aria-label", OP_ARIA_LABEL[opKey]);
-          opEl.textContent = OP_SYMBOL[opKey];
-          els.problem.appendChild(opEl);
-        }
-      });
+      function appendNum(term) {
+        var el = document.createElement("span");
+        el.className = "num";
+        el.textContent = String(term);
+        els.problem.appendChild(el);
+      }
+
+      function appendOp(opKey) {
+        var el = document.createElement("span");
+        el.className = "op";
+        el.setAttribute("data-op", opKey);
+        el.setAttribute("aria-label", OP_ARIA_LABEL[opKey]);
+        el.textContent = OP_SYMBOL[opKey];
+        els.problem.appendChild(el);
+      }
+
+      function appendParen(text) {
+        var el = document.createElement("span");
+        el.className = "paren";
+        el.textContent = text;
+        els.problem.appendChild(el);
+      }
+
+      var needsParens = p.ops.length > 1 && opTier(p.ops[0]) < opTier(p.ops[1]);
+
+      if (needsParens) appendParen("(");
+      appendNum(p.terms[0]);
+      appendOp(p.ops[0]);
+      appendNum(p.terms[1]);
+      if (needsParens) appendParen(")");
+      if (p.ops.length > 1) {
+        appendOp(p.ops[1]);
+        appendNum(p.terms[2]);
+      }
 
       var eqEl = document.createElement("span");
       eqEl.className = "eq";
