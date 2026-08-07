@@ -53,24 +53,25 @@
   html, body {
     height: 100%;
     margin: 0;
+    overflow: hidden;
+    overscroll-behavior: none;
   }
 
   body {
-    min-height: 100dvh;
+    height: 100dvh;
     display: flex;
     justify-content: center;
     background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-top) 38%, var(--sky-bottom) 100%);
     font-family: var(--font-hand);
     color: var(--ink);
     -webkit-tap-highlight-color: transparent;
-    overflow-x: hidden;
   }
 
   .scene {
     position: relative;
     width: 100%;
     max-width: 56rem;
-    min-height: 100dvh;
+    height: 100dvh;
     display: flex;
     flex-direction: column;
     padding: max(0.75rem, env(safe-area-inset-top)) max(0.9rem, env(safe-area-inset-right)) max(1.8rem, calc(env(safe-area-inset-bottom) + 1.2rem)) max(0.9rem, env(safe-area-inset-left));
