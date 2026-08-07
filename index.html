@@ -1349,6 +1349,11 @@
     els.winMenuBtn.addEventListener("click", function () {
       els.winOverlay.hidden = true;
       setThemeColor(THEME_COLOR_DEFAULT);
+      state.level = MIN_LEVEL;
+      state.correctStreak = 0;
+      state.wrongStreak = 0;
+      renderLevel();
+      saveProgress();
       openMenu();
     });
 
