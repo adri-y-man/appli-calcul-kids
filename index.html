@@ -1241,7 +1241,9 @@
         setFeedback("wrong", "Essaie encore ! 💪", leveledDown ? "On continue, tu vas y arriver ! 🙂" : "");
       }
 
-      renderLevel();
+      // La bulle de niveau/étoiles ne se met à jour qu'une fois l'écran de
+      // célébration refermé, pour ne pas montrer le nouveau niveau avant.
+      if (!leveledUp && !justWon) renderLevel();
       saveProgress();
 
       if (leveledUp) {
@@ -1331,6 +1333,7 @@
     els.levelUpContinueBtn.addEventListener("click", function () {
       els.levelUpOverlay.hidden = true;
       setThemeColor(THEME_COLOR_DEFAULT);
+      renderLevel();
       nextProblem();
     });
 
