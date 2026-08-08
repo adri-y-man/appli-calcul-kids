@@ -147,28 +147,24 @@
 
   .topbar {
     flex: 0 0 auto;
+    position: relative;
+    z-index: 2;
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: clamp(0.5rem, 2vw, 0.9rem);
-    flex-wrap: wrap;
+    margin: calc(-1 * max(0.75rem, env(safe-area-inset-top))) calc(-1 * max(0.9rem, env(safe-area-inset-right))) 0 calc(-1 * max(0.9rem, env(safe-area-inset-left)));
+    padding: calc(env(safe-area-inset-top) + 0.4rem) clamp(0.9rem, 3vw, 1.4rem) 0.55rem;
+    max-height: calc(2cm + env(safe-area-inset-top));
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 0 0 1.6rem 1.6rem;
+    box-shadow: 0 6px 0 rgba(31, 42, 60, 0.1);
   }
 
   .level-pill {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 0.4rem;
-    background: rgba(255, 255, 255, 0.85);
-    border-radius: 1.5rem;
-    padding: 0.5rem 1rem 0.6rem;
-    box-shadow: 0 6px 0 rgba(31, 42, 60, 0.12);
-  }
-
-  .level-pill-row {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    gap: 0.6rem;
+    margin: 0 auto;
   }
 
   .level-pill .num {
@@ -182,6 +178,12 @@
     font-weight: 800;
     font-size: var(--pill-num-fs);
   }
+
+  .level-pill .num[data-mode="add"] { background: var(--green-add); }
+  .level-pill .num[data-mode="sub"] { background: var(--orange-sub); }
+  .level-pill .num[data-mode="mul"] { background: var(--candy-blue); }
+  .level-pill .num[data-mode="div"] { background: var(--candy-pink); }
+  .level-pill .num[data-mode="costaud"] { background: linear-gradient(135deg, #ff7a59, #ff3d77); }
 
   .level-pill .label {
     font-size: var(--fs-eyebrow);
@@ -210,7 +212,7 @@
   }
 
   .max-badge {
-    flex-basis: 100%;
+    flex: 0 0 auto;
     text-align: center;
     font-size: var(--fs-eyebrow);
     font-weight: 800;
@@ -539,23 +541,19 @@
   /* ---------- menu picto + écran de choix du jeu ---------- */
 
   .menu-btn {
-    position: absolute;
-    top: max(0.7rem, env(safe-area-inset-top));
-    left: max(0.7rem, env(safe-area-inset-left));
-    z-index: 6;
-    width: clamp(3rem, 10vw, 3.8rem);
-    height: clamp(3rem, 10vw, 3.8rem);
+    flex: none;
+    width: clamp(2.1rem, 7vw, 2.5rem);
+    height: clamp(2.1rem, 7vw, 2.5rem);
     padding: 0;
     border: none;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.85);
+    background: transparent;
     display: grid;
     place-items: center;
-    box-shadow: 0 6px 0 rgba(31, 42, 60, 0.12);
     cursor: pointer;
   }
 
-  .menu-btn svg { width: 40%; height: 40%; }
+  .menu-btn svg { width: 55%; height: 55%; }
 
   .menu-btn svg path { stroke: var(--ink); }
 
@@ -694,22 +692,19 @@
     <div class="ground"></div>
   </div>
 
-  <button class="menu-btn" id="menuBtn" type="button" aria-label="Retour à l'accueil">
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M15 4 L7 12 L15 20" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
-    </svg>
-  </button>
-
   <header class="topbar">
+    <button class="menu-btn" id="menuBtn" type="button" aria-label="Retour à l'accueil">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M15 4 L7 12 L15 20" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+    </button>
     <div class="level-pill">
-      <div class="level-pill-row">
-        <span class="label">Niveau</span>
-        <span class="num" id="levelNum">1</span>
-      </div>
+      <span class="label">Niveau</span>
+      <span class="num" id="levelNum">1</span>
       <div class="stars" id="stars" aria-hidden="true"></div>
     </div>
-    <p class="max-badge" id="maxBadge" hidden><span class="emoji">🌟</span> Niveau maximum atteint</p>
   </header>
+  <p class="max-badge" id="maxBadge" hidden><span class="emoji">🌟</span> Niveau maximum atteint</p>
 
   <main class="problem-zone">
     <div class="problem" id="problem"></div>
@@ -1076,6 +1071,7 @@
 
     function renderLevel() {
       els.levelNum.textContent = String(state.level);
+      els.levelNum.setAttribute("data-mode", state.mode || "");
       var starEls = els.stars.querySelectorAll("svg");
       for (var i = 0; i < starEls.length; i++) {
         starEls[i].classList.toggle("filled", i < state.correctStreak);
