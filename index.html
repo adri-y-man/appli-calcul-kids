@@ -555,9 +555,9 @@
     cursor: pointer;
   }
 
-  .menu-btn svg { width: 32%; height: 32%; }
+  .menu-btn svg { width: 40%; height: 40%; }
 
-  .menu-btn svg rect { fill: var(--ink); }
+  .menu-btn svg path { stroke: var(--ink); }
 
   .menu-btn:focus-visible {
     outline: 3px solid var(--candy-blue);
@@ -694,12 +694,9 @@
     <div class="ground"></div>
   </div>
 
-  <button class="menu-btn" id="menuBtn" type="button" aria-label="Choisir un jeu">
+  <button class="menu-btn" id="menuBtn" type="button" aria-label="Retour à l'accueil">
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      <rect x="3" y="3" width="8" height="8" rx="2"></rect>
-      <rect x="13" y="3" width="8" height="8" rx="2"></rect>
-      <rect x="3" y="13" width="8" height="8" rx="2"></rect>
-      <rect x="13" y="13" width="8" height="8" rx="2"></rect>
+      <path d="M15 4 L7 12 L15 20" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
     </svg>
   </button>
 
