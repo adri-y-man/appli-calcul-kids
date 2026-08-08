@@ -168,6 +168,10 @@
   }
 
   .level-pill .num {
+    appearance: none;
+    border: none;
+    font-family: inherit;
+    cursor: pointer;
     display: grid;
     place-items: center;
     width: var(--pill-num-size);
@@ -177,6 +181,11 @@
     color: var(--white);
     font-weight: 800;
     font-size: var(--pill-num-fs);
+  }
+
+  .level-pill .num:focus-visible {
+    outline: 3px solid var(--ink);
+    outline-offset: 2px;
   }
 
   .level-pill .num[data-mode="add"] { background: var(--green-add); }
@@ -704,7 +713,7 @@
     </button>
     <div class="level-pill">
       <span class="label">Niveau</span>
-      <span class="num" id="levelNum">1</span>
+      <button class="num" id="levelNum" type="button" aria-label="Réinitialiser ce jeu au niveau 1">1</button>
       <div class="stars" id="stars" aria-hidden="true"></div>
     </div>
   </header>
@@ -1307,6 +1316,19 @@
     els.menuBtn.addEventListener("click", openMenu);
     els.modeCards.forEach(function (card) {
       card.addEventListener("click", function () { selectMode(card.getAttribute("data-mode")); });
+    });
+
+    els.levelNum.addEventListener("click", function () {
+      if (!state.mode) return;
+      var ok = window.confirm("Recommencer ce jeu au niveau 1, sans étoile ?");
+      if (!ok) return;
+      state.level = MIN_LEVEL;
+      state.correctStreak = 0;
+      state.wrongStreak = 0;
+      state.locked = false;
+      renderLevel();
+      saveProgress();
+      nextProblem();
     });
 
     els.levelUpContinueBtn.addEventListener("click", function () {
