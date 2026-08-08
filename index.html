@@ -1258,6 +1258,7 @@
     }
 
     var THEME_COLOR_DEFAULT = "#4fb3e8";
+    var THEME_COLOR_BAR = "#e5f4fc";
     var THEME_COLOR_CELEBRATE = "#ffd166";
     var themeColorMeta = document.getElementById("themeColorMeta");
 
@@ -1280,6 +1281,7 @@
 
     function openMenu() {
       els.menuOverlay.hidden = false;
+      setThemeColor(THEME_COLOR_DEFAULT);
     }
 
     function closeMenu() {
@@ -1297,6 +1299,7 @@
       state.wrongStreak = 0;
       state.locked = false;
       closeMenu();
+      setThemeColor(THEME_COLOR_BAR);
       renderLevel();
       nextProblem();
     }
@@ -1308,14 +1311,14 @@
 
     els.levelUpContinueBtn.addEventListener("click", function () {
       els.levelUpOverlay.hidden = true;
-      setThemeColor(THEME_COLOR_DEFAULT);
+      setThemeColor(THEME_COLOR_BAR);
       renderLevel();
       nextProblem();
     });
 
     els.winReplayBtn.addEventListener("click", function () {
       els.winOverlay.hidden = true;
-      setThemeColor(THEME_COLOR_DEFAULT);
+      setThemeColor(THEME_COLOR_BAR);
       state.level = MIN_LEVEL;
       state.correctStreak = 0;
       state.wrongStreak = 0;
@@ -1326,7 +1329,6 @@
 
     els.winMenuBtn.addEventListener("click", function () {
       els.winOverlay.hidden = true;
-      setThemeColor(THEME_COLOR_DEFAULT);
       state.level = MIN_LEVEL;
       state.correctStreak = 0;
       state.wrongStreak = 0;
