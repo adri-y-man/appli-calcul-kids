@@ -1320,7 +1320,7 @@
 
     els.levelNum.addEventListener("click", function () {
       if (!state.mode) return;
-      var ok = window.confirm("Recommencer ce jeu au niveau 1, sans étoile ?");
+      var ok = window.confirm("Recommencer ce jeu au niveau 1 ?");
       if (!ok) return;
       state.level = MIN_LEVEL;
       state.correctStreak = 0;
