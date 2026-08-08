@@ -522,6 +522,19 @@
     100% { transform: scale(1) rotate(0deg); }
   }
 
+  .confirm-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(1rem, 4vw, 2rem);
+    background: rgba(31, 42, 60, 0.55);
+  }
+
+  .confirm-overlay[hidden] { display: none; }
+
   .confetti {
     position: absolute;
     inset: 0;
@@ -792,6 +805,18 @@
       <div class="celebrate-actions">
         <button class="celebrate-btn" id="winReplayBtn" type="button">Recommencer</button>
         <button class="celebrate-btn celebrate-btn-secondary" id="winMenuBtn" type="button">Changer de jeu</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="confirm-overlay" id="resetOverlay" hidden>
+    <div class="celebrate-panel">
+      <div class="celebrate-badge">🔄</div>
+      <h2 class="celebrate-title">Recommencer ?</h2>
+      <p class="celebrate-sub">Tu repars au niveau 1 pour ce jeu.</p>
+      <div class="celebrate-actions">
+        <button class="celebrate-btn celebrate-btn-secondary" id="resetCancelBtn" type="button">Annuler</button>
+        <button class="celebrate-btn" id="resetConfirmBtn" type="button">Recommencer</button>
       </div>
     </div>
   </div>
@@ -1067,7 +1092,10 @@
       winOverlay: document.getElementById("winOverlay"),
       winConfetti: document.getElementById("winConfetti"),
       winReplayBtn: document.getElementById("winReplayBtn"),
-      winMenuBtn: document.getElementById("winMenuBtn")
+      winMenuBtn: document.getElementById("winMenuBtn"),
+      resetOverlay: document.getElementById("resetOverlay"),
+      resetCancelBtn: document.getElementById("resetCancelBtn"),
+      resetConfirmBtn: document.getElementById("resetConfirmBtn")
     };
 
     var STAR_PATH = "M12 2 L14.9 8.6 L22 9.3 L16.5 14 L18.2 21 L12 17.3 L5.8 21 L7.5 14 L2 9.3 L9.1 8.6 Z";
@@ -1320,8 +1348,15 @@
 
     els.levelNum.addEventListener("click", function () {
       if (!state.mode) return;
-      var ok = window.confirm("Recommencer ce jeu au niveau 1 ?");
-      if (!ok) return;
+      els.resetOverlay.hidden = false;
+    });
+
+    els.resetCancelBtn.addEventListener("click", function () {
+      els.resetOverlay.hidden = true;
+    });
+
+    els.resetConfirmBtn.addEventListener("click", function () {
+      els.resetOverlay.hidden = true;
       state.level = MIN_LEVEL;
       state.correctStreak = 0;
       state.wrongStreak = 0;
