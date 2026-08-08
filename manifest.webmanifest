@@ -1,7 +1,7 @@
 {
   "name": "Calcul Malin",
   "short_name": "Calcul Malin",
-  "description": "Additions, soustractions, multiplications, divisions et calcul costaud pour enfant.",
+  "description": "Additions, soustractions, multiplications, divisions et grands calculs pour enfant.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

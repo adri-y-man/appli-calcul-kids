@@ -11,7 +11,7 @@ téléphone) — c'est une page autonome, sans dépendance ni installation.
 ## Principe
 
 - Un picto en haut à gauche ouvre un menu pour choisir le jeu : **Addition**,
-  **Soustraction**, **Multiplication**, **Division**, ou **Calcul costaud**
+  **Soustraction**, **Multiplication**, **Division**, ou **Grands calculs**
   (les 4 opérations mélangées, avec des nombres plus grands).
 - Chaque question propose **3 réponses** à choisir en cliquant/touchant.
 - **3 bonnes réponses d'affilée** → passage au niveau supérieur.
