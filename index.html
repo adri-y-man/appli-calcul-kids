@@ -226,6 +226,7 @@
 
   .problem-zone {
     flex: 1.05 1 0;
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -285,7 +286,10 @@
   /* ---------- feedback ---------- */
 
   .feedback {
-    flex: 0 0 auto;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
     min-height: clamp(2.6rem, 8vh, 3.6rem);
     margin: 0;
     text-align: center;
@@ -708,12 +712,11 @@
 
   <main class="problem-zone">
     <div class="problem" id="problem"></div>
+    <p class="feedback" id="feedback" aria-live="polite">
+      <span class="line-1" id="feedbackLine1"></span>
+      <span class="line-2" id="feedbackLine2"></span>
+    </p>
   </main>
-
-  <p class="feedback" id="feedback" aria-live="polite">
-    <span class="line-1" id="feedbackLine1"></span>
-    <span class="line-2" id="feedbackLine2"></span>
-  </p>
 
   <section class="answers" id="answers" aria-label="Choix de réponses"></section>
 
