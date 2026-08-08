@@ -577,23 +577,6 @@
 
   .menu-overlay[hidden] { display: none; }
 
-  .menu-close {
-    position: absolute;
-    top: max(0.8rem, env(safe-area-inset-top));
-    right: max(0.8rem, env(safe-area-inset-right));
-    width: clamp(2.2rem, 7vw, 2.6rem);
-    height: clamp(2.2rem, 7vw, 2.6rem);
-    border: none;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.85);
-    color: var(--ink);
-    font-weight: 800;
-    font-size: 1.1rem;
-    cursor: pointer;
-    box-shadow: 0 6px 0 rgba(31, 42, 60, 0.12);
-  }
-
-  .menu-close[hidden] { display: none; }
 
   .menu-brand {
     position: absolute;
@@ -743,7 +726,6 @@
   <section class="answers" id="answers" aria-label="Choix de réponses"></section>
 
   <div class="menu-overlay" id="menuOverlay">
-    <button class="menu-close" id="menuCloseBtn" type="button" aria-label="Fermer le menu" hidden>✕</button>
     <div class="menu-brand">
       <svg class="menu-logo" viewBox="0 0 120 120" aria-hidden="true">
         <rect x="4" y="4" width="112" height="112" rx="30" fill="#fff8ee" />
@@ -1065,7 +1047,6 @@
     var els = {
       menuBtn: document.getElementById("menuBtn"),
       menuOverlay: document.getElementById("menuOverlay"),
-      menuCloseBtn: document.getElementById("menuCloseBtn"),
       modeCards: document.querySelectorAll(".mode-card"),
       levelNum: document.getElementById("levelNum"),
       stars: document.getElementById("stars"),
@@ -1302,7 +1283,6 @@
     }
 
     function openMenu() {
-      els.menuCloseBtn.hidden = !state.mode;
       els.menuOverlay.hidden = false;
     }
 
@@ -1326,7 +1306,6 @@
     }
 
     els.menuBtn.addEventListener("click", openMenu);
-    els.menuCloseBtn.addEventListener("click", closeMenu);
     els.modeCards.forEach(function (card) {
       card.addEventListener("click", function () { selectMode(card.getAttribute("data-mode")); });
     });
