@@ -205,6 +205,8 @@
   .level-pill .num[data-mode="div"],
   .level-pill .num[data-mode="div3"] { background: var(--candy-pink); }
   .level-pill .num[data-mode="costaud"] { background: linear-gradient(135deg, #ff7a59, #ff3d77); }
+  .level-pill .num[data-mode="mixas"] { background: linear-gradient(135deg, var(--green-add), var(--orange-sub)); }
+  .level-pill .num[data-mode="mixall"] { background: linear-gradient(135deg, var(--green-add), var(--orange-sub), var(--candy-blue), var(--candy-pink)); }
 
   .level-pill .label {
     font-size: var(--fs-eyebrow);
@@ -701,15 +703,21 @@
   .mode-card[data-op="mul"] { background: var(--candy-blue); }
   .mode-card[data-op="div"] { background: var(--candy-pink); }
 
-  .mode-costaud {
+  .mode-costaud,
+  .mode-wide {
     width: 100%;
     flex-direction: row;
-    background: linear-gradient(135deg, #ff7a59, #ff3d77);
   }
 
-  .mode-costaud .icon { font-size: clamp(1.8rem, 6.5vw, 2.3rem); }
+  .mode-costaud { background: linear-gradient(135deg, #ff7a59, #ff3d77); }
+  .mode-wide[data-mode="mixas"] { background: linear-gradient(135deg, var(--green-add), var(--orange-sub)); }
+  .mode-wide[data-mode="mixall"] { background: linear-gradient(135deg, var(--green-add), var(--orange-sub), var(--candy-blue), var(--candy-pink)); }
 
-  .mode-costaud .costaud-text {
+  .mode-costaud .icon,
+  .mode-wide .icon { font-size: clamp(1.8rem, 6.5vw, 2.3rem); }
+
+  .mode-costaud .costaud-text,
+  .mode-wide .costaud-text {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -717,7 +725,8 @@
     line-height: 1.25;
   }
 
-  .mode-costaud .costaud-sub {
+  .mode-costaud .costaud-sub,
+  .mode-wide .costaud-sub {
     font-size: 0.7em;
     font-weight: 600;
     opacity: 0.9;
@@ -874,6 +883,14 @@
           <span class="op-icon" data-op="div">÷</span>Division
         </button>
       </div>
+      <button class="mode-card mode-wide" type="button" data-mode="mixas">
+        <span class="icon emoji">➕➖</span>
+        <span class="costaud-text">Mix d'addition et soustraction<span class="costaud-sub">les deux mélangées, à toi de deviner !</span></span>
+      </button>
+      <button class="mode-card mode-wide" type="button" data-mode="mixall">
+        <span class="icon emoji">🎲</span>
+        <span class="costaud-text">Mix de tout<span class="costaud-sub">les 4 opérations mélangées !</span></span>
+      </button>
     </div>
 
     <div class="menu-panel" id="menuTerms3" hidden>
@@ -953,6 +970,7 @@
     var OP_SYMBOL = { add: "+", sub: "−", mul: "×", div: "÷" };
     var OP_ARIA_LABEL = { add: "plus", sub: "moins", mul: "fois", div: "divisé par" };
     var MODE_TO_OP_3 = { add3: "add", sub3: "sub", mul3: "mul", div3: "div" };
+    var MIX_MODES = { mixas: ["add", "sub"], mixall: OP_KEYS };
 
     var BASE_LEVELS = {
       add: { param: [5, 10, 15, 20, 25], maxResult: 30 },
@@ -1191,7 +1209,8 @@
       if (MODE_TO_OP_3[state.mode]) {
         return generateFixedOpProblem(MODE_TO_OP_3[state.mode], levelIdx);
       }
-      var opKey = state.mode;
+      var mixChoices = MIX_MODES[state.mode];
+      var opKey = mixChoices ? mixChoices[randInt(0, mixChoices.length - 1)] : state.mode;
       var t = buildTerms(opKey, levelIdx);
       var answer = computeAnswer(opKey, t.a, t.b);
       return {
@@ -1465,7 +1484,7 @@
     }
 
     function categoryOfMode(mode) {
-      if (mode === "add" || mode === "sub" || mode === "mul" || mode === "div") return "2";
+      if (mode === "add" || mode === "sub" || mode === "mul" || mode === "div" || MIX_MODES[mode]) return "2";
       if (MODE_TO_OP_3[mode] || mode === "costaud") return "3";
       return null;
     }
