@@ -10,9 +10,10 @@ téléphone) — c'est une page autonome, sans dépendance ni installation.
 
 ## Principe
 
-- Un picto en haut à gauche ouvre un menu pour choisir le jeu : **Addition**,
-  **Soustraction**, **Multiplication**, **Division**, ou **Grands calculs**
-  (les 4 opérations mélangées, avec des nombres plus grands).
+- Un picto en haut à gauche ouvre un menu pour choisir entre **Calcul à 2
+  termes** (Addition, Soustraction, Multiplication, Division) et **Calcul à
+  3 termes** (les mêmes 4 opérations avec un troisième terme, plus
+  **Grands calculs**, qui mélange les opérations).
 - Chaque question propose **3 réponses** à choisir en cliquant/touchant.
 - **3 bonnes réponses d'affilée** → passage au niveau supérieur.
 - **3 mauvaises réponses d'affilée** → retour au niveau inférieur.

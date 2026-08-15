@@ -196,10 +196,14 @@
     outline-offset: 2px;
   }
 
-  .level-pill .num[data-mode="add"] { background: var(--green-add); }
-  .level-pill .num[data-mode="sub"] { background: var(--orange-sub); }
-  .level-pill .num[data-mode="mul"] { background: var(--candy-blue); }
-  .level-pill .num[data-mode="div"] { background: var(--candy-pink); }
+  .level-pill .num[data-mode="add"],
+  .level-pill .num[data-mode="add3"] { background: var(--green-add); }
+  .level-pill .num[data-mode="sub"],
+  .level-pill .num[data-mode="sub3"] { background: var(--orange-sub); }
+  .level-pill .num[data-mode="mul"],
+  .level-pill .num[data-mode="mul3"] { background: var(--candy-blue); }
+  .level-pill .num[data-mode="div"],
+  .level-pill .num[data-mode="div3"] { background: var(--candy-pink); }
   .level-pill .num[data-mode="costaud"] { background: linear-gradient(135deg, #ff7a59, #ff3d77); }
 
   .level-pill .label {
@@ -690,10 +694,10 @@
   .mode-card .icon { font-size: clamp(2rem, 7.5vw, 2.7rem); }
   .mode-card .op-icon { font-size: clamp(3.3rem, 12.5vw, 4.4rem); }
 
-  .mode-card[data-mode="add"] { background: var(--green-add); }
-  .mode-card[data-mode="sub"] { background: var(--orange-sub); }
-  .mode-card[data-mode="mul"] { background: var(--candy-blue); }
-  .mode-card[data-mode="div"] { background: var(--candy-pink); }
+  .mode-card[data-op="add"] { background: var(--green-add); }
+  .mode-card[data-op="sub"] { background: var(--orange-sub); }
+  .mode-card[data-op="mul"] { background: var(--candy-blue); }
+  .mode-card[data-op="div"] { background: var(--candy-pink); }
 
   .mode-costaud {
     width: 100%;
@@ -715,6 +719,68 @@
     font-size: 0.7em;
     font-weight: 600;
     opacity: 0.9;
+  }
+
+  .category-grid {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.9rem, 3.5vw, 1.3rem);
+  }
+
+  .category-card {
+    appearance: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: clamp(1.1rem, 4.5vw, 1.6rem) clamp(1.2rem, 4.5vw, 1.6rem);
+    border-radius: clamp(1.3rem, 4vw, 1.8rem);
+    color: var(--white);
+    font-weight: 800;
+    font-size: clamp(1.15rem, 4.6vw, 1.5rem);
+    border-bottom: clamp(4px, 1.2vw, 7px) solid rgba(0, 0, 0, 0.22);
+    box-shadow: 0 10px 20px -10px rgba(31, 42, 60, 0.5);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+
+  .category-card:hover { transform: translateY(-2px); }
+  .category-card:active { transform: translateY(2px); border-bottom-width: 3px; }
+
+  .category-card:focus-visible {
+    outline: 4px solid var(--ink);
+    outline-offset: 3px;
+  }
+
+  .category-card .icon { font-size: clamp(2.2rem, 8vw, 2.8rem); flex: none; }
+
+  .category-card[data-category="2"] { background: linear-gradient(135deg, var(--candy-blue), var(--candy-teal)); }
+  .category-card[data-category="3"] { background: linear-gradient(135deg, #ff7a59, #ff3d77); }
+
+  .menu-back {
+    appearance: none;
+    border: none;
+    cursor: pointer;
+    align-self: flex-start;
+    width: clamp(2.4rem, 8vw, 2.9rem);
+    height: clamp(2.4rem, 8vw, 2.9rem);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.85);
+    display: grid;
+    place-items: center;
+    box-shadow: 0 5px 0 rgba(31, 42, 60, 0.15);
+    margin-bottom: -0.4rem;
+  }
+
+  .menu-back svg { width: 42%; height: 42%; }
+  .menu-back svg path { stroke: var(--ink); }
+
+  .menu-back:focus-visible {
+    outline: 3px solid var(--ink);
+    outline-offset: 2px;
   }
 </style>
 
@@ -771,19 +837,61 @@
       </svg>
       <span class="menu-brand-text">Calcul Malin</span>
     </div>
-    <div class="menu-panel">
+    <div class="menu-panel" id="menuHome">
       <h1 class="menu-title">Choisis ton jeu !</h1>
+      <div class="category-grid">
+        <button class="category-card" type="button" data-category="2">
+          <span class="icon emoji">🔢</span>
+          <span>Calcul à 2 termes</span>
+        </button>
+        <button class="category-card category-card-3" type="button" data-category="3">
+          <span class="icon emoji">🔥</span>
+          <span>Calcul à 3 termes</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="menu-panel" id="menuTerms2" hidden>
+      <button class="menu-back" id="terms2BackBtn" type="button" aria-label="Retour">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M15 4 L7 12 L15 20" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+      </button>
+      <h1 class="menu-title">Calcul à 2 termes</h1>
       <div class="mode-grid">
-        <button class="mode-card" type="button" data-mode="add">
+        <button class="mode-card" type="button" data-mode="add" data-op="add">
           <span class="op-icon" data-op="add">+</span>Addition
         </button>
-        <button class="mode-card" type="button" data-mode="sub">
+        <button class="mode-card" type="button" data-mode="sub" data-op="sub">
           <span class="op-icon" data-op="sub">−</span>Soustraction
         </button>
-        <button class="mode-card" type="button" data-mode="mul">
+        <button class="mode-card" type="button" data-mode="mul" data-op="mul">
           <span class="op-icon" data-op="mul">×</span>Multiplication
         </button>
-        <button class="mode-card" type="button" data-mode="div">
+        <button class="mode-card" type="button" data-mode="div" data-op="div">
+          <span class="op-icon" data-op="div">÷</span>Division
+        </button>
+      </div>
+    </div>
+
+    <div class="menu-panel" id="menuTerms3" hidden>
+      <button class="menu-back" id="terms3BackBtn" type="button" aria-label="Retour">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M15 4 L7 12 L15 20" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+      </button>
+      <h1 class="menu-title">Calcul à 3 termes</h1>
+      <div class="mode-grid">
+        <button class="mode-card" type="button" data-mode="add3" data-op="add">
+          <span class="op-icon" data-op="add">+</span>Addition
+        </button>
+        <button class="mode-card" type="button" data-mode="sub3" data-op="sub">
+          <span class="op-icon" data-op="sub">−</span>Soustraction
+        </button>
+        <button class="mode-card" type="button" data-mode="mul3" data-op="mul">
+          <span class="op-icon" data-op="mul">×</span>Multiplication
+        </button>
+        <button class="mode-card" type="button" data-mode="div3" data-op="div">
           <span class="op-icon" data-op="div">÷</span>Division
         </button>
       </div>
@@ -842,6 +950,7 @@
     var OP_KEYS = ["add", "sub", "mul", "div"];
     var OP_SYMBOL = { add: "+", sub: "−", mul: "×", div: "÷" };
     var OP_ARIA_LABEL = { add: "plus", sub: "moins", mul: "fois", div: "divisé par" };
+    var MODE_TO_OP_3 = { add3: "add", sub3: "sub", mul3: "mul", div3: "div" };
 
     var BASE_LEVELS = {
       add: { param: [5, 10, 15, 20, 25], maxResult: 30 },
@@ -1021,13 +1130,17 @@
       return { term: divisor, value: current / divisor };
     }
 
-    function generateCostaudProblem(levelIdx) {
-      var table = {
+    function costaudTable(levelIdx) {
+      return {
         overallMax: COSTAUD3_LEVELS.overallMax[levelIdx],
         addSubRange: COSTAUD3_LEVELS.addSubRange[levelIdx],
         mulRange: COSTAUD3_LEVELS.mulRange[levelIdx],
         divRange: COSTAUD3_LEVELS.divRange[levelIdx]
       };
+    }
+
+    function generateCostaudProblem(levelIdx) {
+      var table = costaudTable(levelIdx);
       var op1 = OP_KEYS[randInt(0, OP_KEYS.length - 1)];
       var op2 = OP_KEYS[randInt(0, OP_KEYS.length - 1)];
       var t1 = randTermRareZero(table.addSubRange);
@@ -1036,6 +1149,22 @@
       return {
         terms: [t1, step1.term, step2.term],
         ops: [op1, op2],
+        answer: step2.value,
+        choices: generateChoices(step2.value, table.overallMax)
+      };
+    }
+
+    // "Addition/Soustraction/Multiplication/Division à 3 termes" : même
+    // mécanique que le calcul costaud, mais avec la même opération enchaînée
+    // deux fois de suite au lieu de deux opérations tirées indépendamment.
+    function generateFixedOpProblem(opKey, levelIdx) {
+      var table = costaudTable(levelIdx);
+      var t1 = randTermRareZero(table.addSubRange);
+      var step1 = applyCostaudStep(opKey, t1, table);
+      var step2 = applyCostaudStep(opKey, step1.value, table);
+      return {
+        terms: [t1, step1.term, step2.term],
+        ops: [opKey, opKey],
         answer: step2.value,
         choices: generateChoices(step2.value, table.overallMax)
       };
@@ -1056,6 +1185,9 @@
     function buildOneProblem(levelIdx) {
       if (state.mode === "costaud") {
         return generateCostaudProblem(levelIdx);
+      }
+      if (MODE_TO_OP_3[state.mode]) {
+        return generateFixedOpProblem(MODE_TO_OP_3[state.mode], levelIdx);
       }
       var opKey = state.mode;
       var t = buildTerms(opKey, levelIdx);
@@ -1084,6 +1216,12 @@
     var els = {
       menuBtn: document.getElementById("menuBtn"),
       menuOverlay: document.getElementById("menuOverlay"),
+      menuHome: document.getElementById("menuHome"),
+      menuTerms2: document.getElementById("menuTerms2"),
+      menuTerms3: document.getElementById("menuTerms3"),
+      categoryCards: document.querySelectorAll(".category-card"),
+      terms2BackBtn: document.getElementById("terms2BackBtn"),
+      terms3BackBtn: document.getElementById("terms3BackBtn"),
       modeCards: document.querySelectorAll(".mode-card"),
       levelNum: document.getElementById("levelNum"),
       stars: document.getElementById("stars"),
@@ -1324,7 +1462,20 @@
       setThemeColor(THEME_COLOR_CELEBRATE);
     }
 
+    function categoryOfMode(mode) {
+      if (mode === "add" || mode === "sub" || mode === "mul" || mode === "div") return "2";
+      if (MODE_TO_OP_3[mode] || mode === "costaud") return "3";
+      return null;
+    }
+
+    function showMenuScreen(screen) {
+      els.menuHome.hidden = screen !== "home";
+      els.menuTerms2.hidden = screen !== "2";
+      els.menuTerms3.hidden = screen !== "3";
+    }
+
     function openMenu() {
+      showMenuScreen(categoryOfMode(state.mode) || "home");
       els.menuOverlay.hidden = false;
       setThemeColor(THEME_COLOR_DEFAULT);
     }
@@ -1353,6 +1504,11 @@
     els.modeCards.forEach(function (card) {
       card.addEventListener("click", function () { selectMode(card.getAttribute("data-mode")); });
     });
+    els.categoryCards.forEach(function (card) {
+      card.addEventListener("click", function () { showMenuScreen(card.getAttribute("data-category")); });
+    });
+    els.terms2BackBtn.addEventListener("click", function () { showMenuScreen("home"); });
+    els.terms3BackBtn.addEventListener("click", function () { showMenuScreen("home"); });
 
     els.levelNum.addEventListener("click", function () {
       if (!state.mode) return;
