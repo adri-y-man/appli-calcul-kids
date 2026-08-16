@@ -205,8 +205,8 @@
   .level-pill .num[data-mode="div"],
   .level-pill .num[data-mode="div3"] { background: var(--candy-pink); }
   .level-pill .num[data-mode="costaud"] { background: linear-gradient(135deg, #ff7a59, #ff3d77); }
-  .level-pill .num[data-mode="mixas"] { background: linear-gradient(135deg, var(--green-add), var(--orange-sub)); }
-  .level-pill .num[data-mode="mixall"] { background: linear-gradient(135deg, var(--green-add), var(--orange-sub), var(--candy-blue), var(--candy-pink)); }
+  .level-pill .num[data-mode="mixas"],
+  .level-pill .num[data-mode="mixall"] { background: linear-gradient(135deg, #ff7a59, #ff3d77); }
 
   .level-pill .label {
     font-size: var(--fs-eyebrow);
@@ -710,8 +710,8 @@
   }
 
   .mode-costaud { background: linear-gradient(135deg, #ff7a59, #ff3d77); }
-  .mode-wide[data-mode="mixas"] { background: linear-gradient(135deg, var(--green-add), var(--orange-sub)); }
-  .mode-wide[data-mode="mixall"] { background: linear-gradient(135deg, var(--green-add), var(--orange-sub), var(--candy-blue), var(--candy-pink)); }
+  .mode-wide[data-mode="mixas"],
+  .mode-wide[data-mode="mixall"] { background: linear-gradient(135deg, #ff7a59, #ff3d77); }
 
   .mode-costaud .icon,
   .mode-wide .icon { font-size: clamp(1.8rem, 6.5vw, 2.3rem); }
@@ -884,7 +884,7 @@
         </button>
       </div>
       <button class="mode-card mode-wide" type="button" data-mode="mixas">
-        <span class="icon emoji">➕➖</span>
+        <span class="icon emoji">➕➖🎲</span>
         <span class="costaud-text">Mix d'addition et soustraction<span class="costaud-sub">les deux mélangées, à toi de deviner !</span></span>
       </button>
       <button class="mode-card mode-wide" type="button" data-mode="mixall">
