@@ -204,7 +204,8 @@
   .level-pill .num[data-mode="mul3"] { background: var(--candy-blue); }
   .level-pill .num[data-mode="div"],
   .level-pill .num[data-mode="div3"] { background: var(--candy-pink); }
-  .level-pill .num[data-mode="costaud"] { background: linear-gradient(135deg, #ff7a59, #ff3d77); }
+  .level-pill .num[data-mode="costaud"],
+  .level-pill .num[data-mode="mixas3"] { background: linear-gradient(135deg, #ff7a59, #ff3d77); }
   .level-pill .num[data-mode="mixas"],
   .level-pill .num[data-mode="mixall"] { background: linear-gradient(135deg, #ff7a59, #ff3d77); }
 
@@ -914,6 +915,10 @@
           <span class="op-icon" data-op="div">÷</span>Division
         </button>
       </div>
+      <button class="mode-card mode-costaud" type="button" data-mode="mixas3">
+        <span class="icon emoji">🎲</span>
+        <span class="costaud-text">Mix d'additions et de soustractions<span class="costaud-sub">les deux mélangées, à toi de deviner !</span></span>
+      </button>
       <button class="mode-card mode-costaud" type="button" data-mode="costaud">
         <span class="icon emoji">🔥</span>
         <span class="costaud-text">Mix de tout<span class="costaud-sub">les 4 opérations mélangées !</span></span>
@@ -971,6 +976,7 @@
     var OP_ARIA_LABEL = { add: "plus", sub: "moins", mul: "fois", div: "divisé par" };
     var MODE_TO_OP_3 = { add3: "add", sub3: "sub", mul3: "mul", div3: "div" };
     var MIX_MODES = { mixas: ["add", "sub"], mixall: OP_KEYS };
+    var MIX_MODES_3 = { mixas3: ["add", "sub"], costaud: OP_KEYS };
 
     var BASE_LEVELS = {
       add: { param: [5, 10, 15, 20, 25], maxResult: 30 },
@@ -1159,10 +1165,12 @@
       };
     }
 
-    function generateCostaudProblem(levelIdx) {
+    // Tire 2 opérations indépendamment (donc potentiellement identiques ou
+    // différentes) parmi celles autorisées, enchaînées sur 3 termes.
+    function generateMixedOpProblem(allowedOps, levelIdx) {
       var table = costaudTable(levelIdx);
-      var op1 = OP_KEYS[randInt(0, OP_KEYS.length - 1)];
-      var op2 = OP_KEYS[randInt(0, OP_KEYS.length - 1)];
+      var op1 = allowedOps[randInt(0, allowedOps.length - 1)];
+      var op2 = allowedOps[randInt(0, allowedOps.length - 1)];
       var t1 = randTermRareZero(table.addSubRange);
       var step1 = applyCostaudStep(op1, t1, table);
       var step2 = applyCostaudStep(op2, step1.value, table);
@@ -1203,8 +1211,8 @@
     }
 
     function buildOneProblem(levelIdx) {
-      if (state.mode === "costaud") {
-        return generateCostaudProblem(levelIdx);
+      if (MIX_MODES_3[state.mode]) {
+        return generateMixedOpProblem(MIX_MODES_3[state.mode], levelIdx);
       }
       if (MODE_TO_OP_3[state.mode]) {
         return generateFixedOpProblem(MODE_TO_OP_3[state.mode], levelIdx);
@@ -1485,7 +1493,7 @@
 
     function categoryOfMode(mode) {
       if (mode === "add" || mode === "sub" || mode === "mul" || mode === "div" || MIX_MODES[mode]) return "2";
-      if (MODE_TO_OP_3[mode] || mode === "costaud") return "3";
+      if (MODE_TO_OP_3[mode] || MIX_MODES_3[mode]) return "3";
       return null;
     }
 
