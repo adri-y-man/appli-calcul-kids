@@ -814,6 +814,8 @@
 
   .category-card[data-category="2"] { background: linear-gradient(135deg, var(--candy-blue), var(--candy-teal)); }
   .category-card[data-category="3"] { background: linear-gradient(135deg, var(--sky-top), #3454d1); }
+  .category-card-colors { background: linear-gradient(135deg, #e63946, #ffd400, #43b98a, #3d7fe0); }
+  .category-card-reading { background: linear-gradient(135deg, #f4a261, #6a4c93); }
 
   #menuHome .category-grid {
     flex-direction: row;
@@ -1021,7 +1023,7 @@
           </span>
           <span class="app-icon-label">Calcul Malin</span>
         </button>
-        <button class="category-card category-card-app" type="button" id="colorsCard">
+        <button class="category-card category-card-app" type="button" data-category="anglais">
           <span class="app-icon-tile">
             <svg viewBox="0 0 120 120" aria-hidden="true">
               <rect x="4" y="4" width="112" height="112" rx="30" fill="#fff8ee" />
@@ -1042,7 +1044,7 @@
           </span>
           <span class="app-icon-label">Anglais Malin</span>
         </button>
-        <button class="category-card category-card-app" type="button" id="readingCard">
+        <button class="category-card category-card-app" type="button" data-category="lire">
           <span class="app-icon-tile">
             <svg viewBox="0 0 120 120" aria-hidden="true">
               <rect x="4" y="4" width="112" height="112" rx="30" fill="#fff8ee" />
@@ -1076,6 +1078,36 @@
         <button class="category-card category-card-3" type="button" data-category="3">
           <span class="icon emoji">🧮</span>
           <span>Calculs à 3 termes</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="menu-panel" id="menuAnglais" hidden>
+      <button class="menu-back" id="anglaisBackBtn" type="button" aria-label="Retour">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M15 4 L7 12 L15 20" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+      </button>
+      <h1 class="menu-title">Anglais Malin</h1>
+      <div class="category-grid">
+        <button class="category-card category-card-colors" type="button" id="colorsCard">
+          <span class="icon emoji">🎨</span>
+          <span>Les couleurs en anglais</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="menu-panel" id="menuLire" hidden>
+      <button class="menu-back" id="lireBackBtn" type="button" aria-label="Retour">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M15 4 L7 12 L15 20" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+      </button>
+      <h1 class="menu-title">Lire Malin</h1>
+      <div class="category-grid">
+        <button class="category-card category-card-reading" type="button" id="readingCard">
+          <span class="icon emoji">📖</span>
+          <span>Mes premières lectures</span>
         </button>
       </div>
     </div>
@@ -1581,10 +1613,14 @@
       menuCalc: document.getElementById("menuCalc"),
       menuTerms2: document.getElementById("menuTerms2"),
       menuTerms3: document.getElementById("menuTerms3"),
+      menuAnglais: document.getElementById("menuAnglais"),
+      menuLire: document.getElementById("menuLire"),
       categoryCards: document.querySelectorAll(".category-card"),
       calcBackBtn: document.getElementById("calcBackBtn"),
       terms2BackBtn: document.getElementById("terms2BackBtn"),
       terms3BackBtn: document.getElementById("terms3BackBtn"),
+      anglaisBackBtn: document.getElementById("anglaisBackBtn"),
+      lireBackBtn: document.getElementById("lireBackBtn"),
       colorsCard: document.getElementById("colorsCard"),
       readingCard: document.getElementById("readingCard"),
       modeCards: document.querySelectorAll(".mode-card"),
@@ -1941,6 +1977,8 @@
     function categoryOfMode(mode) {
       if (mode === "add" || mode === "sub" || mode === "mul" || mode === "div" || MIX_MODES[mode]) return "2";
       if (MODE_TO_OP_3[mode] || MIX_MODES_3[mode]) return "3";
+      if (mode === "colors") return "anglais";
+      if (mode === "reading") return "lire";
       return null;
     }
 
@@ -1949,6 +1987,8 @@
       els.menuCalc.hidden = screen !== "calc";
       els.menuTerms2.hidden = screen !== "2";
       els.menuTerms3.hidden = screen !== "3";
+      els.menuAnglais.hidden = screen !== "anglais";
+      els.menuLire.hidden = screen !== "lire";
     }
 
     function openMenu() {
@@ -1989,6 +2029,8 @@
     els.calcBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
     els.terms2BackBtn.addEventListener("click", function () { showMenuScreen("calc"); });
     els.terms3BackBtn.addEventListener("click", function () { showMenuScreen("calc"); });
+    els.anglaisBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
+    els.lireBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
 
     els.levelNum.addEventListener("click", function () {
       if (!state.mode) return;
