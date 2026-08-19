@@ -1,5 +1,5 @@
 <meta charset="UTF-8" />
-<title>Calcul Malin</title>
+<title>Petit Malin</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
 <meta name="color-scheme" content="light" />
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect x='4' y='4' width='112' height='112' rx='30' fill='%23fff8ee' stroke='%231f2a3c' stroke-width='5'/%3E%3Crect x='12' y='12' width='46' height='46' rx='16' fill='%2343b98a'/%3E%3Crect x='62' y='12' width='46' height='46' rx='16' fill='%23f2994a'/%3E%3Crect x='12' y='62' width='46' height='46' rx='16' fill='%23598ce6'/%3E%3Crect x='62' y='62' width='46' height='46' rx='16' fill='%23ef5da8'/%3E%3Crect x='26' y='32' width='18' height='6' rx='3' fill='%23fff'/%3E%3Crect x='32' y='26' width='6' height='18' rx='3' fill='%23fff'/%3E%3Crect x='77' y='32' width='18' height='6' rx='3' fill='%23fff'/%3E%3Cg transform='rotate(45 35 85)'%3E%3Crect x='26' y='82' width='18' height='6' rx='3' fill='%23fff'/%3E%3Crect x='32' y='76' width='6' height='18' rx='3' fill='%23fff'/%3E%3C/g%3E%3Crect x='77' y='82' width='18' height='6' rx='3' fill='%23fff'/%3E%3Ccircle cx='86' cy='72' r='4' fill='%23fff'/%3E%3Ccircle cx='86' cy='98' r='4' fill='%23fff'/%3E%3C/svg%3E" />
@@ -9,9 +9,9 @@
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-<meta name="apple-mobile-web-app-title" content="Calcul Malin" />
+<meta name="apple-mobile-web-app-title" content="Petit Malin" />
 <meta property="og:type" content="website" />
-<meta property="og:title" content="Calcul Malin" />
+<meta property="og:title" content="Petit Malin" />
 <meta property="og:description" content="Apprendre en s'amusant ! Additions, soustractions, multiplications, divisions et grands calculs. 5 niveaux passés et c'est gagné !" />
 <meta property="og:url" content="https://adri-y-man.github.io/appli-calcul-kids/" />
 <meta property="og:image" content="https://adri-y-man.github.io/appli-calcul-kids/icons/icon-512.png" />
@@ -814,6 +814,7 @@
 
   .category-card[data-category="2"] { background: linear-gradient(135deg, var(--candy-blue), var(--candy-teal)); }
   .category-card[data-category="3"] { background: linear-gradient(135deg, var(--sky-top), #3454d1); }
+  .category-card-calc { background: linear-gradient(135deg, var(--candy-blue), #3454d1); }
   .category-card-colors { background: linear-gradient(135deg, #e63946, #ffd400, #43b98a, #3d7fe0); }
   .category-card-reading { background: linear-gradient(135deg, #f4a261, #6a4c93); }
 
@@ -949,18 +950,14 @@
         <circle cx="86" cy="72" r="4" fill="#fff" />
         <circle cx="86" cy="98" r="4" fill="#fff" />
       </svg>
-      <span class="menu-brand-text">Calcul Malin</span>
+      <span class="menu-brand-text">Petit Malin</span>
     </div>
     <div class="menu-panel" id="menuHome">
       <h1 class="menu-title">Choisis ton jeu !</h1>
       <div class="category-grid">
-        <button class="category-card" type="button" data-category="2">
+        <button class="category-card category-card-calc" type="button" data-category="calc">
           <span class="icon emoji">🧮</span>
-          <span>Calcul à 2 termes</span>
-        </button>
-        <button class="category-card category-card-3" type="button" data-category="3">
-          <span class="icon emoji">🧮</span>
-          <span>Calcul à 3 termes</span>
+          <span>Calcul Malin</span>
         </button>
         <button class="category-card category-card-colors" type="button" id="colorsCard">
           <span class="icon emoji">🎨</span>
@@ -973,13 +970,32 @@
       </div>
     </div>
 
+    <div class="menu-panel" id="menuCalc" hidden>
+      <button class="menu-back" id="calcBackBtn" type="button" aria-label="Retour">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M15 4 L7 12 L15 20" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+      </button>
+      <h1 class="menu-title">Calcul Malin</h1>
+      <div class="category-grid">
+        <button class="category-card" type="button" data-category="2">
+          <span class="icon emoji">🧮</span>
+          <span>Calculs à 2 termes</span>
+        </button>
+        <button class="category-card category-card-3" type="button" data-category="3">
+          <span class="icon emoji">🧮</span>
+          <span>Calculs à 3 termes</span>
+        </button>
+      </div>
+    </div>
+
     <div class="menu-panel" id="menuTerms2" hidden>
       <button class="menu-back" id="terms2BackBtn" type="button" aria-label="Retour">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M15 4 L7 12 L15 20" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
         </svg>
       </button>
-      <h1 class="menu-title">Calcul à 2 termes</h1>
+      <h1 class="menu-title">Calculs à 2 termes</h1>
       <div class="mode-grid">
         <button class="mode-card" type="button" data-mode="add" data-op="add">
           <span class="op-icon" data-op="add">+</span>Addition
@@ -1010,7 +1026,7 @@
           <path d="M15 4 L7 12 L15 20" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
         </svg>
       </button>
-      <h1 class="menu-title">Calcul à 3 termes</h1>
+      <h1 class="menu-title">Calculs à 3 termes</h1>
       <div class="mode-grid">
         <button class="mode-card" type="button" data-mode="add3" data-op="add">
           <span class="op-icon" data-op="add">+</span>Addition
@@ -1471,9 +1487,11 @@
       menuBtn: document.getElementById("menuBtn"),
       menuOverlay: document.getElementById("menuOverlay"),
       menuHome: document.getElementById("menuHome"),
+      menuCalc: document.getElementById("menuCalc"),
       menuTerms2: document.getElementById("menuTerms2"),
       menuTerms3: document.getElementById("menuTerms3"),
       categoryCards: document.querySelectorAll(".category-card"),
+      calcBackBtn: document.getElementById("calcBackBtn"),
       terms2BackBtn: document.getElementById("terms2BackBtn"),
       terms3BackBtn: document.getElementById("terms3BackBtn"),
       colorsCard: document.getElementById("colorsCard"),
@@ -1837,6 +1855,7 @@
 
     function showMenuScreen(screen) {
       els.menuHome.hidden = screen !== "home";
+      els.menuCalc.hidden = screen !== "calc";
       els.menuTerms2.hidden = screen !== "2";
       els.menuTerms3.hidden = screen !== "3";
     }
@@ -1876,8 +1895,9 @@
     });
     els.colorsCard.addEventListener("click", function () { selectMode("colors"); });
     els.readingCard.addEventListener("click", function () { selectMode("reading"); });
-    els.terms2BackBtn.addEventListener("click", function () { showMenuScreen("home"); });
-    els.terms3BackBtn.addEventListener("click", function () { showMenuScreen("home"); });
+    els.calcBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
+    els.terms2BackBtn.addEventListener("click", function () { showMenuScreen("calc"); });
+    els.terms3BackBtn.addEventListener("click", function () { showMenuScreen("calc"); });
 
     els.levelNum.addEventListener("click", function () {
       if (!state.mode) return;

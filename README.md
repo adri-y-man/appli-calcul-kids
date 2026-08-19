@@ -1,7 +1,7 @@
-# Calcul Malin
+# Petit Malin
 
-Jeu web pour apprendre les additions, soustractions, multiplications et
-divisions, pensé pour un enfant qui découvre le calcul.
+Jeu web pour apprendre à calculer, à reconnaître les couleurs en anglais et
+à lire ses premiers mots, pensé pour un enfant qui découvre tout ça.
 
 ## Jouer
 
@@ -10,10 +10,10 @@ téléphone) — c'est une page autonome, sans dépendance ni installation.
 
 ## Principe
 
-- Un picto en haut à gauche ouvre un menu pour choisir entre **Calcul à 2
-  termes** (Addition, Soustraction, Multiplication, Division) et **Calcul à
-  3 termes** (les mêmes 4 opérations avec un troisième terme, plus
-  **Grands calculs**, qui mélange les opérations).
+- Un picto en haut à gauche ouvre un menu pour choisir entre trois jeux :
+  **Calcul Malin** (Calculs à 2 termes ou à 3 termes : Addition, Soustraction,
+  Multiplication, Division, et les mix qui mélangent), **Les couleurs en
+  anglais**, et **Mes premières lectures**.
 - Chaque question propose **3 réponses** à choisir en cliquant/touchant.
 - **3 bonnes réponses d'affilée** → passage au niveau supérieur.
 - **3 mauvaises réponses d'affilée** → retour au niveau inférieur.

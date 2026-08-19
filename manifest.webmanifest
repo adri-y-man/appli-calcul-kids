@@ -1,6 +1,6 @@
 {
-  "name": "Calcul Malin",
-  "short_name": "Calcul Malin",
+  "name": "Petit Malin",
+  "short_name": "Petit Malin",
   "description": "Additions, soustractions, multiplications, divisions et grands calculs pour enfant.",
   "start_url": "./index.html",
   "scope": "./",
