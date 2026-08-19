@@ -814,31 +814,48 @@
 
   .category-card[data-category="2"] { background: linear-gradient(135deg, var(--candy-blue), var(--candy-teal)); }
   .category-card[data-category="3"] { background: linear-gradient(135deg, var(--sky-top), #3454d1); }
-  .category-card-colors { background: linear-gradient(135deg, #e63946, #ffd400, #43b98a, #3d7fe0); }
-  .category-card-reading { background: linear-gradient(135deg, #f4a261, #6a4c93); }
 
-  .category-card-calc {
+  #menuHome .category-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: clamp(1rem, 5vw, 1.8rem);
+  }
+
+  .category-card-app {
+    width: auto;
+    flex: 0 1 auto;
     background: none;
     box-shadow: none;
     border-bottom: none;
     flex-direction: column;
     justify-content: center;
     gap: 0.5rem;
-    padding: clamp(0.5rem, 2vw, 0.9rem) clamp(1.2rem, 4.5vw, 1.6rem);
+    padding: clamp(0.5rem, 2vw, 0.9rem);
   }
-  .category-card-calc:active { transform: translateY(2px); }
-  .category-card-calc .app-icon-tile {
+  .category-card-app:active { transform: translateY(2px); }
+  .category-card-app .app-icon-tile {
     width: clamp(4.4rem, 19vw, 6rem);
     height: clamp(4.4rem, 19vw, 6rem);
     border-radius: 27%;
     overflow: hidden;
     flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff8ee;
     box-shadow: 0 10px 20px -10px rgba(31, 42, 60, 0.5);
   }
-  .category-card-calc .app-icon-tile svg { display: block; width: 100%; height: 100%; }
-  .category-card-calc .app-icon-label {
+  .category-card-app .app-icon-tile svg { display: block; width: 100%; height: 100%; }
+  .category-card-app .app-icon-tile .icon { font-size: clamp(2rem, 9vw, 2.8rem); }
+  .category-card-app .app-icon-label {
     font-family: "Comic Sans MS", "Comic Sans", "Segoe Print", "Chalkboard SE", "Bradley Hand", cursive;
     font-weight: 700;
+    font-size: clamp(0.85rem, 3.6vw, 1.05rem);
+    line-height: 1.15;
+    max-width: 6.4rem;
+    text-align: center;
     color: var(--white);
     text-shadow: 0 2px 0 rgba(31, 42, 60, 0.25);
   }
@@ -982,7 +999,7 @@
     <div class="menu-panel" id="menuHome">
       <h1 class="menu-title">Choisis ton jeu !</h1>
       <div class="category-grid">
-        <button class="category-card category-card-calc" type="button" data-category="calc">
+        <button class="category-card category-card-app" type="button" data-category="calc">
           <span class="app-icon-tile">
             <svg viewBox="0 0 120 120" aria-hidden="true">
               <rect x="4" y="4" width="112" height="112" rx="30" fill="#fff8ee" />
@@ -1004,13 +1021,13 @@
           </span>
           <span class="app-icon-label">Calcul Malin</span>
         </button>
-        <button class="category-card category-card-colors" type="button" id="colorsCard">
-          <span class="icon emoji">🎨</span>
-          <span>Les couleurs en anglais</span>
+        <button class="category-card category-card-app" type="button" id="colorsCard">
+          <span class="app-icon-tile"><span class="icon emoji">🎨</span></span>
+          <span class="app-icon-label">Anglais Malin</span>
         </button>
-        <button class="category-card category-card-reading" type="button" id="readingCard">
-          <span class="icon emoji">📖</span>
-          <span>Mes premières lectures</span>
+        <button class="category-card category-card-app" type="button" id="readingCard">
+          <span class="app-icon-tile"><span class="icon emoji">📖</span></span>
+          <span class="app-icon-label">Lire Malin</span>
         </button>
       </div>
     </div>
