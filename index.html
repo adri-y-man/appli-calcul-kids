@@ -207,6 +207,7 @@
   .level-pill .num[data-mode="costaud"],
   .level-pill .num[data-mode="mixas3"] { background: linear-gradient(135deg, #ff7a59, #ff3d77); }
   .level-pill .num[data-mode="colors"] { background: linear-gradient(135deg, #e63946, #ffd400, #43b98a, #3d7fe0); }
+  .level-pill .num[data-mode="reading"] { background: linear-gradient(135deg, #f4a261, #6a4c93); }
   .level-pill .num[data-mode="mixas"],
   .level-pill .num[data-mode="mixall"] { background: linear-gradient(135deg, #ff7a59, #ff3d77); }
 
@@ -339,6 +340,13 @@
 
   .color-swatch-btn {
     border: 3px solid rgba(31, 42, 60, 0.3);
+  }
+
+  .reading-word { cursor: default; }
+
+  .picture-btn {
+    font-size: calc(var(--fs-button) * 1.3);
+    line-height: 1;
   }
 
   /* ---------- feedback ---------- */
@@ -806,6 +814,7 @@
   .category-card[data-category="2"] { background: linear-gradient(135deg, var(--candy-blue), var(--candy-teal)); }
   .category-card[data-category="3"] { background: linear-gradient(135deg, var(--sky-top), #3454d1); }
   .category-card-colors { background: linear-gradient(135deg, #e63946, #ffd400, #43b98a, #3d7fe0); }
+  .category-card-reading { background: linear-gradient(135deg, #f4a261, #6a4c93); }
 
   .menu-back {
     appearance: none;
@@ -956,6 +965,10 @@
           <span class="icon emoji">🎨</span>
           <span>Les couleurs en anglais</span>
         </button>
+        <button class="category-card category-card-reading" type="button" id="readingCard">
+          <span class="icon emoji">📖</span>
+          <span>Ma première lecture</span>
+        </button>
       </div>
     </div>
 
@@ -1104,6 +1117,49 @@
       ["red", "blue", "yellow", "green", "orange", "purple", "black", "white"],
       ["red", "blue", "yellow", "green", "orange", "purple", "black", "white", "pink", "brown"],
       ["red", "blue", "yellow", "green", "orange", "purple", "black", "white", "pink", "brown", "gray", "gold"]
+    ];
+
+    var WORD_DEFS = {
+      chat: { word: "chat", emoji: "🐱" },
+      chien: { word: "chien", emoji: "🐶" },
+      velo: { word: "vélo", emoji: "🚲" },
+      ballon: { word: "ballon", emoji: "⚽" },
+      maison: { word: "maison", emoji: "🏠" },
+      bateau: { word: "bateau", emoji: "⛵" },
+      gateau: { word: "gâteau", emoji: "🎂" },
+      soleil: { word: "soleil", emoji: "☀️" },
+      lapin: { word: "lapin", emoji: "🐰" },
+      canard: { word: "canard", emoji: "🦆" },
+      cheval: { word: "cheval", emoji: "🐴" },
+      oiseau: { word: "oiseau", emoji: "🐦" },
+      poisson: { word: "poisson", emoji: "🐟" },
+      robot: { word: "robot", emoji: "🤖" },
+      fusee: { word: "fusée", emoji: "🚀" },
+      chateau: { word: "château", emoji: "🏰" },
+      tracteur: { word: "tracteur", emoji: "🚜" },
+      tomate: { word: "tomate", emoji: "🍅" },
+      carotte: { word: "carotte", emoji: "🥕" },
+      banane: { word: "banane", emoji: "🍌" },
+      arbre: { word: "arbre", emoji: "🌳" },
+      papillon: { word: "papillon", emoji: "🦋" },
+      elephant: { word: "éléphant", emoji: "🐘" },
+      escargot: { word: "escargot", emoji: "🐌" },
+      dinosaure: { word: "dinosaure", emoji: "🦕" },
+      crocodile: { word: "crocodile", emoji: "🐊" },
+      parapluie: { word: "parapluie", emoji: "☂️" }
+    };
+
+    // Mots courts et très courants d'abord, mots plus longs (2-3 syllabes,
+    // moins fréquents) ajoutés progressivement au fil des niveaux.
+    var WORD_LEVEL_POOL = [
+      ["chat", "chien", "velo", "ballon"],
+      ["chat", "chien", "velo", "ballon", "maison", "bateau", "gateau", "soleil"],
+      ["chat", "chien", "velo", "ballon", "maison", "bateau", "gateau", "soleil", "lapin", "canard", "cheval", "oiseau"],
+      ["chat", "chien", "velo", "ballon", "maison", "bateau", "gateau", "soleil", "lapin", "canard", "cheval", "oiseau",
+        "poisson", "robot", "fusee", "chateau", "tracteur"],
+      ["chat", "chien", "velo", "ballon", "maison", "bateau", "gateau", "soleil", "lapin", "canard", "cheval", "oiseau",
+        "poisson", "robot", "fusee", "chateau", "tracteur", "tomate", "carotte", "banane", "arbre", "papillon",
+        "elephant", "escargot", "dinosaure", "crocodile", "parapluie"]
     ];
 
     var BASE_LEVELS = {
@@ -1324,6 +1380,20 @@
       };
     }
 
+    function generateReadingProblem(levelIdx) {
+      var pool = WORD_LEVEL_POOL[levelIdx];
+      var targetKey = pool[randInt(0, pool.length - 1)];
+      var distractors = shuffle(pool.filter(function (k) { return k !== targetKey; })).slice(0, 2);
+      var choices = shuffle(distractors.concat([targetKey]));
+      return {
+        kind: "reading",
+        word: WORD_DEFS[targetKey].word,
+        wordKey: targetKey,
+        answer: targetKey,
+        choices: choices
+      };
+    }
+
     // "Addition/Soustraction/Multiplication/Division à 3 termes" : même
     // mécanique que le calcul costaud, mais avec la même opération enchaînée
     // deux fois de suite au lieu de deux opérations tirées indépendamment.
@@ -1345,6 +1415,9 @@
       if (p1.kind === "colors" || p2.kind === "colors") {
         return p1.kind === "colors" && p2.kind === "colors" && p1.colorKey === p2.colorKey;
       }
+      if (p1.kind === "reading" || p2.kind === "reading") {
+        return p1.kind === "reading" && p2.kind === "reading" && p1.wordKey === p2.wordKey;
+      }
       if (p1.ops.length !== p2.ops.length || p1.terms.length !== p2.terms.length) return false;
       for (var i = 0; i < p1.ops.length; i++) {
         if (p1.ops[i] !== p2.ops[i]) return false;
@@ -1358,6 +1431,9 @@
     function buildOneProblem(levelIdx) {
       if (state.mode === "colors") {
         return generateColorsProblem(levelIdx);
+      }
+      if (state.mode === "reading") {
+        return generateReadingProblem(levelIdx);
       }
       if (MIX_MODES_3[state.mode]) {
         return generateMixedOpProblem(MIX_MODES_3[state.mode], levelIdx);
@@ -1400,6 +1476,7 @@
       terms2BackBtn: document.getElementById("terms2BackBtn"),
       terms3BackBtn: document.getElementById("terms3BackBtn"),
       colorsCard: document.getElementById("colorsCard"),
+      readingCard: document.getElementById("readingCard"),
       modeCards: document.querySelectorAll(".mode-card"),
       levelNum: document.getElementById("levelNum"),
       stars: document.getElementById("stars"),
@@ -1467,6 +1544,25 @@
       window.speechSynthesis.speak(utter);
     }
 
+    // Les mots à afficher (couleurs en anglais, lecture en français) ont une
+    // longueur très variable ("chat" vs "dinosaure") : on réduit la taille
+    // de police au besoin pour que le mot ne déborde jamais de l'écran,
+    // plutôt que de viser une taille fixe pensée pour un seul caractère.
+    function fitWordText(el) {
+      if (typeof window.getComputedStyle !== "function") return;
+      el.style.fontSize = "";
+      var maxWidth = Math.min(window.innerWidth || 9999, document.documentElement.clientWidth || 9999) * 0.82;
+      var size = parseFloat(window.getComputedStyle(el).fontSize);
+      if (!size) return;
+      var minSize = 14;
+      var guard = 0;
+      while (el.scrollWidth > maxWidth && size > minSize && guard < 40) {
+        size -= 2;
+        el.style.fontSize = size + "px";
+        guard++;
+      }
+    }
+
     function renderProblem() {
       var p = state.problem;
       els.problem.innerHTML = "";
@@ -1487,6 +1583,23 @@
         wordBtn.appendChild(wordIcon);
         wordBtn.addEventListener("click", function () { speakColorWord(p.word); });
         els.problem.appendChild(wordBtn);
+        fitWordText(wordText);
+        els.problem.classList.remove("pop");
+        void els.problem.offsetWidth;
+        els.problem.classList.add("pop");
+        return;
+      }
+
+      if (p.kind === "reading") {
+        els.problem.removeAttribute("data-terms");
+        var readingWord = document.createElement("span");
+        readingWord.className = "color-word reading-word";
+        var readingWordText = document.createElement("span");
+        readingWordText.className = "color-word-text";
+        readingWordText.textContent = p.word;
+        readingWord.appendChild(readingWordText);
+        els.problem.appendChild(readingWord);
+        fitWordText(readingWordText);
         els.problem.classList.remove("pop");
         void els.problem.offsetWidth;
         els.problem.classList.add("pop");
@@ -1569,6 +1682,22 @@
           btn.style.background = def.hex;
           btn.setAttribute("data-value", key);
           btn.setAttribute("aria-label", "Répondre " + def.fr);
+          btn.addEventListener("click", function () { onAnswer(key, btn); });
+          els.answers.appendChild(btn);
+        });
+        return;
+      }
+
+      if (state.problem.kind === "reading") {
+        var picturePalette = shuffle(CANDY_COLORS.slice());
+        state.problem.choices.forEach(function (key, idx) {
+          var def = WORD_DEFS[key];
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "answer-btn picture-btn emoji " + picturePalette[idx % picturePalette.length];
+          btn.textContent = def.emoji;
+          btn.setAttribute("data-value", key);
+          btn.setAttribute("aria-label", "Répondre " + def.word);
           btn.addEventListener("click", function () { onAnswer(key, btn); });
           els.answers.appendChild(btn);
         });
@@ -1742,6 +1871,7 @@
       card.addEventListener("click", function () { showMenuScreen(card.getAttribute("data-category")); });
     });
     els.colorsCard.addEventListener("click", function () { selectMode("colors"); });
+    els.readingCard.addEventListener("click", function () { selectMode("reading"); });
     els.terms2BackBtn.addEventListener("click", function () { showMenuScreen("home"); });
     els.terms3BackBtn.addEventListener("click", function () { showMenuScreen("home"); });
 
