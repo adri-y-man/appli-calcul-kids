@@ -320,8 +320,8 @@
     color: var(--ink);
     display: inline-flex;
     align-items: center;
-    gap: 0.35em;
-    padding: 0.25em 0.85em;
+    gap: 0.5rem;
+    padding: 0.5rem 1.1rem;
     border-radius: 999px;
     box-shadow: 0 6px 0 rgba(31, 42, 60, 0.15);
     transition: transform 0.12s ease, box-shadow 0.12s ease;
@@ -337,7 +337,7 @@
     text-transform: uppercase;
   }
 
-  .color-word-icon { font-size: 0.5em; }
+  .color-word-icon { font-size: 1.15rem; }
 
   .color-swatch-btn {
     border: 3px solid rgba(31, 42, 60, 0.3);
@@ -1549,17 +1549,20 @@
     // longueur très variable ("chat" vs "dinosaure") : on réduit la taille
     // de police au besoin pour que le mot ne déborde jamais de l'écran,
     // plutôt que de viser une taille fixe pensée pour un seul caractère.
-    function fitWordText(el) {
+    function fitWordText(pill, textEl) {
       if (typeof window.getComputedStyle !== "function") return;
-      el.style.fontSize = "";
-      var maxWidth = Math.min(window.innerWidth || 9999, document.documentElement.clientWidth || 9999) * 0.82;
-      var size = parseFloat(window.getComputedStyle(el).fontSize);
+      textEl.style.fontSize = "";
+      // On mesure la largeur de la bulle entière (texte + icône + padding),
+      // pas seulement du texte, sinon le padding peut à lui seul dépasser
+      // de l'écran même quand le texte tient.
+      var maxWidth = Math.min(window.innerWidth || 9999, document.documentElement.clientWidth || 9999) * 0.85;
+      var size = parseFloat(window.getComputedStyle(textEl).fontSize);
       if (!size) return;
       var minSize = 14;
       var guard = 0;
-      while (el.scrollWidth > maxWidth && size > minSize && guard < 40) {
+      while (pill.scrollWidth > maxWidth && size > minSize && guard < 40) {
         size -= 2;
-        el.style.fontSize = size + "px";
+        textEl.style.fontSize = size + "px";
         guard++;
       }
     }
@@ -1584,7 +1587,7 @@
         wordBtn.appendChild(wordIcon);
         wordBtn.addEventListener("click", function () { speakColorWord(p.word); });
         els.problem.appendChild(wordBtn);
-        fitWordText(wordText);
+        fitWordText(wordBtn, wordText);
         els.problem.classList.remove("pop");
         void els.problem.offsetWidth;
         els.problem.classList.add("pop");
@@ -1600,7 +1603,7 @@
         readingWordText.textContent = p.word;
         readingWord.appendChild(readingWordText);
         els.problem.appendChild(readingWord);
-        fitWordText(readingWordText);
+        fitWordText(readingWord, readingWordText);
         els.problem.classList.remove("pop");
         void els.problem.offsetWidth;
         els.problem.classList.add("pop");
