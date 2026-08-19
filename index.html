@@ -206,6 +206,7 @@
   .level-pill .num[data-mode="div3"] { background: var(--candy-pink); }
   .level-pill .num[data-mode="costaud"],
   .level-pill .num[data-mode="mixas3"] { background: linear-gradient(135deg, #ff7a59, #ff3d77); }
+  .level-pill .num[data-mode="colors"] { background: linear-gradient(135deg, #e63946, #ffd400, #43b98a, #3d7fe0); }
   .level-pill .num[data-mode="mixas"],
   .level-pill .num[data-mode="mixall"] { background: linear-gradient(135deg, #ff7a59, #ff3d77); }
 
@@ -305,6 +306,39 @@
   .problem .paren {
     color: var(--ink);
     font-size: var(--fs-op);
+  }
+
+  /* ---------- jeu des couleurs ---------- */
+
+  .color-word {
+    appearance: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    background: rgba(255, 255, 255, 0.85);
+    color: var(--ink);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    padding: 0.25em 0.85em;
+    border-radius: 999px;
+    box-shadow: 0 6px 0 rgba(31, 42, 60, 0.15);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+
+  .color-word:active { transform: translateY(2px); box-shadow: 0 3px 0 rgba(31, 42, 60, 0.15); }
+  .color-word:focus-visible { outline: 3px solid var(--candy-blue); outline-offset: 3px; }
+
+  .color-word-text {
+    font-weight: 900;
+    font-size: var(--fs-op);
+    line-height: 1;
+  }
+
+  .color-word-icon { font-size: 0.5em; }
+
+  .color-swatch-btn {
+    border: 3px solid rgba(31, 42, 60, 0.3);
   }
 
   /* ---------- feedback ---------- */
@@ -771,6 +805,7 @@
 
   .category-card[data-category="2"] { background: linear-gradient(135deg, var(--candy-blue), var(--candy-teal)); }
   .category-card[data-category="3"] { background: linear-gradient(135deg, var(--sky-top), #3454d1); }
+  .category-card-colors { background: linear-gradient(135deg, #e63946, #ffd400, #43b98a, #3d7fe0); }
 
   .menu-back {
     appearance: none;
@@ -917,6 +952,10 @@
           <span class="icon emoji">🧮</span>
           <span>Calcul à 3 termes</span>
         </button>
+        <button class="category-card category-card-colors" type="button" id="colorsCard">
+          <span class="icon emoji">🎨</span>
+          <span>Les couleurs en anglais</span>
+        </button>
       </div>
     </div>
 
@@ -1034,6 +1073,38 @@
     var MODE_TO_OP_3 = { add3: "add", sub3: "sub", mul3: "mul", div3: "div" };
     var MIX_MODES = { mixas: ["add", "sub"], mixall: OP_KEYS };
     var MIX_MODES_3 = { mixas3: ["add", "sub"], costaud: OP_KEYS };
+
+    // Certains jeux (comme les couleurs) demandent moins d'étoiles par
+    // niveau que les jeux de calcul.
+    var STARS_FOR_MODE = { colors: 3 };
+    function starsToLevelUp(mode) {
+      return STARS_FOR_MODE[mode] || STARS_TO_LEVEL_UP;
+    }
+
+    var COLOR_DEFS = {
+      red: { en: "Red", fr: "Rouge", hex: "#e63946" },
+      blue: { en: "Blue", fr: "Bleu", hex: "#3d7fe0" },
+      yellow: { en: "Yellow", fr: "Jaune", hex: "#ffd400" },
+      green: { en: "Green", fr: "Vert", hex: "#43b98a" },
+      orange: { en: "Orange", fr: "Orange", hex: "#ff8c3d" },
+      purple: { en: "Purple", fr: "Violet", hex: "#8e5ce6" },
+      black: { en: "Black", fr: "Noir", hex: "#2a2a2a" },
+      white: { en: "White", fr: "Blanc", hex: "#ffffff" },
+      pink: { en: "Pink", fr: "Rose", hex: "#ef5da8" },
+      brown: { en: "Brown", fr: "Marron", hex: "#8b5a2b" },
+      gray: { en: "Gray", fr: "Gris", hex: "#9aa1ab" },
+      gold: { en: "Gold", fr: "Or", hex: "#d4af37" }
+    };
+
+    // Le lot de couleurs disponibles s'agrandit à chaque niveau : plus de
+    // choix possibles, donc plus difficile de deviner sans connaître le mot.
+    var COLOR_LEVEL_POOL = [
+      ["red", "blue", "yellow", "green"],
+      ["red", "blue", "yellow", "green", "orange", "purple"],
+      ["red", "blue", "yellow", "green", "orange", "purple", "black", "white"],
+      ["red", "blue", "yellow", "green", "orange", "purple", "black", "white", "pink", "brown"],
+      ["red", "blue", "yellow", "green", "orange", "purple", "black", "white", "pink", "brown", "gray", "gold"]
+    ];
 
     var BASE_LEVELS = {
       add: { param: [5, 10, 15, 20, 25], maxResult: 30 },
@@ -1239,6 +1310,20 @@
       };
     }
 
+    function generateColorsProblem(levelIdx) {
+      var pool = COLOR_LEVEL_POOL[levelIdx];
+      var targetKey = pool[randInt(0, pool.length - 1)];
+      var distractors = shuffle(pool.filter(function (k) { return k !== targetKey; })).slice(0, 2);
+      var choices = shuffle(distractors.concat([targetKey]));
+      return {
+        kind: "colors",
+        word: COLOR_DEFS[targetKey].en,
+        colorKey: targetKey,
+        answer: targetKey,
+        choices: choices
+      };
+    }
+
     // "Addition/Soustraction/Multiplication/Division à 3 termes" : même
     // mécanique que le calcul costaud, mais avec la même opération enchaînée
     // deux fois de suite au lieu de deux opérations tirées indépendamment.
@@ -1257,6 +1342,9 @@
 
     function sameProblem(p1, p2) {
       if (!p1 || !p2) return false;
+      if (p1.kind === "colors" || p2.kind === "colors") {
+        return p1.kind === "colors" && p2.kind === "colors" && p1.colorKey === p2.colorKey;
+      }
       if (p1.ops.length !== p2.ops.length || p1.terms.length !== p2.terms.length) return false;
       for (var i = 0; i < p1.ops.length; i++) {
         if (p1.ops[i] !== p2.ops[i]) return false;
@@ -1268,6 +1356,9 @@
     }
 
     function buildOneProblem(levelIdx) {
+      if (state.mode === "colors") {
+        return generateColorsProblem(levelIdx);
+      }
       if (MIX_MODES_3[state.mode]) {
         return generateMixedOpProblem(MIX_MODES_3[state.mode], levelIdx);
       }
@@ -1308,6 +1399,7 @@
       categoryCards: document.querySelectorAll(".category-card"),
       terms2BackBtn: document.getElementById("terms2BackBtn"),
       terms3BackBtn: document.getElementById("terms3BackBtn"),
+      colorsCard: document.getElementById("colorsCard"),
       modeCards: document.querySelectorAll(".mode-card"),
       levelNum: document.getElementById("levelNum"),
       stars: document.getElementById("stars"),
@@ -1332,18 +1424,25 @@
 
     var STAR_PATH = "M12 2 L14.9 8.6 L22 9.3 L16.5 14 L18.2 21 L12 17.3 L5.8 21 L7.5 14 L2 9.3 L9.1 8.6 Z";
 
-    for (var s = 0; s < STARS_TO_LEVEL_UP; s++) {
-      var starSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-      starSvg.setAttribute("viewBox", "0 0 24 24");
-      var starPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      starPath.setAttribute("d", STAR_PATH);
-      starSvg.appendChild(starPath);
-      els.stars.appendChild(starSvg);
+    // Le nombre d'étoiles affichées dépend du jeu (5 pour les calculs, 3
+    // pour les couleurs) : reconstruit à chaque rendu plutôt qu'une fois
+    // pour de bon au chargement.
+    function buildStars(count) {
+      els.stars.innerHTML = "";
+      for (var s = 0; s < count; s++) {
+        var starSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        starSvg.setAttribute("viewBox", "0 0 24 24");
+        var starPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        starPath.setAttribute("d", STAR_PATH);
+        starSvg.appendChild(starPath);
+        els.stars.appendChild(starSvg);
+      }
     }
 
     function renderLevel() {
       els.levelNum.textContent = String(state.level);
       els.levelNum.setAttribute("data-mode", state.mode || "");
+      buildStars(starsToLevelUp(state.mode));
       var starEls = els.stars.querySelectorAll("svg");
       for (var i = 0; i < starEls.length; i++) {
         starEls[i].classList.toggle("filled", i < state.correctStreak);
@@ -1359,9 +1458,41 @@
       return (opKey === "mul" || opKey === "div") ? 2 : 1;
     }
 
+    function speakColorWord(word) {
+      if (!("speechSynthesis" in window)) return;
+      window.speechSynthesis.cancel();
+      var utter = new SpeechSynthesisUtterance(word);
+      utter.lang = "en-US";
+      utter.rate = 0.85;
+      window.speechSynthesis.speak(utter);
+    }
+
     function renderProblem() {
       var p = state.problem;
       els.problem.innerHTML = "";
+
+      if (p.kind === "colors") {
+        els.problem.removeAttribute("data-terms");
+        var wordBtn = document.createElement("button");
+        wordBtn.type = "button";
+        wordBtn.className = "color-word";
+        wordBtn.setAttribute("aria-label", "Écouter le mot " + p.word);
+        var wordText = document.createElement("span");
+        wordText.className = "color-word-text";
+        wordText.textContent = p.word;
+        var wordIcon = document.createElement("span");
+        wordIcon.className = "color-word-icon";
+        wordIcon.textContent = "🔊";
+        wordBtn.appendChild(wordText);
+        wordBtn.appendChild(wordIcon);
+        wordBtn.addEventListener("click", function () { speakColorWord(p.word); });
+        els.problem.appendChild(wordBtn);
+        els.problem.classList.remove("pop");
+        void els.problem.offsetWidth;
+        els.problem.classList.add("pop");
+        return;
+      }
+
       els.problem.setAttribute("data-terms", String(p.terms.length));
 
       function appendNum(term) {
@@ -1428,12 +1559,29 @@
 
     function renderAnswers() {
       els.answers.innerHTML = "";
+
+      if (state.problem.kind === "colors") {
+        state.problem.choices.forEach(function (key) {
+          var def = COLOR_DEFS[key];
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "answer-btn color-swatch-btn";
+          btn.style.background = def.hex;
+          btn.setAttribute("data-value", key);
+          btn.setAttribute("aria-label", "Répondre " + def.fr);
+          btn.addEventListener("click", function () { onAnswer(key, btn); });
+          els.answers.appendChild(btn);
+        });
+        return;
+      }
+
       var palette = shuffle(CANDY_COLORS.slice());
       state.problem.choices.forEach(function (value, idx) {
         var btn = document.createElement("button");
         btn.type = "button";
         btn.className = "answer-btn " + palette[idx % palette.length];
         btn.textContent = String(value);
+        btn.setAttribute("data-value", value);
         btn.setAttribute("aria-label", "Répondre " + value);
         btn.addEventListener("click", function () { onAnswer(value, btn); });
         els.answers.appendChild(btn);
@@ -1451,8 +1599,8 @@
 
       buttons.forEach(function (b) {
         b.disabled = true;
-        var v = Number(b.textContent);
-        if (v === state.problem.answer) {
+        var v = b.getAttribute("data-value");
+        if (String(v) === String(state.problem.answer)) {
           b.classList.add("is-correct");
         } else if (b === btn) {
           b.classList.add("is-wrong");
@@ -1468,7 +1616,7 @@
       if (isCorrect) {
         state.wrongStreak = 0;
         state.correctStreak++;
-        if (state.correctStreak >= STARS_TO_LEVEL_UP) {
+        if (state.correctStreak >= starsToLevelUp(state.mode)) {
           if (state.level < MAX_LEVEL) {
             state.level++;
             leveledUp = true;
@@ -1577,7 +1725,7 @@
       var savedLevel = saved && typeof saved.level === "number" ? saved.level : NaN;
       var savedStars = saved && typeof saved.stars === "number" ? saved.stars : NaN;
       state.level = (savedLevel >= MIN_LEVEL && savedLevel <= MAX_LEVEL) ? savedLevel : MIN_LEVEL;
-      state.correctStreak = (savedStars >= 0 && savedStars < STARS_TO_LEVEL_UP) ? savedStars : 0;
+      state.correctStreak = (savedStars >= 0 && savedStars < starsToLevelUp(mode)) ? savedStars : 0;
       state.wrongStreak = 0;
       state.locked = false;
       closeMenu();
@@ -1593,6 +1741,7 @@
     els.categoryCards.forEach(function (card) {
       card.addEventListener("click", function () { showMenuScreen(card.getAttribute("data-category")); });
     });
+    els.colorsCard.addEventListener("click", function () { selectMode("colors"); });
     els.terms2BackBtn.addEventListener("click", function () { showMenuScreen("home"); });
     els.terms3BackBtn.addEventListener("click", function () { showMenuScreen("home"); });
 
