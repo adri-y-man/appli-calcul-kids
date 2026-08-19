@@ -794,6 +794,63 @@
     outline: 3px solid var(--ink);
     outline-offset: 2px;
   }
+
+  /* mobile paysage (écran court) : la largeur ne manque pas, mais la hauteur
+     est très limitée — on réduit tout ce qui est dimensionné en vw (pensé
+     pour tablette/ordinateur) vers des tailles basées sur la hauteur. Placé
+     en toute fin de feuille de style pour l'emporter sur les règles
+     non conditionnelles ci-dessus (même sélecteur, même spécificité). */
+  @media (orientation: landscape) and (max-height: 500px) {
+    :root {
+      --fs-eyebrow: clamp(0.7rem, 3.2vh, 0.85rem);
+      --fs-problem: clamp(2rem, 13vh, 3rem);
+      --fs-op: clamp(1.6rem, 10vh, 2.3rem);
+      --fs-button: clamp(1.15rem, 7vh, 1.6rem);
+      --fs-feedback: clamp(0.85rem, 4vh, 1.05rem);
+      --pill-num-size: clamp(1.4rem, 6vh, 1.7rem);
+      --pill-num-fs: clamp(0.75rem, 3.2vh, 0.9rem);
+      --star-size: clamp(1rem, 4.2vh, 1.25rem);
+    }
+
+    .topbar {
+      max-height: calc(1.3cm + env(safe-area-inset-top));
+      padding: calc(env(safe-area-inset-top) + 0.25rem) clamp(0.8rem, 3vw, 1.2rem) 0.35rem;
+    }
+
+    .answer-btn { min-height: 2.6rem; }
+
+    .menu-overlay {
+      align-items: flex-start;
+      padding: clamp(2.6rem, 13vh, 3.4rem) clamp(0.6rem, 3vw, 1rem) clamp(0.6rem, 3vh, 1rem);
+      overflow-y: auto;
+    }
+
+    .menu-brand-text { font-size: clamp(1rem, 5vh, 1.3rem); }
+    .menu-logo { width: clamp(1.8rem, 7vh, 2.2rem); height: clamp(1.8rem, 7vh, 2.2rem); }
+
+    .menu-panel { gap: clamp(0.4rem, 2vh, 0.65rem); }
+    .menu-title { font-size: clamp(1.1rem, 6vh, 1.5rem); }
+
+    .mode-grid { gap: clamp(0.35rem, 1.6vh, 0.5rem); }
+    .mode-card {
+      padding: clamp(0.3rem, 1.5vh, 0.5rem) 0.5rem;
+      font-size: clamp(0.75rem, 3vh, 0.9rem);
+    }
+    .mode-card .icon { font-size: clamp(1.1rem, 4.5vh, 1.4rem); }
+    .mode-card .op-icon { font-size: clamp(1.4rem, 6vh, 1.9rem); }
+
+    .mode-costaud .icon,
+    .mode-wide .icon { font-size: clamp(1rem, 4vh, 1.3rem); }
+
+    .category-grid { gap: clamp(0.35rem, 1.6vh, 0.5rem); }
+    .category-card {
+      padding: clamp(0.45rem, 2vh, 0.7rem) 0.8rem;
+      font-size: clamp(0.85rem, 3.4vh, 1.05rem);
+    }
+    .category-card .icon { font-size: clamp(1.3rem, 5vh, 1.6rem); }
+
+    .menu-back { width: clamp(1.8rem, 6.5vh, 2.2rem); height: clamp(1.8rem, 6.5vh, 2.2rem); }
+  }
 </style>
 
 <div class="scene">
@@ -920,7 +977,7 @@
         <span class="costaud-text">Mix d'additions et de soustractions<span class="costaud-sub">les deux mélangées, à toi de deviner !</span></span>
       </button>
       <button class="mode-card mode-costaud" type="button" data-mode="costaud">
-        <span class="icon emoji">🔥</span>
+        <span class="icon emoji">🎲</span>
         <span class="costaud-text">Mix de tout<span class="costaud-sub">les 4 opérations mélangées !</span></span>
       </button>
     </div>
