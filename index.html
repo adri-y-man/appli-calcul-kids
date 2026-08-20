@@ -1346,7 +1346,7 @@
       if (!state.mode) return;
       try {
         var data = loadProgress();
-        data[state.mode] = { level: state.level, stars: state.correctStreak };
+        data[state.mode] = { level: state.level, stars: state.correctStreak, problem: state.problem };
         window.localStorage.setItem(PROGRESS_KEY, JSON.stringify(data));
       } catch (e) {
         // localStorage indisponible (navigation privée, quota...) : on ignore.
@@ -1934,6 +1934,7 @@
       setFeedback("", "", "");
       renderProblem();
       renderAnswers();
+      saveProgress();
     }
 
     var CONFETTI_COLORS = ["var(--green-add)", "var(--orange-sub)", "var(--candy-blue)", "var(--candy-pink)", "var(--gold)"];
@@ -2014,7 +2015,17 @@
       closeMenu();
       setThemeColor(THEME_COLOR_BAR);
       renderLevel();
-      nextProblem();
+      var savedProblem = saved && saved.problem && Array.isArray(saved.problem.choices) ? saved.problem : null;
+      if (savedProblem) {
+        // Reprend exactement le calcul en cours plutôt que d'en tirer un
+        // nouveau, au cas où l'appli aurait été fermée par accident.
+        state.problem = savedProblem;
+        setFeedback("", "", "");
+        renderProblem();
+        renderAnswers();
+      } else {
+        nextProblem();
+      }
     }
 
     els.menuBtn.addEventListener("click", openMenu);
@@ -2075,6 +2086,7 @@
       state.level = MIN_LEVEL;
       state.correctStreak = 0;
       state.wrongStreak = 0;
+      state.problem = null;
       renderLevel();
       saveProgress();
       openMenu();
