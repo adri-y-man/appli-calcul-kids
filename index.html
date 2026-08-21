@@ -1406,9 +1406,8 @@
     var MIX_MODES = { mixas: ["add", "sub"], mixall: OP_KEYS };
     var MIX_MODES_3 = { mixas3: ["add", "sub"], costaud: OP_KEYS };
 
-    // Certains jeux (comme les couleurs) demandent moins d'étoiles par
-    // niveau que les jeux de calcul.
-    var STARS_FOR_MODE = { colors: 3, letters: 3, syllables: 3, animals: 3, numbers: 3, body: 3, count: 3 };
+    // Tous les jeux demandent le même nombre d'étoiles par niveau.
+    var STARS_FOR_MODE = {};
     function starsToLevelUp(mode) {
       return STARS_FOR_MODE[mode] || STARS_TO_LEVEL_UP;
     }
