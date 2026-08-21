@@ -350,6 +350,15 @@
     line-height: 1;
   }
 
+  /* ---------- jeu des chiffres en anglais : objets répétés à compter ---------- */
+
+  .count-btn {
+    font-size: clamp(1.3rem, 6.5vw, 2rem);
+    line-height: 1.25;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
   /* ---------- prompt image (lettres, syllabes) ---------- */
 
   .picture-prompt {
@@ -1216,6 +1225,10 @@
           <span class="icon emoji">🐶</span>
           <span>Les animaux en anglais</span>
         </button>
+        <button class="category-card category-card-body" type="button" id="bodyCard">
+          <span class="icon emoji">✋</span>
+          <span>Le corps humain en anglais</span>
+        </button>
       </div>
     </div>
 
@@ -1531,6 +1544,26 @@
       ["cat", "dog", "cow", "duck", "horse", "rabbit", "bird", "fish", "pig", "sheep", "lion", "elephant"]
     ];
 
+    var BODY_DEFS = {
+      hand: { en: "Hand", emoji: "✋" },
+      foot: { en: "Foot", emoji: "🦶" },
+      ear: { en: "Ear", emoji: "👂" },
+      eye: { en: "Eye", emoji: "👁️" },
+      nose: { en: "Nose", emoji: "👃" },
+      mouth: { en: "Mouth", emoji: "👄" },
+      leg: { en: "Leg", emoji: "🦵" },
+      arm: { en: "Arm", emoji: "💪" },
+      tooth: { en: "Tooth", emoji: "🦷" },
+      finger: { en: "Finger", emoji: "👆" }
+    };
+    var BODY_LEVEL_POOL = [
+      ["hand", "foot", "ear", "eye"],
+      ["hand", "foot", "ear", "eye", "nose", "mouth"],
+      ["hand", "foot", "ear", "eye", "nose", "mouth", "leg", "arm"],
+      ["hand", "foot", "ear", "eye", "nose", "mouth", "leg", "arm", "tooth", "finger"],
+      ["hand", "foot", "ear", "eye", "nose", "mouth", "leg", "arm", "tooth", "finger"]
+    ];
+
     var BASE_LEVELS = {
       add: { param: [5, 10, 15, 20, 25], maxResult: 30 },
       sub: { param: [5, 10, 15, 20, 25] },
@@ -1763,6 +1796,20 @@
       };
     }
 
+    function generateBodyProblem(levelIdx) {
+      var pool = BODY_LEVEL_POOL[levelIdx];
+      var targetKey = pool[randInt(0, pool.length - 1)];
+      var distractors = shuffle(pool.filter(function (k) { return k !== targetKey; })).slice(0, 2);
+      var choices = shuffle(distractors.concat([targetKey]));
+      return {
+        kind: "body",
+        word: BODY_DEFS[targetKey].en,
+        bodyKey: targetKey,
+        answer: targetKey,
+        choices: choices
+      };
+    }
+
     function generateReadingProblem(levelIdx) {
       var pool = WORD_LEVEL_POOL[levelIdx];
       var targetKey = pool[randInt(0, pool.length - 1)];
@@ -1852,6 +1899,9 @@
       if (p1.kind === "animals" || p2.kind === "animals") {
         return p1.kind === "animals" && p2.kind === "animals" && p1.animalKey === p2.animalKey;
       }
+      if (p1.kind === "body" || p2.kind === "body") {
+        return p1.kind === "body" && p2.kind === "body" && p1.bodyKey === p2.bodyKey;
+      }
       if (p1.kind === "reading" || p2.kind === "reading") {
         return p1.kind === "reading" && p2.kind === "reading" && p1.wordKey === p2.wordKey;
       }
@@ -1880,6 +1930,9 @@
       }
       if (state.mode === "animals") {
         return generateAnimalsProblem(levelIdx);
+      }
+      if (state.mode === "body") {
+        return generateBodyProblem(levelIdx);
       }
       if (state.mode === "reading") {
         return generateReadingProblem(levelIdx);
@@ -1941,6 +1994,7 @@
       lireBackBtn: document.getElementById("lireBackBtn"),
       colorsCard: document.getElementById("colorsCard"),
       animalsCard: document.getElementById("animalsCard"),
+      bodyCard: document.getElementById("bodyCard"),
       readingCard: document.getElementById("readingCard"),
       lettersCard: document.getElementById("lettersCard"),
       syllablesCard: document.getElementById("syllablesCard"),
@@ -2038,7 +2092,7 @@
       var p = state.problem;
       els.problem.innerHTML = "";
 
-      if (p.kind === "colors" || p.kind === "animals") {
+      if (p.kind === "colors" || p.kind === "animals" || p.kind === "body") {
         els.problem.removeAttribute("data-terms");
         var wordBtn = document.createElement("button");
         wordBtn.type = "button";
@@ -2217,6 +2271,22 @@
           var btn = document.createElement("button");
           btn.type = "button";
           btn.className = "answer-btn picture-btn emoji " + animalPalette[idx % animalPalette.length];
+          btn.textContent = def.emoji;
+          btn.setAttribute("data-value", key);
+          btn.setAttribute("aria-label", "Répondre " + def.en);
+          btn.addEventListener("click", function () { onAnswer(key, btn); });
+          els.answers.appendChild(btn);
+        });
+        return;
+      }
+
+      if (state.problem.kind === "body") {
+        var bodyPalette = shuffle(CANDY_COLORS.slice());
+        state.problem.choices.forEach(function (key, idx) {
+          var def = BODY_DEFS[key];
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "answer-btn picture-btn emoji " + bodyPalette[idx % bodyPalette.length];
           btn.textContent = def.emoji;
           btn.setAttribute("data-value", key);
           btn.setAttribute("aria-label", "Répondre " + def.en);
@@ -2425,6 +2495,7 @@
     });
     els.colorsCard.addEventListener("click", function () { selectMode("colors"); });
     els.animalsCard.addEventListener("click", function () { selectMode("animals"); });
+    els.bodyCard.addEventListener("click", function () { selectMode("body"); });
     els.readingCard.addEventListener("click", function () { selectMode("reading"); });
     els.lettersCard.addEventListener("click", function () { selectMode("letters"); });
     els.syllablesCard.addEventListener("click", function () { selectMode("syllables"); });
