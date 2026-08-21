@@ -350,6 +350,23 @@
     line-height: 1;
   }
 
+  /* ---------- prompt image (lettres, syllabes) ---------- */
+
+  .picture-prompt {
+    font-size: clamp(5rem, 22vw, 9rem);
+    line-height: 1;
+  }
+
+  /* ---------- réponses-mots (rimes) : police plus petite que les pilules
+     chiffres/lettres, pour que les mots plus longs tiennent dans le bouton ---------- */
+
+  .word-btn {
+    font-size: clamp(1.1rem, 5.8vw, 1.7rem);
+    text-transform: uppercase;
+    padding-left: 0.4rem;
+    padding-right: 0.4rem;
+  }
+
   /* ---------- feedback ---------- */
 
   .feedback {
@@ -816,6 +833,13 @@
   .category-card[data-category="3"] { background: linear-gradient(135deg, var(--sky-top), #3454d1); }
   .category-card-colors { background: linear-gradient(135deg, #e63946, #ffd400, #43b98a, #3d7fe0); }
   .category-card-reading { background: linear-gradient(135deg, #f4a261, #6a4c93); }
+  .category-card-letters { background: linear-gradient(135deg, #43b98a, #2a9d6f); }
+  .category-card-syllables { background: linear-gradient(135deg, #598ce6, #3454d1); }
+  .category-card-rhymes { background: linear-gradient(135deg, #ef5da8, #d9418c); }
+  .category-card-animals { background: linear-gradient(135deg, #f2994a, #d9724c); }
+  .category-card-numbers { background: linear-gradient(135deg, #4fb3e8, #3d7fe0); }
+  .category-card-body { background: linear-gradient(135deg, #8e5ce6, #6a4c93); }
+  .category-card-nombres { background: linear-gradient(135deg, #ffc93c, #f2994a); }
 
   #menuHome .category-grid {
     flex-direction: row;
@@ -1109,6 +1133,18 @@
           <span class="icon emoji">📖</span>
           <span>Mes premières lectures</span>
         </button>
+        <button class="category-card category-card-letters" type="button" id="lettersCard">
+          <span class="icon emoji">🔤</span>
+          <span>Les premières lettres</span>
+        </button>
+        <button class="category-card category-card-syllables" type="button" id="syllablesCard">
+          <span class="icon emoji">🧩</span>
+          <span>Le jeu des syllabes</span>
+        </button>
+        <button class="category-card category-card-rhymes" type="button" id="rhymesCard">
+          <span class="icon emoji">🎵</span>
+          <span>Les mots qui riment</span>
+        </button>
       </div>
     </div>
 
@@ -1229,7 +1265,7 @@
 
     // Certains jeux (comme les couleurs) demandent moins d'étoiles par
     // niveau que les jeux de calcul.
-    var STARS_FOR_MODE = { colors: 3 };
+    var STARS_FOR_MODE = { colors: 3, letters: 3, syllables: 3, animals: 3, numbers: 3, body: 3 };
     function starsToLevelUp(mode) {
       return STARS_FOR_MODE[mode] || STARS_TO_LEVEL_UP;
     }
@@ -1300,6 +1336,77 @@
       ["chat", "chien", "velo", "ballon", "maison", "bateau", "gateau", "soleil", "lapin", "canard", "cheval", "oiseau",
         "poisson", "robot", "fusee", "chateau", "tracteur", "tomate", "carotte", "banane", "arbre", "papillon",
         "elephant", "escargot", "dinosaure", "crocodile", "parapluie"]
+    ];
+
+    var ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+    var LETTER_WORDS = {
+      chat: { emoji: "🐱", letter: "C" },
+      ballon: { emoji: "⚽", letter: "B" },
+      soleil: { emoji: "☀️", letter: "S" },
+      maison: { emoji: "🏠", letter: "M" },
+      lapin: { emoji: "🐰", letter: "L" },
+      robot: { emoji: "🤖", letter: "R" },
+      poisson: { emoji: "🐟", letter: "P" },
+      tomate: { emoji: "🍅", letter: "T" },
+      fusee: { emoji: "🚀", letter: "F" },
+      vache: { emoji: "🐮", letter: "V" },
+      gateau: { emoji: "🎂", letter: "G" },
+      arbre: { emoji: "🌳", letter: "A" }
+    };
+    var LETTER_LEVEL_POOL = [
+      ["chat", "ballon", "soleil", "maison"],
+      ["chat", "ballon", "soleil", "maison", "lapin", "robot"],
+      ["chat", "ballon", "soleil", "maison", "lapin", "robot", "poisson", "tomate"],
+      ["chat", "ballon", "soleil", "maison", "lapin", "robot", "poisson", "tomate", "fusee", "vache"],
+      ["chat", "ballon", "soleil", "maison", "lapin", "robot", "poisson", "tomate", "fusee", "vache", "gateau", "arbre"]
+    ];
+
+    // Découpage volontairement simplifié (pas de linguistique stricte) : le
+    // but est de faire entendre/repérer la première syllabe d'un mot connu,
+    // pas de couvrir toutes les règles de syllabation françaises.
+    var SYLLABLE_WORDS = {
+      maison: { emoji: "🏠", syllable: "MAI" },
+      lapin: { emoji: "🐰", syllable: "LA" },
+      gateau: { emoji: "🎂", syllable: "GÂ" },
+      tomate: { emoji: "🍅", syllable: "TO" },
+      robot: { emoji: "🤖", syllable: "RO" },
+      fusee: { emoji: "🚀", syllable: "FU" },
+      tortue: { emoji: "🐢", syllable: "TOR" },
+      cheval: { emoji: "🐴", syllable: "CHE" },
+      soleil: { emoji: "☀️", syllable: "SO" },
+      chateau: { emoji: "🏰", syllable: "CHÂ" },
+      bateau: { emoji: "⛵", syllable: "BA" },
+      panda: { emoji: "🐼", syllable: "PAN" }
+    };
+    var SYLLABLE_LEVEL_POOL = [
+      ["maison", "lapin", "gateau", "tomate"],
+      ["maison", "lapin", "gateau", "tomate", "robot", "fusee"],
+      ["maison", "lapin", "gateau", "tomate", "robot", "fusee", "tortue", "cheval"],
+      ["maison", "lapin", "gateau", "tomate", "robot", "fusee", "tortue", "cheval", "soleil", "chateau"],
+      ["maison", "lapin", "gateau", "tomate", "robot", "fusee", "tortue", "cheval", "soleil", "chateau", "bateau", "panda"]
+    ];
+    // Syllabes-leurres indépendantes de la liste de mots ci-dessus, pour ne
+    // jamais risquer de proposer deux fois la même bonne réponse.
+    var SYLLABLE_DISTRACTOR_POOL = ["NI", "VE", "DO", "JU", "QUI", "BU", "RA", "TI", "MO", "KI", "SA", "PE", "LU", "ZO", "NA", "FI", "GO", "CA", "DI", "WA"];
+
+    // Familles de mots qui riment (son de fin identique). Chaque famille a
+    // au moins 2 mots pour pouvoir tirer un mot-cible et une bonne réponse
+    // différente qui rime avec lui.
+    var RHYME_FAMILIES = {
+      a: ["chat", "rat"],
+      in: ["chien", "train", "main"],
+      ou: ["loup", "hibou", "chou"],
+      i: ["souris", "tapis", "riz"],
+      on: ["ballon", "dragon", "poisson"],
+      omme: ["pomme", "gomme"]
+    };
+    var RHYME_LEVEL_POOL = [
+      ["a", "in", "ou"],
+      ["a", "in", "ou", "i"],
+      ["a", "in", "ou", "i", "on"],
+      ["a", "in", "ou", "i", "on", "omme"],
+      ["a", "in", "ou", "i", "on", "omme"]
     ];
 
     var BASE_LEVELS = {
@@ -1534,6 +1641,57 @@
       };
     }
 
+    function generateLettersProblem(levelIdx) {
+      var pool = LETTER_LEVEL_POOL[levelIdx];
+      var targetKey = pool[randInt(0, pool.length - 1)];
+      var targetLetter = LETTER_WORDS[targetKey].letter;
+      var otherLetters = shuffle(ALPHABET.filter(function (l) { return l !== targetLetter; })).slice(0, 2);
+      var choices = shuffle(otherLetters.concat([targetLetter]));
+      return {
+        kind: "letters",
+        pictureKey: targetKey,
+        emoji: LETTER_WORDS[targetKey].emoji,
+        answer: targetLetter,
+        choices: choices
+      };
+    }
+
+    function generateSyllablesProblem(levelIdx) {
+      var pool = SYLLABLE_LEVEL_POOL[levelIdx];
+      var targetKey = pool[randInt(0, pool.length - 1)];
+      var targetSyllable = SYLLABLE_WORDS[targetKey].syllable;
+      var otherSyllables = shuffle(SYLLABLE_DISTRACTOR_POOL.filter(function (s) { return s !== targetSyllable; })).slice(0, 2);
+      var choices = shuffle(otherSyllables.concat([targetSyllable]));
+      return {
+        kind: "syllables",
+        pictureKey: targetKey,
+        emoji: SYLLABLE_WORDS[targetKey].emoji,
+        answer: targetSyllable,
+        choices: choices
+      };
+    }
+
+    function generateRhymesProblem(levelIdx) {
+      var families = RHYME_LEVEL_POOL[levelIdx];
+      var familyKey = families[randInt(0, families.length - 1)];
+      var familyWords = shuffle(RHYME_FAMILIES[familyKey].slice());
+      var targetWord = familyWords[0];
+      var correctAnswer = familyWords[1];
+      var otherFamilyKeys = shuffle(families.filter(function (k) { return k !== familyKey; })).slice(0, 2);
+      var distractorWords = otherFamilyKeys.map(function (k) {
+        var words = RHYME_FAMILIES[k];
+        return words[randInt(0, words.length - 1)];
+      });
+      var choices = shuffle(distractorWords.concat([correctAnswer]));
+      return {
+        kind: "rhymes",
+        word: targetWord,
+        answer: correctAnswer,
+        choices: choices,
+        wordKey: targetWord + "|" + correctAnswer
+      };
+    }
+
     // "Addition/Soustraction/Multiplication/Division à 3 termes" : même
     // mécanique que le calcul costaud, mais avec la même opération enchaînée
     // deux fois de suite au lieu de deux opérations tirées indépendamment.
@@ -1558,6 +1716,15 @@
       if (p1.kind === "reading" || p2.kind === "reading") {
         return p1.kind === "reading" && p2.kind === "reading" && p1.wordKey === p2.wordKey;
       }
+      if (p1.kind === "letters" || p2.kind === "letters") {
+        return p1.kind === "letters" && p2.kind === "letters" && p1.pictureKey === p2.pictureKey;
+      }
+      if (p1.kind === "syllables" || p2.kind === "syllables") {
+        return p1.kind === "syllables" && p2.kind === "syllables" && p1.pictureKey === p2.pictureKey;
+      }
+      if (p1.kind === "rhymes" || p2.kind === "rhymes") {
+        return p1.kind === "rhymes" && p2.kind === "rhymes" && p1.wordKey === p2.wordKey;
+      }
       if (p1.ops.length !== p2.ops.length || p1.terms.length !== p2.terms.length) return false;
       for (var i = 0; i < p1.ops.length; i++) {
         if (p1.ops[i] !== p2.ops[i]) return false;
@@ -1574,6 +1741,15 @@
       }
       if (state.mode === "reading") {
         return generateReadingProblem(levelIdx);
+      }
+      if (state.mode === "letters") {
+        return generateLettersProblem(levelIdx);
+      }
+      if (state.mode === "syllables") {
+        return generateSyllablesProblem(levelIdx);
+      }
+      if (state.mode === "rhymes") {
+        return generateRhymesProblem(levelIdx);
       }
       if (MIX_MODES_3[state.mode]) {
         return generateMixedOpProblem(MIX_MODES_3[state.mode], levelIdx);
@@ -1623,6 +1799,9 @@
       lireBackBtn: document.getElementById("lireBackBtn"),
       colorsCard: document.getElementById("colorsCard"),
       readingCard: document.getElementById("readingCard"),
+      lettersCard: document.getElementById("lettersCard"),
+      syllablesCard: document.getElementById("syllablesCard"),
+      rhymesCard: document.getElementById("rhymesCard"),
       modeCards: document.querySelectorAll(".mode-card"),
       levelNum: document.getElementById("levelNum"),
       stars: document.getElementById("stars"),
@@ -1739,7 +1918,7 @@
         return;
       }
 
-      if (p.kind === "reading") {
+      if (p.kind === "reading" || p.kind === "rhymes") {
         els.problem.removeAttribute("data-terms");
         var readingWord = document.createElement("span");
         readingWord.className = "color-word reading-word";
@@ -1749,6 +1928,18 @@
         readingWord.appendChild(readingWordText);
         els.problem.appendChild(readingWord);
         fitWordText(readingWord, readingWordText);
+        els.problem.classList.remove("pop");
+        void els.problem.offsetWidth;
+        els.problem.classList.add("pop");
+        return;
+      }
+
+      if (p.kind === "letters" || p.kind === "syllables") {
+        els.problem.removeAttribute("data-terms");
+        var pic = document.createElement("span");
+        pic.className = "picture-prompt emoji";
+        pic.textContent = p.emoji;
+        els.problem.appendChild(pic);
         els.problem.classList.remove("pop");
         void els.problem.offsetWidth;
         els.problem.classList.add("pop");
@@ -1848,6 +2039,21 @@
           btn.setAttribute("data-value", key);
           btn.setAttribute("aria-label", "Répondre " + def.word);
           btn.addEventListener("click", function () { onAnswer(key, btn); });
+          els.answers.appendChild(btn);
+        });
+        return;
+      }
+
+      if (state.problem.kind === "rhymes") {
+        var wordPalette = shuffle(CANDY_COLORS.slice());
+        state.problem.choices.forEach(function (word, idx) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "answer-btn word-btn " + wordPalette[idx % wordPalette.length];
+          btn.textContent = word;
+          btn.setAttribute("data-value", word);
+          btn.setAttribute("aria-label", "Répondre " + word);
+          btn.addEventListener("click", function () { onAnswer(word, btn); });
           els.answers.appendChild(btn);
         });
         return;
@@ -1978,8 +2184,8 @@
     function categoryOfMode(mode) {
       if (mode === "add" || mode === "sub" || mode === "mul" || mode === "div" || MIX_MODES[mode]) return "2";
       if (MODE_TO_OP_3[mode] || MIX_MODES_3[mode]) return "3";
-      if (mode === "colors") return "anglais";
-      if (mode === "reading") return "lire";
+      if (mode === "colors" || mode === "animals" || mode === "numbers" || mode === "body") return "anglais";
+      if (mode === "reading" || mode === "letters" || mode === "syllables" || mode === "rhymes") return "lire";
       return null;
     }
 
@@ -2037,6 +2243,9 @@
     });
     els.colorsCard.addEventListener("click", function () { selectMode("colors"); });
     els.readingCard.addEventListener("click", function () { selectMode("reading"); });
+    els.lettersCard.addEventListener("click", function () { selectMode("letters"); });
+    els.syllablesCard.addEventListener("click", function () { selectMode("syllables"); });
+    els.rhymesCard.addEventListener("click", function () { selectMode("rhymes"); });
     els.calcBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
     els.terms2BackBtn.addEventListener("click", function () { showMenuScreen("calc"); });
     els.terms3BackBtn.addEventListener("click", function () { showMenuScreen("calc"); });
