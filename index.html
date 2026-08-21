@@ -705,6 +705,59 @@
 
   .menu-panel[hidden] { display: none; }
 
+  /* ---------- petit renard qui traverse l'écran d'accueil ---------- */
+
+  .fox-walk-lane {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: clamp(4.5rem, 16vh, 7rem);
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  .fox-walker {
+    position: absolute;
+    bottom: 8px;
+    left: -110px;
+    width: clamp(70px, 12vw, 100px);
+    height: auto;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .fox-walker { animation: fox-walk-across 9s linear infinite, fox-bob 0.4s ease-in-out infinite; }
+    .fox-tail { animation: fox-tail-wag 0.6s ease-in-out infinite; }
+    .fox-leg-back { animation: fox-leg-swing-a 0.4s ease-in-out infinite; }
+    .fox-leg-front { animation: fox-leg-swing-b 0.4s ease-in-out infinite; }
+  }
+
+  .fox-tail { transform-origin: 20px 42px; }
+  .fox-leg-back { transform-origin: 33px 52px; }
+  .fox-leg-front { transform-origin: 57px 52px; }
+
+  @keyframes fox-walk-across {
+    0% { left: -110px; }
+    100% { left: 100%; }
+  }
+  @keyframes fox-bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+  }
+  @keyframes fox-tail-wag {
+    0%, 100% { transform: rotate(-6deg); }
+    50% { transform: rotate(6deg); }
+  }
+  @keyframes fox-leg-swing-a {
+    0%, 100% { transform: rotate(18deg); }
+    50% { transform: rotate(-18deg); }
+  }
+  @keyframes fox-leg-swing-b {
+    0%, 100% { transform: rotate(-18deg); }
+    50% { transform: rotate(18deg); }
+  }
+
   .menu-logo {
     width: clamp(2.6rem, 8.4vw, 3.3rem);
     height: clamp(2.6rem, 8.4vw, 3.3rem);
@@ -939,6 +992,10 @@
       overflow-y: auto;
     }
 
+    /* trop peu de hauteur pour laisser le renard se promener sans gêner
+       le contenu du menu, qui défile déjà dans cet espace réduit. */
+    .fox-walk-lane { display: none; }
+
     .menu-brand-text { font-size: clamp(1rem, 5vh, 1.3rem); }
     .menu-logo { width: clamp(1.8rem, 7vh, 2.2rem); height: clamp(1.8rem, 7vh, 2.2rem); }
 
@@ -1084,6 +1141,43 @@
           </span>
           <span class="app-icon-label">Lire Malin</span>
         </button>
+      </div>
+      <div class="fox-walk-lane" aria-hidden="true">
+        <svg class="fox-walker" viewBox="0 0 100 70">
+          <ellipse cx="50" cy="60" rx="32" ry="4" fill="#000" opacity="0.08" />
+          <g class="fox-tail">
+            <path d="M20 42 Q -2 32 4 14 Q 10 28 24 36 Z" fill="#E8743B" />
+            <path d="M4 14 Q 2 8 8 6 Q 8 14 13 19 Z" fill="#FDFBF6" />
+          </g>
+          <ellipse cx="42" cy="44" rx="22" ry="15" fill="#E8743B" />
+          <ellipse cx="44" cy="50" rx="13" ry="7" fill="#FDFBF6" />
+          <g class="fox-leg-back">
+            <path d="M30 50 Q33 48 36 50 L35.5 59 Q36 64 33 64.5 Q30 64 30.5 59 Z" fill="#C85A24" />
+            <path d="M30.5 63.5 Q33 65.5 35.5 63.5 Q35.5 66.5 33 66.8 Q30.5 66.5 30.5 63.5 Z" fill="#3A2418" />
+            <line x1="31.5" y1="65" x2="31.5" y2="66.5" stroke="#2C2C2A" stroke-width="0.6" stroke-linecap="round" />
+            <line x1="33" y1="65.3" x2="33" y2="67" stroke="#2C2C2A" stroke-width="0.6" stroke-linecap="round" />
+            <line x1="34.5" y1="65" x2="34.5" y2="66.5" stroke="#2C2C2A" stroke-width="0.6" stroke-linecap="round" />
+          </g>
+          <g class="fox-leg-front">
+            <path d="M54 50 Q57 48 60 50 L59.5 59 Q60 64 57 64.5 Q54 64 54.5 59 Z" fill="#C85A24" />
+            <path d="M54.5 63.5 Q57 65.5 59.5 63.5 Q59.5 66.5 57 66.8 Q54.5 66.5 54.5 63.5 Z" fill="#3A2418" />
+            <line x1="55.5" y1="65" x2="55.5" y2="66.5" stroke="#2C2C2A" stroke-width="0.6" stroke-linecap="round" />
+            <line x1="57" y1="65.3" x2="57" y2="67" stroke="#2C2C2A" stroke-width="0.6" stroke-linecap="round" />
+            <line x1="58.5" y1="65" x2="58.5" y2="66.5" stroke="#2C2C2A" stroke-width="0.6" stroke-linecap="round" />
+          </g>
+          <g transform="translate(52,18)">
+            <path d="M4 6 L8 -5 L13 7 Z" fill="#E8743B" />
+            <path d="M18 2 L24 -7 L24 6 Z" fill="#E8743B" />
+            <circle cx="14" cy="14" r="13" fill="#E8743B" />
+            <path d="M6 4 L9 -1 L11 5 Z" fill="#3A2418" />
+            <path d="M20 1 L23 -4 L24 3 Z" fill="#3A2418" />
+            <ellipse cx="16" cy="18" rx="6" ry="5" fill="#FDFBF6" />
+            <circle cx="19" cy="12" r="1.6" fill="#2C2C2A" />
+            <circle cx="11" cy="13" r="1.6" fill="#2C2C2A" />
+            <ellipse cx="17" cy="16.5" rx="1.6" ry="1.2" fill="#3A2418" />
+            <path d="M15 18 Q17 20 19 18" stroke="#3A2418" stroke-width="1.2" fill="none" stroke-linecap="round" />
+          </g>
+        </svg>
       </div>
     </div>
 
