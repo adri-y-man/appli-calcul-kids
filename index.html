@@ -3384,11 +3384,20 @@
 
     // Bouton/geste retour Android : sans ça, une PWA sans historique interne
     // se ferme dès la première pression au lieu de revenir en arrière dans
-    // l'appli. On "piège" chaque retour avec une entrée d'historique factice
-    // et on la ré-arme après chaque action, jusqu'à l'écran d'accueil du
-    // menu où l'on laisse enfin le retour quitter l'appli normalement.
+    // l'appli. On "piège" chaque retour avec des entrées d'historique
+    // factices et on les ré-arme après chaque action, jusqu'à l'écran
+    // d'accueil du menu où l'on laisse enfin le retour quitter l'appli
+    // normalement. On empile plusieurs entrées à chaque armement (pas une
+    // seule) : sur certains téléphones, deux pressions rapprochées sur le
+    // retour peuvent arriver avant que le JS ait fini de traiter la
+    // première, et une seule entrée de marge ne suffit alors pas à
+    // empêcher la fermeture accidentelle de l'appli.
+    var BACK_TRAP_RUNWAY = 6;
+
     function armBackTrap() {
-      history.pushState({ petitMalinBack: true }, "");
+      for (var i = 0; i < BACK_TRAP_RUNWAY; i++) {
+        history.pushState({ petitMalinBack: true }, "");
+      }
     }
 
     function handleBackPress() {
