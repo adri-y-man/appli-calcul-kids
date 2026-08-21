@@ -974,6 +974,21 @@
     text-shadow: 0 3px 0 rgba(31, 42, 60, 0.25);
   }
 
+  /* ---------- ligne d'en-tête des sous-menus : bouton retour et titre
+     alignés sur la même rangée ---------- */
+
+  .menu-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: clamp(0.7rem, 3vw, 1.1rem);
+  }
+
+  .menu-header .menu-title {
+    flex: 1;
+    text-align: left;
+  }
+
   .mode-grid {
     width: 100%;
     display: grid;
@@ -1149,7 +1164,7 @@
     appearance: none;
     border: none;
     cursor: pointer;
-    align-self: flex-start;
+    flex: none;
     width: clamp(2.4rem, 8vw, 2.9rem);
     height: clamp(2.4rem, 8vw, 2.9rem);
     border-radius: 50%;
@@ -1157,7 +1172,6 @@
     display: grid;
     place-items: center;
     box-shadow: 0 5px 0 rgba(31, 42, 60, 0.15);
-    margin-bottom: -0.4rem;
   }
 
   .menu-back svg { width: 42%; height: 42%; }
@@ -1427,12 +1441,14 @@
     </div>
 
     <div class="menu-panel" id="menuCalc" hidden>
-      <button class="menu-back" id="calcBackBtn" type="button" aria-label="Retour">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M15 4 L7 12 L15 20" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
-        </svg>
-      </button>
-      <h1 class="menu-title">Calcul Malin</h1>
+      <div class="menu-header">
+        <button class="menu-back" id="calcBackBtn" type="button" aria-label="Retour">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 4 L7 12 L15 20" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+        <h1 class="menu-title">Calcul Malin</h1>
+      </div>
       <div class="category-grid">
         <button class="category-card" type="button" data-category="2">
           <span class="icon emoji">🧮</span>
@@ -1450,12 +1466,14 @@
     </div>
 
     <div class="menu-panel" id="menuNombres" hidden>
-      <button class="menu-back" id="nombresBackBtn" type="button" aria-label="Retour">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M15 4 L7 12 L15 20" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
-        </svg>
-      </button>
-      <h1 class="menu-title">Jeux de nombres</h1>
+      <div class="menu-header">
+        <button class="menu-back" id="nombresBackBtn" type="button" aria-label="Retour">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 4 L7 12 L15 20" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+        <h1 class="menu-title">Jeux de nombres</h1>
+      </div>
       <div class="mode-grid">
         <button class="mode-card mode-wide" type="button" data-mode="count">
           <span class="icon emoji">🍎</span>
@@ -1473,12 +1491,14 @@
     </div>
 
     <div class="menu-panel" id="menuAnglais" hidden>
-      <button class="menu-back" id="anglaisBackBtn" type="button" aria-label="Retour">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M15 4 L7 12 L15 20" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
-        </svg>
-      </button>
-      <h1 class="menu-title">Anglais Malin</h1>
+      <div class="menu-header">
+        <button class="menu-back" id="anglaisBackBtn" type="button" aria-label="Retour">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 4 L7 12 L15 20" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+        <h1 class="menu-title">Anglais Malin</h1>
+      </div>
       <div class="category-grid">
         <button class="category-card category-card-colors" type="button" id="colorsCard">
           <span class="icon emoji">🎨</span>
@@ -1496,12 +1516,14 @@
     </div>
 
     <div class="menu-panel" id="menuLire" hidden>
-      <button class="menu-back" id="lireBackBtn" type="button" aria-label="Retour">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M15 4 L7 12 L15 20" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
-        </svg>
-      </button>
-      <h1 class="menu-title">Lire Malin</h1>
+      <div class="menu-header">
+        <button class="menu-back" id="lireBackBtn" type="button" aria-label="Retour">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 4 L7 12 L15 20" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+        <h1 class="menu-title">Lire Malin</h1>
+      </div>
       <div class="category-grid">
         <button class="category-card category-card-reading" type="button" id="readingCard">
           <span class="icon emoji">📖</span>
@@ -1523,12 +1545,14 @@
     </div>
 
     <div class="menu-panel" id="menuPeinture" hidden>
-      <button class="menu-back" id="peintureBackBtn" type="button" aria-label="Retour">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M15 4 L7 12 L15 20" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
-        </svg>
-      </button>
-      <h1 class="menu-title">Peinture Malin</h1>
+      <div class="menu-header">
+        <button class="menu-back" id="peintureBackBtn" type="button" aria-label="Retour">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 4 L7 12 L15 20" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+        <h1 class="menu-title">Peinture Malin</h1>
+      </div>
       <div class="category-grid">
         <button class="category-card category-card-coloriage" type="button" id="coloriageCard">
           <span class="icon emoji">🖍️</span>
@@ -1546,12 +1570,14 @@
     </div>
 
     <div class="menu-panel" id="menuTerms2" hidden>
-      <button class="menu-back" id="terms2BackBtn" type="button" aria-label="Retour">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M15 4 L7 12 L15 20" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
-        </svg>
-      </button>
-      <h1 class="menu-title">Calculs à 2 termes</h1>
+      <div class="menu-header">
+        <button class="menu-back" id="terms2BackBtn" type="button" aria-label="Retour">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 4 L7 12 L15 20" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+        <h1 class="menu-title">Calculs à 2 termes</h1>
+      </div>
       <div class="mode-grid">
         <button class="mode-card" type="button" data-mode="add" data-op="add">
           <span class="op-icon" data-op="add">+</span>Addition
@@ -1577,12 +1603,14 @@
     </div>
 
     <div class="menu-panel" id="menuTerms3" hidden>
-      <button class="menu-back" id="terms3BackBtn" type="button" aria-label="Retour">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M15 4 L7 12 L15 20" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
-        </svg>
-      </button>
-      <h1 class="menu-title">Calculs à 3 termes</h1>
+      <div class="menu-header">
+        <button class="menu-back" id="terms3BackBtn" type="button" aria-label="Retour">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 4 L7 12 L15 20" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+        <h1 class="menu-title">Calculs à 3 termes</h1>
+      </div>
       <div class="mode-grid">
         <button class="mode-card" type="button" data-mode="add3" data-op="add">
           <span class="op-icon" data-op="add">+</span>Addition
