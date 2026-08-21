@@ -379,6 +379,26 @@
     line-height: 1.15;
   }
 
+  /* ---------- jeu "plus grand ou plus petit ?" : question en toutes lettres ---------- */
+
+  .instruction-prompt {
+    font-size: clamp(1.5rem, 6.2vw, 2.3rem);
+    font-weight: 800;
+    color: var(--white);
+    text-shadow: 0 3px 0 rgba(31, 42, 60, 0.25);
+    text-align: center;
+    line-height: 1.3;
+    max-width: 85vw;
+  }
+
+  /* ---------- jeu "complète la suite" : virgules entre les nombres connus ---------- */
+
+  .seq-comma {
+    color: var(--ink);
+    font-size: var(--fs-op);
+    font-weight: 900;
+  }
+
   /* ---------- réponses-mots (rimes) : police plus petite que les pilules
      chiffres/lettres, pour que les mots plus longs tiennent dans le bouton ---------- */
 
@@ -848,6 +868,9 @@
   .mode-costaud { background: linear-gradient(135deg, #ff7a59, #ff3d77); }
   .mode-wide[data-mode="mixas"],
   .mode-wide[data-mode="mixall"] { background: linear-gradient(135deg, #ff7a59, #ff3d77); }
+  .mode-wide[data-mode="count"] { background: linear-gradient(135deg, #ffc93c, #f2994a); }
+  .mode-wide[data-mode="compare"] { background: linear-gradient(135deg, #598ce6, #3454d1); }
+  .mode-wide[data-mode="sequence"] { background: linear-gradient(135deg, #43b98a, #2a9d6f); }
 
   .mode-costaud .icon,
   .mode-wide .icon { font-size: clamp(1.8rem, 6.5vw, 2.3rem); }
@@ -1234,9 +1257,17 @@
       </button>
       <h1 class="menu-title">Jeux de nombres</h1>
       <div class="mode-grid">
-        <button class="mode-card mode-costaud" type="button" data-mode="count">
+        <button class="mode-card mode-wide" type="button" data-mode="count">
           <span class="icon emoji">🍎</span>
           <span class="costaud-text">Compte les objets<span class="costaud-sub">combien y en a-t-il ?</span></span>
+        </button>
+        <button class="mode-card mode-wide" type="button" data-mode="compare">
+          <span class="icon emoji">⚖️</span>
+          <span class="costaud-text">Plus grand ou plus petit ?<span class="costaud-sub">trouve le bon nombre</span></span>
+        </button>
+        <button class="mode-card mode-wide" type="button" data-mode="sequence">
+          <span class="icon emoji">🔢</span>
+          <span class="costaud-text">Complète la suite<span class="costaud-sub">quel nombre manque ?</span></span>
         </button>
       </div>
     </div>
@@ -1618,6 +1649,14 @@
     var COUNT_OBJECTS = ["🍎", "⭐", "🎈", "🐱", "🌸", "🚗"];
     var COUNT_LEVELS = { maxCount: [5, 8, 12, 16, 20] };
 
+    // "Plus grand ou plus petit ?" : les 3 nombres tirés vont de 0 à
+    // maxNum, un intervalle qui grandit avec le niveau.
+    var COMPARE_LEVELS = { maxNum: [10, 20, 40, 70, 100] };
+
+    // "Complète la suite" : suite arithmétique de pas croissant (+1 puis
+    // +2 puis +5), sur une plage de départ qui grandit aussi.
+    var SEQUENCE_LEVELS = { maxStart: [8, 15, 25, 40, 60], step: [1, 1, 2, 2, 5] };
+
     // Calcul costaud : 3 termes, 2 opérations tirées indépendamment (donc
     // potentiellement différentes) parmi +, −, ×, ÷, enchaînées de gauche à
     // droite. Chaque étape est bornée pour rester positive, entière, et sous
@@ -1765,6 +1804,49 @@
         emoji: emoji,
         answer: count,
         choices: generateChoices(count, maxCount)
+      };
+    }
+
+    // "Plus grand ou plus petit ?" : 3 nombres distincts affichés comme
+    // réponses possibles, il faut trouver le plus grand (ou le plus petit,
+    // tiré au hasard) des trois.
+    function generateCompareProblem(levelIdx) {
+      var maxNum = COMPARE_LEVELS.maxNum[levelIdx];
+      var numbers = [];
+      while (numbers.length < 3) {
+        var candidate = randInt(0, maxNum);
+        if (numbers.indexOf(candidate) === -1) numbers.push(candidate);
+      }
+      var compareMode = Math.random() < 0.5 ? "max" : "min";
+      var answer = compareMode === "max" ? Math.max.apply(null, numbers) : Math.min.apply(null, numbers);
+      return {
+        kind: "compare",
+        numbers: numbers,
+        compareMode: compareMode,
+        answer: answer,
+        choices: numbers.slice()
+      };
+    }
+
+    // "Complète la suite" : une suite arithmétique de 4 nombres avec un trou
+    // (jamais en première position, pour que le pas reste devinable).
+    function generateSequenceProblem(levelIdx) {
+      var step = SEQUENCE_LEVELS.step[levelIdx];
+      var maxStart = SEQUENCE_LEVELS.maxStart[levelIdx];
+      var length = 4;
+      var start = randInt(0, maxStart);
+      var sequence = [];
+      for (var i = 0; i < length; i++) sequence.push(start + i * step);
+      var blankIdx = randInt(1, length - 1);
+      var answer = sequence[blankIdx];
+      var display = sequence.slice();
+      display[blankIdx] = null;
+      var upperBound = sequence[length - 1] + step * 2;
+      return {
+        kind: "sequence",
+        sequence: display,
+        answer: answer,
+        choices: generateChoices(answer, upperBound)
       };
     }
 
@@ -1956,6 +2038,16 @@
       if (p1.kind === "count" || p2.kind === "count") {
         return p1.kind === "count" && p2.kind === "count" && p1.count === p2.count && p1.emoji === p2.emoji;
       }
+      if (p1.kind === "compare" || p2.kind === "compare") {
+        if (p1.kind !== "compare" || p2.kind !== "compare" || p1.compareMode !== p2.compareMode) return false;
+        var cn1 = p1.numbers.slice().sort(function (a, b) { return a - b; }).join(",");
+        var cn2 = p2.numbers.slice().sort(function (a, b) { return a - b; }).join(",");
+        return cn1 === cn2;
+      }
+      if (p1.kind === "sequence" || p2.kind === "sequence") {
+        return p1.kind === "sequence" && p2.kind === "sequence" &&
+          JSON.stringify(p1.sequence) === JSON.stringify(p2.sequence) && p1.answer === p2.answer;
+      }
       if (p1.kind === "colors" || p2.kind === "colors") {
         return p1.kind === "colors" && p2.kind === "colors" && p1.colorKey === p2.colorKey;
       }
@@ -1990,6 +2082,12 @@
     function buildOneProblem(levelIdx) {
       if (state.mode === "count") {
         return generateCountProblem(levelIdx);
+      }
+      if (state.mode === "compare") {
+        return generateCompareProblem(levelIdx);
+      }
+      if (state.mode === "sequence") {
+        return generateSequenceProblem(levelIdx);
       }
       if (state.mode === "colors") {
         return generateColorsProblem(levelIdx);
@@ -2252,6 +2350,45 @@
         countQEl.className = "q";
         countQEl.textContent = "?";
         els.problem.appendChild(countQEl);
+        els.problem.classList.remove("pop");
+        void els.problem.offsetWidth;
+        els.problem.classList.add("pop");
+        return;
+      }
+
+      if (p.kind === "compare") {
+        els.problem.removeAttribute("data-terms");
+        var instr = document.createElement("span");
+        instr.className = "instruction-prompt";
+        instr.textContent = p.compareMode === "max" ? "Quel est le plus grand nombre ?" : "Quel est le plus petit nombre ?";
+        els.problem.appendChild(instr);
+        els.problem.classList.remove("pop");
+        void els.problem.offsetWidth;
+        els.problem.classList.add("pop");
+        return;
+      }
+
+      if (p.kind === "sequence") {
+        els.problem.removeAttribute("data-terms");
+        p.sequence.forEach(function (val, idx) {
+          if (idx > 0) {
+            var comma = document.createElement("span");
+            comma.className = "seq-comma";
+            comma.textContent = ",";
+            els.problem.appendChild(comma);
+          }
+          if (val === null) {
+            var seqQEl = document.createElement("span");
+            seqQEl.className = "q";
+            seqQEl.textContent = "?";
+            els.problem.appendChild(seqQEl);
+          } else {
+            var seqNumEl = document.createElement("span");
+            seqNumEl.className = "num";
+            seqNumEl.textContent = String(val);
+            els.problem.appendChild(seqNumEl);
+          }
+        });
         els.problem.classList.remove("pop");
         void els.problem.offsetWidth;
         els.problem.classList.add("pop");
