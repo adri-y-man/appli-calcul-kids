@@ -366,6 +366,19 @@
     line-height: 1;
   }
 
+  /* ---------- jeu "compte les objets" : rangée d'objets à dénombrer ---------- */
+
+  .count-objects {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.1em;
+    max-width: 78vw;
+    font-size: clamp(1.7rem, 7.5vw, 2.8rem);
+    line-height: 1.15;
+  }
+
   /* ---------- réponses-mots (rimes) : police plus petite que les pilules
      chiffres/lettres, pour que les mots plus longs tiennent dans le bouton ---------- */
 
@@ -1206,6 +1219,25 @@
           <span class="icon emoji">🧮</span>
           <span>Calculs à 3 termes</span>
         </button>
+        <button class="category-card category-card-nombres" type="button" data-category="nombres">
+          <span class="icon emoji">🔢</span>
+          <span>Jeux de nombres</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="menu-panel" id="menuNombres" hidden>
+      <button class="menu-back" id="nombresBackBtn" type="button" aria-label="Retour">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M15 4 L7 12 L15 20" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+      </button>
+      <h1 class="menu-title">Jeux de nombres</h1>
+      <div class="mode-grid">
+        <button class="mode-card mode-costaud" type="button" data-mode="count">
+          <span class="icon emoji">🍎</span>
+          <span class="costaud-text">Compte les objets<span class="costaud-sub">combien y en a-t-il ?</span></span>
+        </button>
       </div>
     </div>
 
@@ -1376,7 +1408,7 @@
 
     // Certains jeux (comme les couleurs) demandent moins d'étoiles par
     // niveau que les jeux de calcul.
-    var STARS_FOR_MODE = { colors: 3, letters: 3, syllables: 3, animals: 3, numbers: 3, body: 3 };
+    var STARS_FOR_MODE = { colors: 3, letters: 3, syllables: 3, animals: 3, numbers: 3, body: 3, count: 3 };
     function starsToLevelUp(mode) {
       return STARS_FOR_MODE[mode] || STARS_TO_LEVEL_UP;
     }
@@ -1582,6 +1614,11 @@
       div: { param: [3, 5, 7, 9, 10] }
     };
 
+    // "Compte les objets" : une rangée d'objets à dénombrer, un peu plus
+    // nombreux à chaque niveau.
+    var COUNT_OBJECTS = ["🍎", "⭐", "🎈", "🐱", "🌸", "🚗"];
+    var COUNT_LEVELS = { maxCount: [5, 8, 12, 16, 20] };
+
     // Calcul costaud : 3 termes, 2 opérations tirées indépendamment (donc
     // potentiellement différentes) parmi +, −, ×, ÷, enchaînées de gauche à
     // droite. Chaque étape est bornée pour rester positive, entière, et sous
@@ -1717,6 +1754,19 @@
         tries++;
       }
       return shuffle(Array.from(choices));
+    }
+
+    function generateCountProblem(levelIdx) {
+      var maxCount = COUNT_LEVELS.maxCount[levelIdx];
+      var count = randInt(1, maxCount);
+      var emoji = COUNT_OBJECTS[randInt(0, COUNT_OBJECTS.length - 1)];
+      return {
+        kind: "count",
+        count: count,
+        emoji: emoji,
+        answer: count,
+        choices: generateChoices(count, maxCount)
+      };
     }
 
     function applyCostaudStep(opKey, current, table) {
@@ -1904,6 +1954,9 @@
 
     function sameProblem(p1, p2) {
       if (!p1 || !p2) return false;
+      if (p1.kind === "count" || p2.kind === "count") {
+        return p1.kind === "count" && p2.kind === "count" && p1.count === p2.count && p1.emoji === p2.emoji;
+      }
       if (p1.kind === "colors" || p2.kind === "colors") {
         return p1.kind === "colors" && p2.kind === "colors" && p1.colorKey === p2.colorKey;
       }
@@ -1936,6 +1989,9 @@
     }
 
     function buildOneProblem(levelIdx) {
+      if (state.mode === "count") {
+        return generateCountProblem(levelIdx);
+      }
       if (state.mode === "colors") {
         return generateColorsProblem(levelIdx);
       }
@@ -1997,12 +2053,14 @@
       menuTerms3: document.getElementById("menuTerms3"),
       menuAnglais: document.getElementById("menuAnglais"),
       menuLire: document.getElementById("menuLire"),
+      menuNombres: document.getElementById("menuNombres"),
       categoryCards: document.querySelectorAll(".category-card"),
       calcBackBtn: document.getElementById("calcBackBtn"),
       terms2BackBtn: document.getElementById("terms2BackBtn"),
       terms3BackBtn: document.getElementById("terms3BackBtn"),
       anglaisBackBtn: document.getElementById("anglaisBackBtn"),
       lireBackBtn: document.getElementById("lireBackBtn"),
+      nombresBackBtn: document.getElementById("nombresBackBtn"),
       colorsCard: document.getElementById("colorsCard"),
       animalsCard: document.getElementById("animalsCard"),
       bodyCard: document.getElementById("bodyCard"),
@@ -2171,6 +2229,30 @@
         pic.className = "picture-prompt emoji";
         pic.textContent = p.emoji;
         els.problem.appendChild(pic);
+        els.problem.classList.remove("pop");
+        void els.problem.offsetWidth;
+        els.problem.classList.add("pop");
+        return;
+      }
+
+      if (p.kind === "count") {
+        els.problem.removeAttribute("data-terms");
+        var objectsWrap = document.createElement("span");
+        objectsWrap.className = "count-objects emoji";
+        for (var oi = 0; oi < p.count; oi++) {
+          var objEl = document.createElement("span");
+          objEl.textContent = p.emoji;
+          objectsWrap.appendChild(objEl);
+        }
+        els.problem.appendChild(objectsWrap);
+        var countEqEl = document.createElement("span");
+        countEqEl.className = "eq";
+        countEqEl.textContent = "=";
+        els.problem.appendChild(countEqEl);
+        var countQEl = document.createElement("span");
+        countQEl.className = "q";
+        countQEl.textContent = "?";
+        els.problem.appendChild(countQEl);
         els.problem.classList.remove("pop");
         void els.problem.offsetWidth;
         els.problem.classList.add("pop");
@@ -2447,6 +2529,7 @@
     function categoryOfMode(mode) {
       if (mode === "add" || mode === "sub" || mode === "mul" || mode === "div" || MIX_MODES[mode]) return "2";
       if (MODE_TO_OP_3[mode] || MIX_MODES_3[mode]) return "3";
+      if (mode === "count" || mode === "compare" || mode === "sequence") return "nombres";
       if (mode === "colors" || mode === "animals" || mode === "numbers" || mode === "body") return "anglais";
       if (mode === "reading" || mode === "letters" || mode === "syllables" || mode === "rhymes") return "lire";
       return null;
@@ -2459,6 +2542,7 @@
       els.menuTerms3.hidden = screen !== "3";
       els.menuAnglais.hidden = screen !== "anglais";
       els.menuLire.hidden = screen !== "lire";
+      els.menuNombres.hidden = screen !== "nombres";
     }
 
     function openMenu() {
@@ -2516,6 +2600,7 @@
     els.terms3BackBtn.addEventListener("click", function () { showMenuScreen("calc"); });
     els.anglaisBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
     els.lireBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
+    els.nombresBackBtn.addEventListener("click", function () { showMenuScreen("calc"); });
 
     els.levelNum.addEventListener("click", function () {
       if (!state.mode) return;
