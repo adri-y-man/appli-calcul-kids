@@ -1860,11 +1860,11 @@
       return (opKey === "mul" || opKey === "div") ? 2 : 1;
     }
 
-    function speakColorWord(word) {
+    function speakWord(word, lang) {
       if (!("speechSynthesis" in window)) return;
       window.speechSynthesis.cancel();
       var utter = new SpeechSynthesisUtterance(word);
-      utter.lang = "en-US";
+      utter.lang = lang || "en-US";
       utter.rate = 0.85;
       window.speechSynthesis.speak(utter);
     }
@@ -1909,7 +1909,7 @@
         wordIcon.textContent = "🔊";
         wordBtn.appendChild(wordText);
         wordBtn.appendChild(wordIcon);
-        wordBtn.addEventListener("click", function () { speakColorWord(p.word); });
+        wordBtn.addEventListener("click", function () { speakWord(p.word, "en-US"); });
         els.problem.appendChild(wordBtn);
         fitWordText(wordBtn, wordText);
         els.problem.classList.remove("pop");
@@ -1918,7 +1918,7 @@
         return;
       }
 
-      if (p.kind === "reading" || p.kind === "rhymes") {
+      if (p.kind === "reading") {
         els.problem.removeAttribute("data-terms");
         var readingWord = document.createElement("span");
         readingWord.className = "color-word reading-word";
@@ -1928,6 +1928,29 @@
         readingWord.appendChild(readingWordText);
         els.problem.appendChild(readingWord);
         fitWordText(readingWord, readingWordText);
+        els.problem.classList.remove("pop");
+        void els.problem.offsetWidth;
+        els.problem.classList.add("pop");
+        return;
+      }
+
+      if (p.kind === "rhymes") {
+        els.problem.removeAttribute("data-terms");
+        var rhymeBtn = document.createElement("button");
+        rhymeBtn.type = "button";
+        rhymeBtn.className = "color-word";
+        rhymeBtn.setAttribute("aria-label", "Écouter le mot " + p.word);
+        var rhymeText = document.createElement("span");
+        rhymeText.className = "color-word-text";
+        rhymeText.textContent = p.word;
+        var rhymeIcon = document.createElement("span");
+        rhymeIcon.className = "color-word-icon";
+        rhymeIcon.textContent = "🔊";
+        rhymeBtn.appendChild(rhymeText);
+        rhymeBtn.appendChild(rhymeIcon);
+        rhymeBtn.addEventListener("click", function () { speakWord(p.word, "fr-FR"); });
+        els.problem.appendChild(rhymeBtn);
+        fitWordText(rhymeBtn, rhymeText);
         els.problem.classList.remove("pop");
         void els.problem.offsetWidth;
         els.problem.classList.add("pop");
