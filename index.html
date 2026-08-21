@@ -3208,6 +3208,29 @@
       els.menuPeinture.hidden = screen !== "peinture";
     }
 
+    // Vers quel écran de menu revenir avec le bouton retour Android, pour
+    // chaque sous-écran (miroir des boutons "retour" affichés à l'écran).
+    var MENU_BACK_TARGET = {
+      calc: "home",
+      "2": "calc",
+      "3": "calc",
+      anglais: "home",
+      lire: "home",
+      nombres: "calc",
+      peinture: "home"
+    };
+
+    function currentMenuScreen() {
+      if (!els.menuCalc.hidden) return "calc";
+      if (!els.menuTerms2.hidden) return "2";
+      if (!els.menuTerms3.hidden) return "3";
+      if (!els.menuAnglais.hidden) return "anglais";
+      if (!els.menuLire.hidden) return "lire";
+      if (!els.menuNombres.hidden) return "nombres";
+      if (!els.menuPeinture.hidden) return "peinture";
+      return "home";
+    }
+
     function openMenu() {
       showMenuScreen(categoryOfMode(state.mode) || "home");
       els.menuOverlay.hidden = false;
@@ -3330,6 +3353,46 @@
       saveProgress();
       openMenu();
     });
+
+    // Bouton/geste retour Android : sans ça, une PWA sans historique interne
+    // se ferme dès la première pression au lieu de revenir en arrière dans
+    // l'appli. On "piège" chaque retour avec une entrée d'historique factice
+    // et on la ré-arme après chaque action, jusqu'à l'écran d'accueil du
+    // menu où l'on laisse enfin le retour quitter l'appli normalement.
+    function armBackTrap() {
+      history.pushState({ petitMalinBack: true }, "");
+    }
+
+    function handleBackPress() {
+      if (!els.resetOverlay.hidden) {
+        els.resetOverlay.hidden = true;
+        armBackTrap();
+        return;
+      }
+      if (!els.levelUpOverlay.hidden || !els.winOverlay.hidden) {
+        // On laisse l'enfant terminer via les boutons dédiés plutôt que de
+        // fermer la célébration avec le retour.
+        armBackTrap();
+        return;
+      }
+      if (!els.menuOverlay.hidden) {
+        var screen = currentMenuScreen();
+        if (screen !== "home") {
+          showMenuScreen(MENU_BACK_TARGET[screen]);
+          armBackTrap();
+        }
+        // Sur l'accueil du menu : plus rien à quoi revenir dans l'appli,
+        // on laisse le retour suivant fermer l'appli normalement.
+        return;
+      }
+      // En train de jouer, menu fermé : le retour rouvre le menu plutôt que
+      // de fermer l'appli.
+      openMenu();
+      armBackTrap();
+    }
+
+    window.addEventListener("popstate", handleBackPress);
+    armBackTrap();
 
     renderLevel();
     openMenu();
