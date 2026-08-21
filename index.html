@@ -1212,6 +1212,10 @@
           <span class="icon emoji">🎨</span>
           <span>Les couleurs en anglais</span>
         </button>
+        <button class="category-card category-card-animals" type="button" id="animalsCard">
+          <span class="icon emoji">🐶</span>
+          <span>Les animaux en anglais</span>
+        </button>
       </div>
     </div>
 
@@ -1503,6 +1507,30 @@
       ["a", "in", "ou", "i", "on", "omme"]
     ];
 
+    var ANIMAL_DEFS = {
+      cat: { en: "Cat", emoji: "🐱" },
+      dog: { en: "Dog", emoji: "🐶" },
+      cow: { en: "Cow", emoji: "🐮" },
+      duck: { en: "Duck", emoji: "🦆" },
+      horse: { en: "Horse", emoji: "🐴" },
+      rabbit: { en: "Rabbit", emoji: "🐰" },
+      bird: { en: "Bird", emoji: "🐦" },
+      fish: { en: "Fish", emoji: "🐟" },
+      pig: { en: "Pig", emoji: "🐷" },
+      sheep: { en: "Sheep", emoji: "🐑" },
+      lion: { en: "Lion", emoji: "🦁" },
+      elephant: { en: "Elephant", emoji: "🐘" }
+    };
+    // Le lot d'animaux disponibles s'agrandit à chaque niveau, comme pour
+    // les couleurs.
+    var ANIMAL_LEVEL_POOL = [
+      ["cat", "dog", "cow", "duck"],
+      ["cat", "dog", "cow", "duck", "horse", "rabbit"],
+      ["cat", "dog", "cow", "duck", "horse", "rabbit", "bird", "fish"],
+      ["cat", "dog", "cow", "duck", "horse", "rabbit", "bird", "fish", "pig", "sheep"],
+      ["cat", "dog", "cow", "duck", "horse", "rabbit", "bird", "fish", "pig", "sheep", "lion", "elephant"]
+    ];
+
     var BASE_LEVELS = {
       add: { param: [5, 10, 15, 20, 25], maxResult: 30 },
       sub: { param: [5, 10, 15, 20, 25] },
@@ -1721,6 +1749,20 @@
       };
     }
 
+    function generateAnimalsProblem(levelIdx) {
+      var pool = ANIMAL_LEVEL_POOL[levelIdx];
+      var targetKey = pool[randInt(0, pool.length - 1)];
+      var distractors = shuffle(pool.filter(function (k) { return k !== targetKey; })).slice(0, 2);
+      var choices = shuffle(distractors.concat([targetKey]));
+      return {
+        kind: "animals",
+        word: ANIMAL_DEFS[targetKey].en,
+        animalKey: targetKey,
+        answer: targetKey,
+        choices: choices
+      };
+    }
+
     function generateReadingProblem(levelIdx) {
       var pool = WORD_LEVEL_POOL[levelIdx];
       var targetKey = pool[randInt(0, pool.length - 1)];
@@ -1807,6 +1849,9 @@
       if (p1.kind === "colors" || p2.kind === "colors") {
         return p1.kind === "colors" && p2.kind === "colors" && p1.colorKey === p2.colorKey;
       }
+      if (p1.kind === "animals" || p2.kind === "animals") {
+        return p1.kind === "animals" && p2.kind === "animals" && p1.animalKey === p2.animalKey;
+      }
       if (p1.kind === "reading" || p2.kind === "reading") {
         return p1.kind === "reading" && p2.kind === "reading" && p1.wordKey === p2.wordKey;
       }
@@ -1832,6 +1877,9 @@
     function buildOneProblem(levelIdx) {
       if (state.mode === "colors") {
         return generateColorsProblem(levelIdx);
+      }
+      if (state.mode === "animals") {
+        return generateAnimalsProblem(levelIdx);
       }
       if (state.mode === "reading") {
         return generateReadingProblem(levelIdx);
@@ -1892,6 +1940,7 @@
       anglaisBackBtn: document.getElementById("anglaisBackBtn"),
       lireBackBtn: document.getElementById("lireBackBtn"),
       colorsCard: document.getElementById("colorsCard"),
+      animalsCard: document.getElementById("animalsCard"),
       readingCard: document.getElementById("readingCard"),
       lettersCard: document.getElementById("lettersCard"),
       syllablesCard: document.getElementById("syllablesCard"),
@@ -1989,7 +2038,7 @@
       var p = state.problem;
       els.problem.innerHTML = "";
 
-      if (p.kind === "colors") {
+      if (p.kind === "colors" || p.kind === "animals") {
         els.problem.removeAttribute("data-terms");
         var wordBtn = document.createElement("button");
         wordBtn.type = "button";
@@ -2155,6 +2204,22 @@
           btn.textContent = def.emoji;
           btn.setAttribute("data-value", key);
           btn.setAttribute("aria-label", "Répondre " + def.word);
+          btn.addEventListener("click", function () { onAnswer(key, btn); });
+          els.answers.appendChild(btn);
+        });
+        return;
+      }
+
+      if (state.problem.kind === "animals") {
+        var animalPalette = shuffle(CANDY_COLORS.slice());
+        state.problem.choices.forEach(function (key, idx) {
+          var def = ANIMAL_DEFS[key];
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "answer-btn picture-btn emoji " + animalPalette[idx % animalPalette.length];
+          btn.textContent = def.emoji;
+          btn.setAttribute("data-value", key);
+          btn.setAttribute("aria-label", "Répondre " + def.en);
           btn.addEventListener("click", function () { onAnswer(key, btn); });
           els.answers.appendChild(btn);
         });
@@ -2359,6 +2424,7 @@
       card.addEventListener("click", function () { showMenuScreen(card.getAttribute("data-category")); });
     });
     els.colorsCard.addEventListener("click", function () { selectMode("colors"); });
+    els.animalsCard.addEventListener("click", function () { selectMode("animals"); });
     els.readingCard.addEventListener("click", function () { selectMode("reading"); });
     els.lettersCard.addEventListener("click", function () { selectMode("letters"); });
     els.syllablesCard.addEventListener("click", function () { selectMode("syllables"); });
