@@ -1393,17 +1393,28 @@
       pink: { en: "Pink", fr: "Rose", hex: "#ef5da8" },
       brown: { en: "Brown", fr: "Marron", hex: "#8b5a2b" },
       gray: { en: "Gray", fr: "Gris", hex: "#9aa1ab" },
-      gold: { en: "Gold", fr: "Or", hex: "#d4af37" }
+      gold: { en: "Gold", fr: "Or", hex: "#d4af37" },
+      lightblue: { en: "Light Blue", fr: "Bleu clair", hex: "#8ec9f0" },
+      darkgreen: { en: "Dark Green", fr: "Vert foncé", hex: "#1f5c3f" },
+      navy: { en: "Navy", fr: "Bleu marine", hex: "#1b2a4a" },
+      turquoise: { en: "Turquoise", fr: "Turquoise", hex: "#2fd4c4" },
+      khaki: { en: "Khaki", fr: "Kaki", hex: "#c3b091" },
+      burgundy: { en: "Burgundy", fr: "Bordeaux", hex: "#6d1b2e" },
+      coral: { en: "Coral", fr: "Corail", hex: "#ff6f5e" },
+      mint: { en: "Mint", fr: "Menthe", hex: "#8fe3c0" }
     };
 
     // Le lot de couleurs disponibles s'agrandit à chaque niveau : plus de
     // choix possibles, donc plus difficile de deviner sans connaître le mot.
+    // Les niveaux 4-5 introduisent des teintes plus subtiles (clair/foncé,
+    // nuances proches) pour vraiment pousser la difficulté au sommet.
     var COLOR_LEVEL_POOL = [
       ["red", "blue", "yellow", "green"],
       ["red", "blue", "yellow", "green", "orange", "purple"],
       ["red", "blue", "yellow", "green", "orange", "purple", "black", "white"],
-      ["red", "blue", "yellow", "green", "orange", "purple", "black", "white", "pink", "brown"],
-      ["red", "blue", "yellow", "green", "orange", "purple", "black", "white", "pink", "brown", "gray", "gold"]
+      ["red", "blue", "yellow", "green", "orange", "purple", "black", "white", "pink", "brown", "gray", "gold", "lightblue", "darkgreen"],
+      ["red", "blue", "yellow", "green", "orange", "purple", "black", "white", "pink", "brown", "gray", "gold", "lightblue", "darkgreen",
+        "navy", "turquoise", "khaki", "burgundy", "coral", "mint"]
     ];
 
     var WORD_DEFS = {
