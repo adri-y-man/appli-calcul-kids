@@ -997,6 +997,7 @@
   }
 
   .mode-card {
+    position: relative;
     appearance: none;
     border: none;
     cursor: pointer;
@@ -1006,7 +1007,7 @@
     align-items: center;
     justify-content: center;
     gap: 0.2rem;
-    padding: clamp(0.8rem, 3.2vw, 1.15rem) 0.75rem;
+    padding: clamp(0.8rem, 3.2vw, 1.15rem) 0.75rem clamp(1.9rem, 5.8vw, 2.4rem);
     border-radius: clamp(1.1rem, 3.5vw, 1.6rem);
     color: var(--white);
     font-weight: 800;
@@ -1014,6 +1015,23 @@
     border-bottom: clamp(4px, 1.2vw, 7px) solid rgba(0, 0, 0, 0.22);
     box-shadow: 0 10px 20px -10px rgba(31, 42, 60, 0.5);
     transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+
+  /* ---------- pastille de niveau scolaire, flottante en bas à droite
+     de chaque tuile de jeu ---------- */
+
+  .level-badge {
+    position: absolute;
+    bottom: clamp(0.4rem, 1.6vw, 0.55rem);
+    right: clamp(0.5rem, 2vw, 0.7rem);
+    background: rgba(31, 42, 60, 0.32);
+    color: var(--white);
+    font-size: clamp(0.62rem, 2.2vw, 0.72rem);
+    font-weight: 800;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    white-space: nowrap;
+    pointer-events: none;
   }
 
   .mode-card:hover { transform: translateY(-2px); }
@@ -1072,6 +1090,7 @@
   }
 
   .category-card {
+    position: relative;
     appearance: none;
     border: none;
     cursor: pointer;
@@ -1080,7 +1099,7 @@
     display: flex;
     align-items: center;
     gap: 0.9rem;
-    padding: clamp(1.1rem, 4.5vw, 1.6rem) clamp(1.2rem, 4.5vw, 1.6rem);
+    padding: clamp(1.1rem, 4.5vw, 1.6rem) clamp(3.4rem, 10vw, 4.2rem) clamp(1.1rem, 4.5vw, 1.6rem) clamp(1.2rem, 4.5vw, 1.6rem);
     border-radius: clamp(1.3rem, 4vw, 1.8rem);
     color: var(--white);
     font-weight: 800;
@@ -1241,6 +1260,13 @@
     .category-card .icon { font-size: clamp(1.3rem, 5vh, 1.6rem); }
 
     .menu-back { width: clamp(1.8rem, 6.5vh, 2.2rem); height: clamp(1.8rem, 6.5vh, 2.2rem); }
+
+    .level-badge {
+      bottom: clamp(0.2rem, 0.8vh, 0.35rem);
+      right: clamp(0.3rem, 1.2vh, 0.45rem);
+      font-size: clamp(0.52rem, 2.2vh, 0.62rem);
+      padding: 0.12rem 0.4rem;
+    }
 
     /* Peinture Malin : hauteur très limitée, la tuile doit rester sous la
        barre du haut plutôt que suivre sa taille pensée pour le portrait. */
@@ -1453,14 +1479,17 @@
         <button class="category-card" type="button" data-category="2">
           <span class="icon emoji">🧮</span>
           <span>Calculs à 2 termes</span>
+          <span class="level-badge">GS-CE1</span>
         </button>
         <button class="category-card category-card-3" type="button" data-category="3">
           <span class="icon emoji">🧮</span>
           <span>Calculs à 3 termes</span>
+          <span class="level-badge">CE1-CE2</span>
         </button>
         <button class="category-card category-card-nombres" type="button" data-category="nombres">
           <span class="icon emoji">🔢</span>
           <span>Jeux de nombres</span>
+          <span class="level-badge">PS-CP</span>
         </button>
       </div>
     </div>
@@ -1478,14 +1507,17 @@
         <button class="mode-card mode-wide" type="button" data-mode="count">
           <span class="icon emoji">🍎</span>
           <span class="costaud-text">Compte les objets<span class="costaud-sub">combien y en a-t-il ?</span></span>
+          <span class="level-badge">PS-MS</span>
         </button>
         <button class="mode-card mode-wide" type="button" data-mode="compare">
           <span class="icon emoji">⚖️</span>
           <span class="costaud-text">Plus grand ou plus petit ?<span class="costaud-sub">trouve le bon nombre</span></span>
+          <span class="level-badge">MS-GS</span>
         </button>
         <button class="mode-card mode-wide" type="button" data-mode="sequence">
           <span class="icon emoji">🔢</span>
           <span class="costaud-text">Complète la suite<span class="costaud-sub">quel nombre manque ?</span></span>
+          <span class="level-badge">GS-CE1</span>
         </button>
       </div>
     </div>
@@ -1503,14 +1535,17 @@
         <button class="category-card category-card-colors" type="button" id="colorsCard">
           <span class="icon emoji">🎨</span>
           <span>Les couleurs en anglais</span>
+          <span class="level-badge">MS-GS</span>
         </button>
         <button class="category-card category-card-animals" type="button" id="animalsCard">
           <span class="icon emoji">🐶</span>
           <span>Les animaux en anglais</span>
+          <span class="level-badge">MS-CP</span>
         </button>
         <button class="category-card category-card-body" type="button" id="bodyCard">
           <span class="icon emoji">✋</span>
           <span>Le corps humain en anglais</span>
+          <span class="level-badge">MS-CP</span>
         </button>
       </div>
     </div>
@@ -1528,18 +1563,22 @@
         <button class="category-card category-card-reading" type="button" id="readingCard">
           <span class="icon emoji">📖</span>
           <span>Mes premières lectures</span>
+          <span class="level-badge">GS-CP</span>
         </button>
         <button class="category-card category-card-letters" type="button" id="lettersCard">
           <span class="icon emoji">🔤</span>
           <span>Les premières lettres</span>
+          <span class="level-badge">GS-CP</span>
         </button>
         <button class="category-card category-card-syllables" type="button" id="syllablesCard">
           <span class="icon emoji">🧩</span>
           <span>Le jeu des syllabes</span>
+          <span class="level-badge">CP</span>
         </button>
         <button class="category-card category-card-rhymes" type="button" id="rhymesCard">
           <span class="icon emoji">🎵</span>
           <span>Les mots qui riment</span>
+          <span class="level-badge">MS-GS</span>
         </button>
       </div>
     </div>
@@ -1557,14 +1596,17 @@
         <button class="category-card category-card-coloriage" type="button" id="coloriageCard">
           <span class="icon emoji">🖍️</span>
           <span>Coloriage magique</span>
+          <span class="level-badge">PS-MS</span>
         </button>
         <button class="category-card category-card-modele" type="button" id="modeleCard">
           <span class="icon emoji">🖼️</span>
           <span>Peins comme le modèle</span>
+          <span class="level-badge">MS-GS</span>
         </button>
         <button class="category-card category-card-dessine" type="button" id="dessineCard">
           <span class="icon emoji">✏️</span>
           <span>Dessine libre</span>
+          <span class="level-badge">Dès 3 ans</span>
         </button>
       </div>
     </div>
@@ -1581,24 +1623,30 @@
       <div class="mode-grid">
         <button class="mode-card" type="button" data-mode="add" data-op="add">
           <span class="op-icon" data-op="add">+</span>Addition
+          <span class="level-badge">GS-CE1</span>
         </button>
         <button class="mode-card" type="button" data-mode="sub" data-op="sub">
           <span class="op-icon" data-op="sub">−</span>Soustraction
+          <span class="level-badge">GS-CE1</span>
         </button>
         <button class="mode-card" type="button" data-mode="mul" data-op="mul">
           <span class="op-icon" data-op="mul">×</span>Multiplication
+          <span class="level-badge">CE1-CE2</span>
         </button>
         <button class="mode-card" type="button" data-mode="div" data-op="div">
           <span class="op-icon" data-op="div">÷</span>Division
+          <span class="level-badge">CE1-CE2</span>
         </button>
       </div>
       <button class="mode-card mode-wide" type="button" data-mode="mixas">
         <span class="icon emoji">🎲</span>
         <span class="costaud-text">Mix d'addition et soustraction<span class="costaud-sub">les deux mélangées, à toi de deviner !</span></span>
+        <span class="level-badge">GS-CE1</span>
       </button>
       <button class="mode-card mode-wide" type="button" data-mode="mixall">
         <span class="icon emoji">🎲</span>
         <span class="costaud-text">Mix de tout<span class="costaud-sub">les 4 opérations mélangées !</span></span>
+        <span class="level-badge">CE1-CE2</span>
       </button>
     </div>
 
@@ -1614,24 +1662,30 @@
       <div class="mode-grid">
         <button class="mode-card" type="button" data-mode="add3" data-op="add">
           <span class="op-icon" data-op="add">+</span>Addition
+          <span class="level-badge">CE1-CE2</span>
         </button>
         <button class="mode-card" type="button" data-mode="sub3" data-op="sub">
           <span class="op-icon" data-op="sub">−</span>Soustraction
+          <span class="level-badge">CE1-CE2</span>
         </button>
         <button class="mode-card" type="button" data-mode="mul3" data-op="mul">
           <span class="op-icon" data-op="mul">×</span>Multiplication
+          <span class="level-badge">CE1-CE2</span>
         </button>
         <button class="mode-card" type="button" data-mode="div3" data-op="div">
           <span class="op-icon" data-op="div">÷</span>Division
+          <span class="level-badge">CE1-CE2</span>
         </button>
       </div>
       <button class="mode-card mode-costaud" type="button" data-mode="mixas3">
         <span class="icon emoji">🎲</span>
         <span class="costaud-text">Mix d'additions et de soustractions<span class="costaud-sub">les deux mélangées, à toi de deviner !</span></span>
+        <span class="level-badge">CE1-CE2</span>
       </button>
       <button class="mode-card mode-costaud" type="button" data-mode="costaud">
         <span class="icon emoji">🎲</span>
         <span class="costaud-text">Mix de tout<span class="costaud-sub">les 4 opérations mélangées !</span></span>
+        <span class="level-badge">CE1-CE2</span>
       </button>
     </div>
   </div>
