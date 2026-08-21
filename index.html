@@ -175,6 +175,8 @@
     margin: 0 auto;
   }
 
+  .level-pill[hidden] { display: none; }
+
   .level-pill .num {
     appearance: none;
     border: none;
@@ -258,6 +260,8 @@
     justify-content: center;
     min-height: 0;
   }
+
+  .problem-zone[hidden] { display: none; }
 
   .problem {
     display: flex;
@@ -448,9 +452,163 @@
     align-self: center;
   }
 
+  .answers[hidden] { display: none; }
+
   @media (min-width: 640px) {
     .answers { flex-direction: row; }
   }
+
+  /* ---------- Peinture Malin ---------- */
+
+  .paint-screen {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.6rem, 2.2vw, 1rem);
+    min-height: 0;
+    width: 100%;
+  }
+
+  .paint-screen[hidden] { display: none; }
+
+  .paint-stage-wrap {
+    position: relative;
+    flex: 1 1 0;
+    min-height: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .paint-stage {
+    width: min(78vw, 62vh, 26rem);
+    height: min(78vw, 62vh, 26rem);
+    background: #fff8ee;
+    border-radius: 1.4rem;
+    box-shadow: 0 14px 28px -16px rgba(31, 42, 60, 0.4);
+    overflow: hidden;
+    touch-action: none;
+  }
+
+  .paint-stage svg,
+  .paint-stage canvas { width: 100%; height: 100%; display: block; }
+
+  .paint-region { cursor: pointer; transition: fill 0.1s ease; }
+
+  .paint-reference {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+  }
+
+  .paint-reference[hidden] { display: none; }
+
+  .paint-reference-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: var(--white);
+    text-shadow: 0 2px 0 rgba(31, 42, 60, 0.25);
+  }
+
+  .paint-reference-stage {
+    width: clamp(3.2rem, 12vw, 4.5rem);
+    height: clamp(3.2rem, 12vw, 4.5rem);
+    background: #fff8ee;
+    border-radius: 0.8rem;
+    box-shadow: 0 8px 16px -10px rgba(31, 42, 60, 0.5);
+    overflow: hidden;
+  }
+
+  .paint-reference-stage svg { width: 100%; height: 100%; display: block; }
+
+  .paint-feedback {
+    min-height: 1.6rem;
+    margin: 0;
+    text-align: center;
+    font-size: clamp(1rem, 4vw, 1.3rem);
+    font-weight: 800;
+    color: var(--correct);
+    text-shadow: 0 2px 0 rgba(255, 255, 255, 0.6);
+  }
+
+  .paint-palette {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.5rem, 2vw, 0.8rem);
+    max-width: 30rem;
+  }
+
+  .paint-swatch {
+    appearance: none;
+    border: 3px solid rgba(31, 42, 60, 0.25);
+    cursor: pointer;
+    width: clamp(2.4rem, 8vw, 3.1rem);
+    height: clamp(2.4rem, 8vw, 3.1rem);
+    border-radius: 50%;
+    box-shadow: 0 6px 14px -8px rgba(31, 42, 60, 0.5);
+    transition: transform 0.12s ease;
+  }
+
+  .paint-swatch.selected {
+    border-color: var(--ink);
+    transform: scale(1.18);
+    box-shadow: 0 0 0 3px var(--white), 0 6px 14px -8px rgba(31, 42, 60, 0.6);
+  }
+
+  .paint-tools {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.5rem, 2vw, 0.9rem);
+    flex-wrap: wrap;
+  }
+
+  .paint-tools[hidden] { display: none; }
+
+  .paint-tool-btn {
+    appearance: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 800;
+    color: var(--white);
+    background: var(--candy-blue);
+    border-radius: 999px;
+    padding: 0.5rem 1rem;
+    font-size: 0.95rem;
+    border-bottom: 4px solid rgba(0, 0, 0, 0.22);
+    box-shadow: 0 8px 16px -10px rgba(31, 42, 60, 0.45);
+  }
+
+  .paint-tool-btn:active { transform: translateY(2px); border-bottom-width: 2px; }
+  .paint-tool-btn.selected { background: var(--ink); }
+
+  .brush-size-btn {
+    appearance: none;
+    border: none;
+    cursor: pointer;
+    background: var(--white);
+    border: 3px solid rgba(31, 42, 60, 0.25);
+    border-radius: 50%;
+    width: 2.6rem;
+    height: 2.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .brush-size-btn.selected { border-color: var(--ink); background: var(--candy-blue-light); }
+
+  .brush-size-btn .dot { background: var(--ink); border-radius: 50%; }
 
   /* mobile portrait : on pousse encore les tailles pour profiter de l'écran étroit et haut */
   @media (max-width: 640px) and (orientation: portrait) {
@@ -934,6 +1092,9 @@
   .category-card-letters { background: linear-gradient(135deg, #43b98a, #2a9d6f); }
   .category-card-syllables { background: linear-gradient(135deg, #598ce6, #3454d1); }
   .category-card-rhymes { background: linear-gradient(135deg, #ef5da8, #d9418c); }
+  .category-card-coloriage { background: linear-gradient(135deg, #ff8c3d, #e63946); }
+  .category-card-modele { background: linear-gradient(135deg, #8e5ce6, #3454d1); }
+  .category-card-dessine { background: linear-gradient(135deg, #43b98a, #2a9d6f); }
   .category-card-animals { background: linear-gradient(135deg, #f2994a, #d9724c); }
   .category-card-numbers { background: linear-gradient(135deg, #4fb3e8, #3d7fe0); }
   .category-card-body { background: linear-gradient(135deg, #8e5ce6, #6a4c93); }
@@ -1066,6 +1227,19 @@
     .category-card .icon { font-size: clamp(1.3rem, 5vh, 1.6rem); }
 
     .menu-back { width: clamp(1.8rem, 6.5vh, 2.2rem); height: clamp(1.8rem, 6.5vh, 2.2rem); }
+
+    /* Peinture Malin : hauteur très limitée, la tuile doit rester sous la
+       barre du haut plutôt que suivre sa taille pensée pour le portrait. */
+    .paint-screen { gap: clamp(0.2rem, 1vh, 0.4rem); padding-top: 0.2rem; }
+    .paint-stage { width: min(32vw, 38vh, 9rem); height: min(32vw, 38vh, 9rem); }
+    .paint-reference-stage { width: clamp(2rem, 8vh, 2.6rem); height: clamp(2rem, 8vh, 2.6rem); }
+    .paint-reference-label { font-size: 0.6rem; }
+    .paint-swatch { width: clamp(1.5rem, 5vh, 1.9rem); height: clamp(1.5rem, 5vh, 1.9rem); }
+    .paint-feedback { font-size: clamp(0.8rem, 3vh, 0.95rem); min-height: 1rem; }
+    .paint-tool-btn { font-size: 0.72rem; padding: 0.3rem 0.6rem; }
+    .brush-size-btn { width: 1.7rem; height: 1.7rem; }
+    .paint-palette { gap: 0.3rem; }
+    .paint-tools { gap: 0.3rem; }
   }
 </style>
 
@@ -1083,7 +1257,7 @@
         <path d="M15 4 L7 12 L15 20" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
       </svg>
     </button>
-    <div class="level-pill">
+    <div class="level-pill" id="levelPill">
       <span class="label">Niveau</span>
       <button class="num" id="levelNum" type="button" aria-label="Réinitialiser ce jeu au niveau 1">1</button>
       <div class="stars" id="stars" aria-hidden="true"></div>
@@ -1091,7 +1265,7 @@
   </header>
   <p class="max-badge" id="maxBadge" hidden><span class="emoji">🌟</span> Niveau maximum atteint</p>
 
-  <main class="problem-zone">
+  <main class="problem-zone" id="problemZone">
     <div class="problem" id="problem"></div>
     <p class="feedback" id="feedback" aria-live="polite">
       <span class="line-1" id="feedbackLine1"></span>
@@ -1100,6 +1274,19 @@
   </main>
 
   <section class="answers" id="answers" aria-label="Choix de réponses"></section>
+
+  <section class="paint-screen" id="paintScreen" hidden>
+    <div class="paint-stage-wrap">
+      <div class="paint-stage" id="paintStage"></div>
+      <div class="paint-reference" id="paintReference" hidden>
+        <span class="paint-reference-label">Modèle</span>
+        <div class="paint-reference-stage" id="paintReferenceStage"></div>
+      </div>
+    </div>
+    <p class="paint-feedback" id="paintFeedback" aria-live="polite"></p>
+    <div class="paint-palette" id="paintPalette"></div>
+    <div class="paint-tools" id="paintTools" hidden></div>
+  </section>
 
   <div class="menu-overlay" id="menuOverlay">
     <div class="menu-brand">
@@ -1185,6 +1372,19 @@
             </svg>
           </span>
           <span class="app-icon-label">Lire Malin</span>
+        </button>
+        <button class="category-card category-card-app" type="button" data-category="peinture">
+          <span class="app-icon-tile">
+            <svg viewBox="0 0 120 120" aria-hidden="true">
+              <rect x="4" y="4" width="112" height="112" rx="30" fill="#fff8ee" />
+              <path d="M60 18 C34 18 14 36 14 58 C14 76 28 82 40 78 C46 76 50 80 46 86 C42 92 48 102 60 102 C88 102 106 82 106 58 C106 36 86 18 60 18 Z" fill="#f2994a" />
+              <circle cx="40" cy="46" r="8" fill="#e63946" />
+              <circle cx="64" cy="36" r="8" fill="#ffd400" />
+              <circle cx="86" cy="50" r="8" fill="#3d7fe0" />
+              <circle cx="82" cy="76" r="8" fill="#43b98a" />
+            </svg>
+          </span>
+          <span class="app-icon-label">Peinture Malin</span>
         </button>
       </div>
       <div class="fox-walk-lane" aria-hidden="true">
@@ -1318,6 +1518,29 @@
         <button class="category-card category-card-rhymes" type="button" id="rhymesCard">
           <span class="icon emoji">🎵</span>
           <span>Les mots qui riment</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="menu-panel" id="menuPeinture" hidden>
+      <button class="menu-back" id="peintureBackBtn" type="button" aria-label="Retour">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M15 4 L7 12 L15 20" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+      </button>
+      <h1 class="menu-title">Peinture Malin</h1>
+      <div class="category-grid">
+        <button class="category-card category-card-coloriage" type="button" id="coloriageCard">
+          <span class="icon emoji">🖍️</span>
+          <span>Coloriage magique</span>
+        </button>
+        <button class="category-card category-card-modele" type="button" id="modeleCard">
+          <span class="icon emoji">🖼️</span>
+          <span>Peins comme le modèle</span>
+        </button>
+        <button class="category-card category-card-dessine" type="button" id="dessineCard">
+          <span class="icon emoji">✏️</span>
+          <span>Dessine libre</span>
         </button>
       </div>
     </div>
@@ -1659,6 +1882,68 @@
     // +2 puis +5), sur une plage de départ qui grandit aussi.
     var SEQUENCE_LEVELS = { maxStart: [8, 15, 25, 40, 60], step: [1, 1, 2, 2, 5] };
 
+    // Peinture Malin : palette de couleurs partagée par les 3 jeux, et 5
+    // gabarits de coloriage (un par niveau, de 3 à 7 zones à colorier).
+    // Chaque zone porte un attribut data-region="N" ; le tableau
+    // targetColors[N] donne sa couleur "modèle" dans le jeu "Peins comme
+    // le modèle" (même ordre que PAINT_PALETTE, pour un rendu harmonieux).
+    var PAINT_PALETTE = ["#e63946", "#ffd400", "#43b98a", "#3d7fe0", "#8e5ce6", "#ef5da8", "#ff8c3d", "#ffffff"];
+
+    var PAINT_TEMPLATES = [
+      {
+        name: "Le ballon",
+        targetColors: ["#e63946", "#ffd400", "#43b98a"],
+        svg: '<ellipse class="paint-region" data-region="0" cx="100" cy="85" rx="55" ry="65" fill="#fff8ee" stroke="#1f2a3c" stroke-width="4"/>' +
+          '<circle class="paint-region" data-region="1" cx="80" cy="60" r="14" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
+          '<polygon class="paint-region" data-region="2" points="100,150 92,165 108,165" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
+          '<path d="M100 165 Q95 185 100 195" fill="none" stroke="#1f2a3c" stroke-width="3"/>'
+      },
+      {
+        name: "La fleur",
+        targetColors: ["#e63946", "#ffd400", "#43b98a", "#3d7fe0"],
+        svg: '<g class="paint-region" data-region="0" fill="#fff8ee">' +
+          '<ellipse cx="100" cy="60" rx="18" ry="30" stroke="#1f2a3c" stroke-width="3"/>' +
+          '<ellipse cx="100" cy="60" rx="18" ry="30" stroke="#1f2a3c" stroke-width="3" transform="rotate(72 100 90)"/>' +
+          '<ellipse cx="100" cy="60" rx="18" ry="30" stroke="#1f2a3c" stroke-width="3" transform="rotate(144 100 90)"/>' +
+          '<ellipse cx="100" cy="60" rx="18" ry="30" stroke="#1f2a3c" stroke-width="3" transform="rotate(216 100 90)"/>' +
+          '<ellipse cx="100" cy="60" rx="18" ry="30" stroke="#1f2a3c" stroke-width="3" transform="rotate(288 100 90)"/>' +
+          '</g>' +
+          '<circle class="paint-region" data-region="1" cx="100" cy="90" r="18" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
+          '<rect class="paint-region" data-region="2" x="95" y="108" width="10" height="55" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
+          '<path class="paint-region" data-region="3" d="M100 140 Q75 140 70 160 Q90 158 100 140 Z" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>'
+      },
+      {
+        name: "Le poisson",
+        targetColors: ["#e63946", "#ffd400", "#43b98a", "#3d7fe0", "#8e5ce6"],
+        svg: '<ellipse class="paint-region" data-region="0" cx="95" cy="100" rx="60" ry="38" fill="#fff8ee" stroke="#1f2a3c" stroke-width="4"/>' +
+          '<polygon class="paint-region" data-region="1" points="155,100 190,75 190,125" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
+          '<path class="paint-region" data-region="2" d="M75 68 Q95 40 115 68 Q95 78 75 68 Z" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
+          '<path class="paint-region" data-region="3" d="M55 105 Q95 118 135 105 Q95 128 55 105 Z" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
+          '<circle class="paint-region" data-region="4" cx="55" cy="92" r="8" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>'
+      },
+      {
+        name: "La maison",
+        targetColors: ["#e63946", "#ffd400", "#43b98a", "#3d7fe0", "#8e5ce6", "#ef5da8"],
+        svg: '<circle class="paint-region" data-region="0" cx="165" cy="35" r="18" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
+          '<polygon class="paint-region" data-region="1" points="40,95 100,45 160,95" fill="#fff8ee" stroke="#1f2a3c" stroke-width="4"/>' +
+          '<rect class="paint-region" data-region="2" x="50" y="95" width="100" height="80" fill="#fff8ee" stroke="#1f2a3c" stroke-width="4"/>' +
+          '<rect class="paint-region" data-region="3" x="90" y="135" width="26" height="40" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
+          '<rect class="paint-region" data-region="4" x="60" y="110" width="24" height="24" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
+          '<rect class="paint-region" data-region="5" x="118" y="65" width="14" height="26" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>'
+      },
+      {
+        name: "La fusée",
+        targetColors: ["#e63946", "#ffd400", "#43b98a", "#3d7fe0", "#8e5ce6", "#ef5da8", "#ff8c3d"],
+        svg: '<circle class="paint-region" data-region="0" cx="40" cy="40" r="10" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
+          '<path class="paint-region" data-region="1" d="M100 20 Q120 50 120 90 L80 90 Q80 50 100 20 Z" fill="#fff8ee" stroke="#1f2a3c" stroke-width="4"/>' +
+          '<rect class="paint-region" data-region="2" x="80" y="90" width="40" height="60" fill="#fff8ee" stroke="#1f2a3c" stroke-width="4"/>' +
+          '<polygon class="paint-region" data-region="3" points="80,110 55,155 80,150" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
+          '<polygon class="paint-region" data-region="4" points="120,110 145,155 120,150" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
+          '<circle class="paint-region" data-region="5" cx="100" cy="65" r="14" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
+          '<path class="paint-region" data-region="6" d="M85 150 Q100 190 115 150 Q100 165 85 150 Z" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>'
+      }
+    ];
+
     // Calcul costaud : 3 termes, 2 opérations tirées indépendamment (donc
     // potentiellement différentes) parmi +, −, ×, ÷, enchaînées de gauche à
     // droite. Chaque étape est bornée pour rester positive, entière, et sous
@@ -1676,7 +1961,14 @@
       correctStreak: 0,
       wrongStreak: 0,
       problem: null,
-      locked: false
+      locked: false,
+      paintColor: PAINT_PALETTE[0],
+      paintFills: [],
+      paintTouched: [],
+      paintLocked: false,
+      brushSize: 10,
+      eraserOn: false,
+      drawing: false
     };
 
     var PROGRESS_KEY = "calculMalinProgress";
@@ -2153,6 +2445,7 @@
       menuAnglais: document.getElementById("menuAnglais"),
       menuLire: document.getElementById("menuLire"),
       menuNombres: document.getElementById("menuNombres"),
+      menuPeinture: document.getElementById("menuPeinture"),
       categoryCards: document.querySelectorAll(".category-card"),
       calcBackBtn: document.getElementById("calcBackBtn"),
       terms2BackBtn: document.getElementById("terms2BackBtn"),
@@ -2160,6 +2453,7 @@
       anglaisBackBtn: document.getElementById("anglaisBackBtn"),
       lireBackBtn: document.getElementById("lireBackBtn"),
       nombresBackBtn: document.getElementById("nombresBackBtn"),
+      peintureBackBtn: document.getElementById("peintureBackBtn"),
       colorsCard: document.getElementById("colorsCard"),
       animalsCard: document.getElementById("animalsCard"),
       bodyCard: document.getElementById("bodyCard"),
@@ -2167,15 +2461,27 @@
       lettersCard: document.getElementById("lettersCard"),
       syllablesCard: document.getElementById("syllablesCard"),
       rhymesCard: document.getElementById("rhymesCard"),
+      coloriageCard: document.getElementById("coloriageCard"),
+      modeleCard: document.getElementById("modeleCard"),
+      dessineCard: document.getElementById("dessineCard"),
       modeCards: document.querySelectorAll(".mode-card"),
+      levelPill: document.getElementById("levelPill"),
       levelNum: document.getElementById("levelNum"),
       stars: document.getElementById("stars"),
       maxBadge: document.getElementById("maxBadge"),
+      problemZone: document.getElementById("problemZone"),
       problem: document.getElementById("problem"),
       feedback: document.getElementById("feedback"),
       feedbackLine1: document.getElementById("feedbackLine1"),
       feedbackLine2: document.getElementById("feedbackLine2"),
       answers: document.getElementById("answers"),
+      paintScreen: document.getElementById("paintScreen"),
+      paintStage: document.getElementById("paintStage"),
+      paintReference: document.getElementById("paintReference"),
+      paintReferenceStage: document.getElementById("paintReferenceStage"),
+      paintFeedback: document.getElementById("paintFeedback"),
+      paintPalette: document.getElementById("paintPalette"),
+      paintTools: document.getElementById("paintTools"),
       levelUpOverlay: document.getElementById("levelUpOverlay"),
       levelUpNum: document.getElementById("levelUpNum"),
       levelUpConfetti: document.getElementById("levelUpConfetti"),
@@ -2626,6 +2932,223 @@
       saveProgress();
     }
 
+    function isPaintMode(mode) {
+      return mode === "coloriage" || mode === "modele" || mode === "dessine";
+    }
+
+    function currentPaintTemplate() {
+      var levelIdx = Math.min(Math.max(state.level, MIN_LEVEL), MAX_LEVEL) - 1;
+      return PAINT_TEMPLATES[levelIdx];
+    }
+
+    function renderPaintPalette() {
+      els.paintPalette.innerHTML = "";
+      PAINT_PALETTE.forEach(function (color) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        var selected = color === state.paintColor && !state.eraserOn;
+        btn.className = "paint-swatch" + (selected ? " selected" : "");
+        btn.style.background = color;
+        btn.setAttribute("aria-label", "Choisir cette couleur");
+        btn.addEventListener("click", function () {
+          state.paintColor = color;
+          state.eraserOn = false;
+          renderPaintPalette();
+          renderPaintTools();
+        });
+        els.paintPalette.appendChild(btn);
+      });
+    }
+
+    function renderPaintTools() {
+      var isDessine = state.mode === "dessine";
+      els.paintTools.hidden = !isDessine;
+      if (!isDessine) return;
+      els.paintTools.innerHTML = "";
+      [4, 10, 20].forEach(function (size) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "brush-size-btn" + (state.brushSize === size && !state.eraserOn ? " selected" : "");
+        var dot = document.createElement("span");
+        dot.className = "dot";
+        dot.style.width = Math.round(size * 0.7) + "px";
+        dot.style.height = Math.round(size * 0.7) + "px";
+        btn.appendChild(dot);
+        btn.setAttribute("aria-label", "Taille de pinceau");
+        btn.addEventListener("click", function () {
+          state.brushSize = size;
+          state.eraserOn = false;
+          renderPaintTools();
+          renderPaintPalette();
+        });
+        els.paintTools.appendChild(btn);
+      });
+
+      var eraserBtn = document.createElement("button");
+      eraserBtn.type = "button";
+      eraserBtn.className = "paint-tool-btn" + (state.eraserOn ? " selected" : "");
+      eraserBtn.textContent = "🧹 Gomme";
+      eraserBtn.addEventListener("click", function () {
+        state.eraserOn = !state.eraserOn;
+        renderPaintTools();
+        renderPaintPalette();
+      });
+      els.paintTools.appendChild(eraserBtn);
+
+      var clearBtn = document.createElement("button");
+      clearBtn.type = "button";
+      clearBtn.className = "paint-tool-btn";
+      clearBtn.textContent = "🗑️ Recommencer";
+      clearBtn.addEventListener("click", function () { clearPaintCanvas(); });
+      els.paintTools.appendChild(clearBtn);
+    }
+
+    function onPaintRegionClick(region) {
+      if (state.paintLocked) return;
+      var idx = Number(region.getAttribute("data-region"));
+      region.style.fill = state.paintColor;
+      state.paintFills[idx] = state.paintColor;
+      state.paintTouched[idx] = true;
+      checkPaintCompletion();
+    }
+
+    function checkPaintCompletion() {
+      var template = currentPaintTemplate();
+      var complete;
+      if (state.mode === "modele") {
+        complete = template.targetColors.every(function (color, idx) {
+          return state.paintFills[idx] && state.paintFills[idx].toLowerCase() === color.toLowerCase();
+        });
+      } else {
+        complete = state.paintTouched.length > 0 && state.paintTouched.every(function (t) { return t; });
+      }
+      if (complete) onPaintWin();
+    }
+
+    function renderColoringTemplate() {
+      var template = currentPaintTemplate();
+      state.paintFills = template.targetColors.map(function () { return "#fff8ee"; });
+      state.paintTouched = template.targetColors.map(function () { return false; });
+      els.paintStage.innerHTML = '<svg viewBox="0 0 200 200" aria-label="' + template.name + '">' + template.svg + "</svg>";
+      var regions = els.paintStage.querySelectorAll(".paint-region");
+      for (var i = 0; i < regions.length; i++) {
+        (function (region) {
+          region.addEventListener("click", function () { onPaintRegionClick(region); });
+        })(regions[i]);
+      }
+
+      if (state.mode === "modele") {
+        els.paintReference.hidden = false;
+        els.paintReferenceStage.innerHTML = '<svg viewBox="0 0 200 200">' + template.svg + "</svg>";
+        var refRegions = els.paintReferenceStage.querySelectorAll(".paint-region");
+        for (var j = 0; j < refRegions.length; j++) {
+          var refIdx = Number(refRegions[j].getAttribute("data-region"));
+          refRegions[j].style.fill = template.targetColors[refIdx];
+          refRegions[j].style.cursor = "default";
+        }
+      } else {
+        els.paintReference.hidden = true;
+      }
+
+      renderPaintPalette();
+      renderPaintTools();
+    }
+
+    var paintCtx = null;
+    var PAINT_CANVAS_SIZE = 600;
+
+    function clearPaintCanvas() {
+      if (!paintCtx) return;
+      paintCtx.fillStyle = "#fff8ee";
+      paintCtx.fillRect(0, 0, PAINT_CANVAS_SIZE, PAINT_CANVAS_SIZE);
+    }
+
+    function attachDrawHandlers(canvas) {
+      function getPos(e) {
+        var rect = canvas.getBoundingClientRect();
+        var scaleX = PAINT_CANVAS_SIZE / rect.width;
+        var scaleY = PAINT_CANVAS_SIZE / rect.height;
+        return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
+      }
+      function startStroke(e) {
+        state.drawing = true;
+        if (canvas.setPointerCapture) canvas.setPointerCapture(e.pointerId);
+        var pos = getPos(e);
+        paintCtx.lineCap = "round";
+        paintCtx.lineJoin = "round";
+        paintCtx.lineWidth = state.brushSize;
+        paintCtx.strokeStyle = state.eraserOn ? "#fff8ee" : state.paintColor;
+        paintCtx.beginPath();
+        paintCtx.moveTo(pos.x, pos.y);
+        paintCtx.lineTo(pos.x, pos.y);
+        paintCtx.stroke();
+      }
+      function draw(e) {
+        if (!state.drawing) return;
+        var pos = getPos(e);
+        paintCtx.lineTo(pos.x, pos.y);
+        paintCtx.stroke();
+      }
+      function endStroke() { state.drawing = false; }
+      canvas.addEventListener("pointerdown", startStroke);
+      canvas.addEventListener("pointermove", draw);
+      canvas.addEventListener("pointerup", endStroke);
+      canvas.addEventListener("pointercancel", endStroke);
+    }
+
+    function renderFreeDraw() {
+      els.paintReference.hidden = true;
+      els.paintStage.innerHTML = '<canvas id="paintCanvas" width="' + PAINT_CANVAS_SIZE + '" height="' + PAINT_CANVAS_SIZE + '"></canvas>';
+      var canvas = document.getElementById("paintCanvas");
+      paintCtx = canvas.getContext && canvas.getContext("2d");
+      if (paintCtx) clearPaintCanvas();
+      attachDrawHandlers(canvas);
+      renderPaintPalette();
+      renderPaintTools();
+    }
+
+    function renderPaintScreen() {
+      state.paintLocked = false;
+      els.paintFeedback.textContent = "";
+      if (state.mode === "dessine") {
+        renderFreeDraw();
+      } else {
+        renderColoringTemplate();
+      }
+    }
+
+    function startPaintProblem() {
+      renderPaintScreen();
+      saveProgress();
+    }
+
+    function onPaintWin() {
+      state.paintLocked = true;
+      state.wrongStreak = 0;
+      state.correctStreak++;
+      var leveledUp = false;
+      var justWon = false;
+      if (state.correctStreak >= starsToLevelUp(state.mode)) {
+        if (state.level < MAX_LEVEL) {
+          state.level++;
+          leveledUp = true;
+        } else {
+          justWon = true;
+        }
+        state.correctStreak = 0;
+      }
+      if (!leveledUp && !justWon) renderLevel();
+      saveProgress();
+      els.paintFeedback.textContent = "Bravo ! Bien joué ! 🎉";
+      if (leveledUp) {
+        window.setTimeout(function () { showLevelUp(state.level); }, 1100);
+      } else if (justWon) {
+        window.setTimeout(showWin, 1100);
+      } else {
+        window.setTimeout(startPaintProblem, 1400);
+      }
+    }
+
     var CONFETTI_COLORS = ["var(--green-add)", "var(--orange-sub)", "var(--candy-blue)", "var(--candy-pink)", "var(--gold)"];
 
     function spawnConfetti(container, count) {
@@ -2670,6 +3193,7 @@
       if (mode === "count" || mode === "compare" || mode === "sequence") return "nombres";
       if (mode === "colors" || mode === "animals" || mode === "numbers" || mode === "body") return "anglais";
       if (mode === "reading" || mode === "letters" || mode === "syllables" || mode === "rhymes") return "lire";
+      if (isPaintMode(mode)) return "peinture";
       return null;
     }
 
@@ -2681,6 +3205,7 @@
       els.menuAnglais.hidden = screen !== "anglais";
       els.menuLire.hidden = screen !== "lire";
       els.menuNombres.hidden = screen !== "nombres";
+      els.menuPeinture.hidden = screen !== "peinture";
     }
 
     function openMenu() {
@@ -2706,6 +3231,19 @@
       closeMenu();
       setThemeColor(THEME_COLOR_BAR);
       renderLevel();
+
+      var paint = isPaintMode(mode);
+      els.problemZone.hidden = paint;
+      els.answers.hidden = paint;
+      els.paintScreen.hidden = !paint;
+      els.levelPill.hidden = mode === "dessine";
+      if (paint) {
+        state.problem = null;
+        state.eraserOn = false;
+        startPaintProblem();
+        return;
+      }
+
       var savedProblem = saved && saved.problem && Array.isArray(saved.problem.choices) ? saved.problem : null;
       if (savedProblem) {
         // Reprend exactement le calcul en cours plutôt que d'en tirer un
@@ -2733,12 +3271,16 @@
     els.lettersCard.addEventListener("click", function () { selectMode("letters"); });
     els.syllablesCard.addEventListener("click", function () { selectMode("syllables"); });
     els.rhymesCard.addEventListener("click", function () { selectMode("rhymes"); });
+    els.coloriageCard.addEventListener("click", function () { selectMode("coloriage"); });
+    els.modeleCard.addEventListener("click", function () { selectMode("modele"); });
+    els.dessineCard.addEventListener("click", function () { selectMode("dessine"); });
     els.calcBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
     els.terms2BackBtn.addEventListener("click", function () { showMenuScreen("calc"); });
     els.terms3BackBtn.addEventListener("click", function () { showMenuScreen("calc"); });
     els.anglaisBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
     els.lireBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
     els.nombresBackBtn.addEventListener("click", function () { showMenuScreen("calc"); });
+    els.peintureBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
 
     els.levelNum.addEventListener("click", function () {
       if (!state.mode) return;
@@ -2757,14 +3299,14 @@
       state.locked = false;
       renderLevel();
       saveProgress();
-      nextProblem();
+      if (isPaintMode(state.mode)) { startPaintProblem(); } else { nextProblem(); }
     });
 
     els.levelUpContinueBtn.addEventListener("click", function () {
       els.levelUpOverlay.hidden = true;
       setThemeColor(THEME_COLOR_BAR);
       renderLevel();
-      nextProblem();
+      if (isPaintMode(state.mode)) { startPaintProblem(); } else { nextProblem(); }
     });
 
     els.winReplayBtn.addEventListener("click", function () {
@@ -2775,7 +3317,7 @@
       state.wrongStreak = 0;
       renderLevel();
       saveProgress();
-      nextProblem();
+      if (isPaintMode(state.mode)) { startPaintProblem(); } else { nextProblem(); }
     });
 
     els.winMenuBtn.addEventListener("click", function () {
