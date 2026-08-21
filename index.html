@@ -1646,7 +1646,9 @@
 
     // "Compte les objets" : une rangée d'objets à dénombrer, un peu plus
     // nombreux à chaque niveau.
-    var COUNT_OBJECTS = ["🍎", "⭐", "🎈", "🐱", "🌸", "🚗"];
+    // Pas d'étoile ici : elle serait confondue avec les étoiles de niveau
+    // affichées en haut de l'écran.
+    var COUNT_OBJECTS = ["🍎", "🎈", "🐱", "🌸", "🚗"];
     var COUNT_LEVELS = { maxCount: [5, 8, 12, 16, 20] };
 
     // "Plus grand ou plus petit ?" : les 3 nombres tirés vont de 0 à
