@@ -1169,6 +1169,7 @@
   .category-card-modele { background: linear-gradient(135deg, #8e5ce6, #3454d1); }
   .category-card-dessine { background: linear-gradient(135deg, #43b98a, #2a9d6f); }
   .category-card-musiquelibre { background: linear-gradient(135deg, #ef5da8, #8e5ce6); }
+  .category-card-instruments { background: linear-gradient(135deg, #33c2c2, #3454d1); }
   .category-card-animals { background: linear-gradient(135deg, #f2994a, #d9724c); }
   .category-card-numbers { background: linear-gradient(135deg, #4fb3e8, #3d7fe0); }
   .category-card-body { background: linear-gradient(135deg, #8e5ce6, #6a4c93); }
@@ -1664,6 +1665,11 @@
           <span class="icon emoji">🎹</span>
           <span>Musique libre</span>
           <span class="level-badge">Dès 3 ans</span>
+        </button>
+        <button class="category-card category-card-instruments" type="button" id="instrumentsCard">
+          <span class="icon emoji">🎧</span>
+          <span>Quel instrument ?</span>
+          <span class="level-badge">MS-CP</span>
         </button>
       </div>
     </div>
@@ -2188,6 +2194,24 @@
       { freq: 587.33, color: "#ff8c3d" }
     ];
 
+    // "Quel instrument ?" : chaque instrument a son propre son synthétisé
+    // (voir playInstrumentSound) ; le lot proposé s'agrandit avec le
+    // niveau, comme pour les couleurs/animaux en anglais.
+    var INSTRUMENT_DEFS = {
+      tambour: { fr: "Tambour", emoji: "🥁" },
+      piano: { fr: "Piano", emoji: "🎹" },
+      trompette: { fr: "Trompette", emoji: "🎺" },
+      flute: { fr: "Flûte", emoji: "🪈" },
+      clochette: { fr: "Clochette", emoji: "🔔" }
+    };
+    var INSTRUMENT_LEVEL_POOL = [
+      ["tambour", "piano", "trompette"],
+      ["tambour", "piano", "trompette", "flute"],
+      ["tambour", "piano", "trompette", "flute", "clochette"],
+      ["tambour", "piano", "trompette", "flute", "clochette"],
+      ["tambour", "piano", "trompette", "flute", "clochette"]
+    ];
+
     // Calcul costaud : 3 termes, 2 opérations tirées indépendamment (donc
     // potentiellement différentes) parmi +, −, ×, ÷, enchaînées de gauche à
     // droite. Chaque étape est bornée pour rester positive, entière, et sous
@@ -2491,6 +2515,19 @@
       };
     }
 
+    function generateInstrumentsProblem(levelIdx) {
+      var pool = INSTRUMENT_LEVEL_POOL[levelIdx];
+      var targetKey = pool[randInt(0, pool.length - 1)];
+      var distractors = shuffle(pool.filter(function (k) { return k !== targetKey; })).slice(0, 2);
+      var choices = shuffle(distractors.concat([targetKey]));
+      return {
+        kind: "instruments",
+        instrumentKey: targetKey,
+        answer: targetKey,
+        choices: choices
+      };
+    }
+
     function generateReadingProblem(levelIdx) {
       var pool = WORD_LEVEL_POOL[levelIdx];
       var targetKey = pool[randInt(0, pool.length - 1)];
@@ -2596,6 +2633,9 @@
       if (p1.kind === "body" || p2.kind === "body") {
         return p1.kind === "body" && p2.kind === "body" && p1.bodyKey === p2.bodyKey;
       }
+      if (p1.kind === "instruments" || p2.kind === "instruments") {
+        return p1.kind === "instruments" && p2.kind === "instruments" && p1.instrumentKey === p2.instrumentKey;
+      }
       if (p1.kind === "reading" || p2.kind === "reading") {
         return p1.kind === "reading" && p2.kind === "reading" && p1.wordKey === p2.wordKey;
       }
@@ -2636,6 +2676,9 @@
       }
       if (state.mode === "body") {
         return generateBodyProblem(levelIdx);
+      }
+      if (state.mode === "instruments") {
+        return generateInstrumentsProblem(levelIdx);
       }
       if (state.mode === "reading") {
         return generateReadingProblem(levelIdx);
@@ -2710,6 +2753,7 @@
       modeleCard: document.getElementById("modeleCard"),
       dessineCard: document.getElementById("dessineCard"),
       musiqueLibreCard: document.getElementById("musiqueLibreCard"),
+      instrumentsCard: document.getElementById("instrumentsCard"),
       modeCards: document.querySelectorAll(".mode-card"),
       levelPill: document.getElementById("levelPill"),
       levelNum: document.getElementById("levelNum"),
@@ -2831,6 +2875,29 @@
         wordBtn.addEventListener("click", function () { speakWord(p.word, "en-US"); });
         els.problem.appendChild(wordBtn);
         fitWordText(wordBtn, wordText);
+        els.problem.classList.remove("pop");
+        void els.problem.offsetWidth;
+        els.problem.classList.add("pop");
+        return;
+      }
+
+      if (p.kind === "instruments") {
+        els.problem.removeAttribute("data-terms");
+        var soundBtn = document.createElement("button");
+        soundBtn.type = "button";
+        soundBtn.className = "color-word";
+        soundBtn.setAttribute("aria-label", "Écouter le son");
+        var soundText = document.createElement("span");
+        soundText.className = "color-word-text";
+        soundText.textContent = "Écouter";
+        var soundIcon = document.createElement("span");
+        soundIcon.className = "color-word-icon";
+        soundIcon.textContent = "🔊";
+        soundBtn.appendChild(soundText);
+        soundBtn.appendChild(soundIcon);
+        soundBtn.addEventListener("click", function () { playInstrumentSound(p.instrumentKey); });
+        els.problem.appendChild(soundBtn);
+        fitWordText(soundBtn, soundText);
         els.problem.classList.remove("pop");
         void els.problem.offsetWidth;
         els.problem.classList.add("pop");
@@ -3075,6 +3142,22 @@
           btn.textContent = def.emoji;
           btn.setAttribute("data-value", key);
           btn.setAttribute("aria-label", "Répondre " + def.en);
+          btn.addEventListener("click", function () { onAnswer(key, btn); });
+          els.answers.appendChild(btn);
+        });
+        return;
+      }
+
+      if (state.problem.kind === "instruments") {
+        var instrumentPalette = shuffle(CANDY_COLORS.slice());
+        state.problem.choices.forEach(function (key, idx) {
+          var def = INSTRUMENT_DEFS[key];
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "answer-btn picture-btn emoji " + instrumentPalette[idx % instrumentPalette.length];
+          btn.textContent = def.emoji;
+          btn.setAttribute("data-value", key);
+          btn.setAttribute("aria-label", "Répondre " + def.fr);
           btn.addEventListener("click", function () { onAnswer(key, btn); });
           els.answers.appendChild(btn);
         });
@@ -3406,23 +3489,123 @@
     // utilisateur), puis réutilisé pour chaque note.
     var musicCtx = null;
 
-    function playMusicNote(freq) {
+    function ensureMusicCtx() {
       var AudioCtor = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtor) return;
+      if (!AudioCtor) return null;
       if (!musicCtx) musicCtx = new AudioCtor();
       if (musicCtx.state === "suspended") musicCtx.resume();
-      var now = musicCtx.currentTime;
-      var osc = musicCtx.createOscillator();
-      var gain = musicCtx.createGain();
+      return musicCtx;
+    }
+
+    function playMusicNote(freq) {
+      var ctx = ensureMusicCtx();
+      if (!ctx) return;
+      var now = ctx.currentTime;
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
       osc.type = "triangle";
       osc.frequency.value = freq;
       gain.gain.setValueAtTime(0.0001, now);
       gain.gain.exponentialRampToValueAtTime(0.35, now + 0.012);
       gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.9);
       osc.connect(gain);
-      gain.connect(musicCtx.destination);
+      gain.connect(ctx.destination);
       osc.start(now);
       osc.stop(now + 0.9);
+    }
+
+    // "Quel instrument ?" : un timbre synthétisé distinct par instrument,
+    // pour que chaque son reste reconnaissable à l'oreille sans échantillon
+    // audio à charger.
+    function playInstrumentSound(key) {
+      var ctx = ensureMusicCtx();
+      if (!ctx) return;
+      var now = ctx.currentTime;
+
+      if (key === "tambour") {
+        var oscT = ctx.createOscillator();
+        var gainT = ctx.createGain();
+        oscT.type = "sine";
+        oscT.frequency.setValueAtTime(160, now);
+        oscT.frequency.exponentialRampToValueAtTime(45, now + 0.18);
+        gainT.gain.setValueAtTime(0.9, now);
+        gainT.gain.exponentialRampToValueAtTime(0.0001, now + 0.25);
+        oscT.connect(gainT);
+        gainT.connect(ctx.destination);
+        oscT.start(now);
+        oscT.stop(now + 0.25);
+        return;
+      }
+
+      if (key === "piano") {
+        var oscP = ctx.createOscillator();
+        var gainP = ctx.createGain();
+        oscP.type = "triangle";
+        oscP.frequency.value = 440;
+        gainP.gain.setValueAtTime(0.0001, now);
+        gainP.gain.exponentialRampToValueAtTime(0.4, now + 0.01);
+        gainP.gain.exponentialRampToValueAtTime(0.0001, now + 0.7);
+        oscP.connect(gainP);
+        gainP.connect(ctx.destination);
+        oscP.start(now);
+        oscP.stop(now + 0.7);
+        return;
+      }
+
+      if (key === "trompette") {
+        var oscTr = ctx.createOscillator();
+        var gainTr = ctx.createGain();
+        var lfo = ctx.createOscillator();
+        var lfoGain = ctx.createGain();
+        oscTr.type = "sawtooth";
+        oscTr.frequency.value = 392;
+        lfo.frequency.value = 6;
+        lfoGain.gain.value = 8;
+        lfo.connect(lfoGain);
+        lfoGain.connect(oscTr.frequency);
+        gainTr.gain.setValueAtTime(0.0001, now);
+        gainTr.gain.linearRampToValueAtTime(0.28, now + 0.08);
+        gainTr.gain.setValueAtTime(0.28, now + 0.42);
+        gainTr.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+        oscTr.connect(gainTr);
+        gainTr.connect(ctx.destination);
+        lfo.start(now);
+        oscTr.start(now);
+        lfo.stop(now + 0.6);
+        oscTr.stop(now + 0.6);
+        return;
+      }
+
+      if (key === "flute") {
+        var oscF = ctx.createOscillator();
+        var gainF = ctx.createGain();
+        oscF.type = "sine";
+        oscF.frequency.value = 659.25;
+        gainF.gain.setValueAtTime(0.0001, now);
+        gainF.gain.linearRampToValueAtTime(0.3, now + 0.12);
+        gainF.gain.setValueAtTime(0.3, now + 0.45);
+        gainF.gain.exponentialRampToValueAtTime(0.0001, now + 0.7);
+        oscF.connect(gainF);
+        gainF.connect(ctx.destination);
+        oscF.start(now);
+        oscF.stop(now + 0.7);
+        return;
+      }
+
+      if (key === "clochette") {
+        [880, 887].forEach(function (f) {
+          var oscC = ctx.createOscillator();
+          var gainC = ctx.createGain();
+          oscC.type = "sine";
+          oscC.frequency.value = f;
+          gainC.gain.setValueAtTime(0.25, now);
+          gainC.gain.exponentialRampToValueAtTime(0.0001, now + 1.4);
+          oscC.connect(gainC);
+          gainC.connect(ctx.destination);
+          oscC.start(now);
+          oscC.stop(now + 1.4);
+        });
+      }
     }
 
     function renderMusicScreen() {
@@ -3487,7 +3670,7 @@
       if (mode === "colors" || mode === "animals" || mode === "numbers" || mode === "body") return "anglais";
       if (mode === "reading" || mode === "letters" || mode === "syllables" || mode === "rhymes") return "lire";
       if (isPaintMode(mode)) return "peinture";
-      if (mode === "musiquelibre") return "musique";
+      if (mode === "musiquelibre" || mode === "instruments") return "musique";
       return null;
     }
 
@@ -3599,6 +3782,7 @@
     els.modeleCard.addEventListener("click", function () { selectMode("modele"); });
     els.dessineCard.addEventListener("click", function () { selectMode("dessine"); });
     els.musiqueLibreCard.addEventListener("click", function () { selectMode("musiquelibre"); });
+    els.instrumentsCard.addEventListener("click", function () { selectMode("instruments"); });
     els.calcBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
     els.terms2BackBtn.addEventListener("click", function () { showMenuScreen("calc"); });
     els.terms3BackBtn.addEventListener("click", function () { showMenuScreen("calc"); });
