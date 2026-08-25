@@ -609,6 +609,46 @@
 
   .brush-size-btn .dot { background: var(--ink); border-radius: 50%; }
 
+  /* ---------- Musique Malin : xylophone en libre jeu ---------- */
+
+  .music-screen {
+    flex: 1 1 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    width: 100%;
+  }
+
+  .music-screen[hidden] { display: none; }
+
+  .music-stage {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    gap: clamp(0.4rem, 2vw, 0.8rem);
+    width: min(94vw, 40rem);
+    height: 100%;
+  }
+
+  .music-key {
+    appearance: none;
+    border: none;
+    cursor: pointer;
+    flex: 1 1 0;
+    border-radius: clamp(1rem, 3vw, 1.5rem);
+    box-shadow: 0 10px 20px -10px rgba(31, 42, 60, 0.5);
+    border-bottom: clamp(4px, 1.2vw, 7px) solid rgba(0, 0, 0, 0.22);
+    transition: transform 0.08s ease, filter 0.08s ease;
+  }
+
+  .music-key:active,
+  .music-key.playing {
+    transform: translateY(5px) scale(0.96);
+    border-bottom-width: 2px;
+    filter: brightness(1.15);
+  }
+
   /* mobile portrait : on pousse encore les tailles pour profiter de l'écran étroit et haut */
   @media (max-width: 640px) and (orientation: portrait) {
     :root {
@@ -1128,6 +1168,7 @@
   .category-card-coloriage { background: linear-gradient(135deg, #ff8c3d, #e63946); }
   .category-card-modele { background: linear-gradient(135deg, #8e5ce6, #3454d1); }
   .category-card-dessine { background: linear-gradient(135deg, #43b98a, #2a9d6f); }
+  .category-card-musiquelibre { background: linear-gradient(135deg, #ef5da8, #8e5ce6); }
   .category-card-animals { background: linear-gradient(135deg, #f2994a, #d9724c); }
   .category-card-numbers { background: linear-gradient(135deg, #4fb3e8, #3d7fe0); }
   .category-card-body { background: linear-gradient(135deg, #8e5ce6, #6a4c93); }
@@ -1327,6 +1368,10 @@
     <div class="paint-tools" id="paintTools" hidden></div>
   </section>
 
+  <section class="music-screen" id="musicScreen" hidden>
+    <div class="music-stage" id="musicStage"></div>
+  </section>
+
   <div class="menu-overlay" id="menuOverlay">
     <div class="menu-brand">
       <svg class="menu-logo" viewBox="0 0 120 120" aria-hidden="true">
@@ -1424,6 +1469,19 @@
             </svg>
           </span>
           <span class="app-icon-label">Peinture Malin</span>
+        </button>
+        <button class="category-card category-card-app" type="button" data-category="musique">
+          <span class="app-icon-tile">
+            <svg viewBox="0 0 120 120" aria-hidden="true">
+              <rect x="4" y="4" width="112" height="112" rx="30" fill="#fff8ee" />
+              <circle cx="38" cy="86" r="15" fill="#ef5da8" />
+              <circle cx="80" cy="76" r="15" fill="#3d7fe0" />
+              <rect x="50" y="28" width="7" height="60" fill="#1f2a3c" />
+              <rect x="92" y="20" width="7" height="58" fill="#1f2a3c" />
+              <path d="M50 28 Q72 17 99 20 L99 30 Q72 27 50 38 Z" fill="#1f2a3c" />
+            </svg>
+          </span>
+          <span class="app-icon-label">Musique Malin</span>
         </button>
       </div>
       <div class="fox-walk-lane" aria-hidden="true">
@@ -1587,6 +1645,24 @@
         <button class="category-card category-card-dessine" type="button" id="dessineCard">
           <span class="icon emoji">✏️</span>
           <span>Dessin libre</span>
+          <span class="level-badge">Dès 3 ans</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="menu-panel" id="menuMusique" hidden>
+      <div class="menu-header">
+        <button class="menu-back" id="musiqueBackBtn" type="button" aria-label="Retour">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 4 L7 12 L15 20" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+        <h1 class="menu-title">Musique Malin</h1>
+      </div>
+      <div class="category-grid">
+        <button class="category-card category-card-musiquelibre" type="button" id="musiqueLibreCard">
+          <span class="icon emoji">🎹</span>
+          <span>Musique libre</span>
           <span class="level-badge">Dès 3 ans</span>
         </button>
       </div>
@@ -2100,6 +2176,18 @@
       ]
     ];
 
+    // Musique Malin : gamme pentatonique (do-ré-mi-sol-la), pour que toute
+    // combinaison de touches tapées au hasard sonne toujours agréable.
+    var MUSIC_NOTES = [
+      { freq: 261.63, color: "#e63946" },
+      { freq: 293.66, color: "#ffd400" },
+      { freq: 329.63, color: "#43b98a" },
+      { freq: 392.0, color: "#3d7fe0" },
+      { freq: 440.0, color: "#8e5ce6" },
+      { freq: 523.25, color: "#ef5da8" },
+      { freq: 587.33, color: "#ff8c3d" }
+    ];
+
     // Calcul costaud : 3 termes, 2 opérations tirées indépendamment (donc
     // potentiellement différentes) parmi +, −, ×, ÷, enchaînées de gauche à
     // droite. Chaque étape est bornée pour rester positive, entière, et sous
@@ -2602,6 +2690,7 @@
       menuAnglais: document.getElementById("menuAnglais"),
       menuLire: document.getElementById("menuLire"),
       menuPeinture: document.getElementById("menuPeinture"),
+      menuMusique: document.getElementById("menuMusique"),
       categoryCards: document.querySelectorAll(".category-card"),
       calcBackBtn: document.getElementById("calcBackBtn"),
       terms2BackBtn: document.getElementById("terms2BackBtn"),
@@ -2609,6 +2698,7 @@
       anglaisBackBtn: document.getElementById("anglaisBackBtn"),
       lireBackBtn: document.getElementById("lireBackBtn"),
       peintureBackBtn: document.getElementById("peintureBackBtn"),
+      musiqueBackBtn: document.getElementById("musiqueBackBtn"),
       colorsCard: document.getElementById("colorsCard"),
       animalsCard: document.getElementById("animalsCard"),
       bodyCard: document.getElementById("bodyCard"),
@@ -2619,6 +2709,7 @@
       coloriageCard: document.getElementById("coloriageCard"),
       modeleCard: document.getElementById("modeleCard"),
       dessineCard: document.getElementById("dessineCard"),
+      musiqueLibreCard: document.getElementById("musiqueLibreCard"),
       modeCards: document.querySelectorAll(".mode-card"),
       levelPill: document.getElementById("levelPill"),
       levelNum: document.getElementById("levelNum"),
@@ -2637,6 +2728,8 @@
       paintFeedback: document.getElementById("paintFeedback"),
       paintPalette: document.getElementById("paintPalette"),
       paintTools: document.getElementById("paintTools"),
+      musicScreen: document.getElementById("musicScreen"),
+      musicStage: document.getElementById("musicStage"),
       levelUpOverlay: document.getElementById("levelUpOverlay"),
       levelUpNum: document.getElementById("levelUpNum"),
       levelUpConfetti: document.getElementById("levelUpConfetti"),
@@ -3308,6 +3401,47 @@
       }
     }
 
+    // Musique Malin : un contexte audio unique, créé au premier toucher
+    // (les navigateurs bloquent l'audio tant qu'il n'y a pas eu de geste
+    // utilisateur), puis réutilisé pour chaque note.
+    var musicCtx = null;
+
+    function playMusicNote(freq) {
+      var AudioCtor = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtor) return;
+      if (!musicCtx) musicCtx = new AudioCtor();
+      if (musicCtx.state === "suspended") musicCtx.resume();
+      var now = musicCtx.currentTime;
+      var osc = musicCtx.createOscillator();
+      var gain = musicCtx.createGain();
+      osc.type = "triangle";
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.35, now + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.9);
+      osc.connect(gain);
+      gain.connect(musicCtx.destination);
+      osc.start(now);
+      osc.stop(now + 0.9);
+    }
+
+    function renderMusicScreen() {
+      els.musicStage.innerHTML = "";
+      MUSIC_NOTES.forEach(function (note) {
+        var key = document.createElement("button");
+        key.type = "button";
+        key.className = "music-key";
+        key.style.background = note.color;
+        key.setAttribute("aria-label", "Jouer une note");
+        key.addEventListener("click", function () {
+          playMusicNote(note.freq);
+          key.classList.add("playing");
+          window.setTimeout(function () { key.classList.remove("playing"); }, 150);
+        });
+        els.musicStage.appendChild(key);
+      });
+    }
+
     var CONFETTI_COLORS = ["var(--green-add)", "var(--orange-sub)", "var(--candy-blue)", "var(--candy-pink)", "var(--gold)"];
 
     function spawnConfetti(container, count) {
@@ -3353,6 +3487,7 @@
       if (mode === "colors" || mode === "animals" || mode === "numbers" || mode === "body") return "anglais";
       if (mode === "reading" || mode === "letters" || mode === "syllables" || mode === "rhymes") return "lire";
       if (isPaintMode(mode)) return "peinture";
+      if (mode === "musiquelibre") return "musique";
       return null;
     }
 
@@ -3364,6 +3499,7 @@
       els.menuAnglais.hidden = screen !== "anglais";
       els.menuLire.hidden = screen !== "lire";
       els.menuPeinture.hidden = screen !== "peinture";
+      els.menuMusique.hidden = screen !== "musique";
     }
 
     // Vers quel écran de menu revenir avec le bouton retour Android, pour
@@ -3374,7 +3510,8 @@
       "3": "calc",
       anglais: "home",
       lire: "home",
-      peinture: "home"
+      peinture: "home",
+      musique: "home"
     };
 
     function currentMenuScreen() {
@@ -3384,6 +3521,7 @@
       if (!els.menuAnglais.hidden) return "anglais";
       if (!els.menuLire.hidden) return "lire";
       if (!els.menuPeinture.hidden) return "peinture";
+      if (!els.menuMusique.hidden) return "musique";
       return "home";
     }
 
@@ -3412,14 +3550,21 @@
       renderLevel();
 
       var paint = isPaintMode(mode);
-      els.problemZone.hidden = paint;
-      els.answers.hidden = paint;
+      var music = mode === "musiquelibre";
+      els.problemZone.hidden = paint || music;
+      els.answers.hidden = paint || music;
       els.paintScreen.hidden = !paint;
-      els.levelPill.hidden = mode === "dessine";
+      els.musicScreen.hidden = !music;
+      els.levelPill.hidden = mode === "dessine" || music;
       if (paint) {
         state.problem = null;
         state.eraserOn = false;
         startPaintProblem();
+        return;
+      }
+      if (music) {
+        state.problem = null;
+        renderMusicScreen();
         return;
       }
 
@@ -3453,12 +3598,14 @@
     els.coloriageCard.addEventListener("click", function () { selectMode("coloriage"); });
     els.modeleCard.addEventListener("click", function () { selectMode("modele"); });
     els.dessineCard.addEventListener("click", function () { selectMode("dessine"); });
+    els.musiqueLibreCard.addEventListener("click", function () { selectMode("musiquelibre"); });
     els.calcBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
     els.terms2BackBtn.addEventListener("click", function () { showMenuScreen("calc"); });
     els.terms3BackBtn.addEventListener("click", function () { showMenuScreen("calc"); });
     els.anglaisBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
     els.lireBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
     els.peintureBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
+    els.musiqueBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
 
     els.levelNum.addEventListener("click", function () {
       if (!state.mode) return;
