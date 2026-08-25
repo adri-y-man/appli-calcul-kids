@@ -1131,7 +1131,6 @@
   .category-card-animals { background: linear-gradient(135deg, #f2994a, #d9724c); }
   .category-card-numbers { background: linear-gradient(135deg, #4fb3e8, #3d7fe0); }
   .category-card-body { background: linear-gradient(135deg, #8e5ce6, #6a4c93); }
-  .category-card-nombres { background: linear-gradient(135deg, #ffc93c, #f2994a); }
 
   #menuHome .category-grid {
     flex-direction: row;
@@ -1486,22 +1485,6 @@
           <span>Calculs à 3 termes</span>
           <span class="level-badge">CE1-CE2</span>
         </button>
-        <button class="category-card category-card-nombres" type="button" data-category="nombres">
-          <span class="icon emoji">🔢</span>
-          <span>Jeux de nombres</span>
-          <span class="level-badge">PS-CP</span>
-        </button>
-      </div>
-    </div>
-
-    <div class="menu-panel" id="menuNombres" hidden>
-      <div class="menu-header">
-        <button class="menu-back" id="nombresBackBtn" type="button" aria-label="Retour">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M15 4 L7 12 L15 20" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
-          </svg>
-        </button>
-        <h1 class="menu-title">Jeux de nombres</h1>
       </div>
       <div class="mode-grid">
         <button class="mode-card mode-wide" type="button" data-mode="count">
@@ -2620,7 +2603,6 @@
       menuTerms3: document.getElementById("menuTerms3"),
       menuAnglais: document.getElementById("menuAnglais"),
       menuLire: document.getElementById("menuLire"),
-      menuNombres: document.getElementById("menuNombres"),
       menuPeinture: document.getElementById("menuPeinture"),
       categoryCards: document.querySelectorAll(".category-card"),
       calcBackBtn: document.getElementById("calcBackBtn"),
@@ -2628,7 +2610,6 @@
       terms3BackBtn: document.getElementById("terms3BackBtn"),
       anglaisBackBtn: document.getElementById("anglaisBackBtn"),
       lireBackBtn: document.getElementById("lireBackBtn"),
-      nombresBackBtn: document.getElementById("nombresBackBtn"),
       peintureBackBtn: document.getElementById("peintureBackBtn"),
       colorsCard: document.getElementById("colorsCard"),
       animalsCard: document.getElementById("animalsCard"),
@@ -3370,7 +3351,7 @@
     function categoryOfMode(mode) {
       if (mode === "add" || mode === "sub" || mode === "mul" || mode === "div" || MIX_MODES[mode]) return "2";
       if (MODE_TO_OP_3[mode] || MIX_MODES_3[mode]) return "3";
-      if (mode === "count" || mode === "compare" || mode === "sequence") return "nombres";
+      if (mode === "count" || mode === "compare" || mode === "sequence") return "calc";
       if (mode === "colors" || mode === "animals" || mode === "numbers" || mode === "body") return "anglais";
       if (mode === "reading" || mode === "letters" || mode === "syllables" || mode === "rhymes") return "lire";
       if (isPaintMode(mode)) return "peinture";
@@ -3384,7 +3365,6 @@
       els.menuTerms3.hidden = screen !== "3";
       els.menuAnglais.hidden = screen !== "anglais";
       els.menuLire.hidden = screen !== "lire";
-      els.menuNombres.hidden = screen !== "nombres";
       els.menuPeinture.hidden = screen !== "peinture";
     }
 
@@ -3396,7 +3376,6 @@
       "3": "calc",
       anglais: "home",
       lire: "home",
-      nombres: "calc",
       peinture: "home"
     };
 
@@ -3406,7 +3385,6 @@
       if (!els.menuTerms3.hidden) return "3";
       if (!els.menuAnglais.hidden) return "anglais";
       if (!els.menuLire.hidden) return "lire";
-      if (!els.menuNombres.hidden) return "nombres";
       if (!els.menuPeinture.hidden) return "peinture";
       return "home";
     }
@@ -3482,7 +3460,6 @@
     els.terms3BackBtn.addEventListener("click", function () { showMenuScreen("calc"); });
     els.anglaisBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
     els.lireBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
-    els.nombresBackBtn.addEventListener("click", function () { showMenuScreen("calc"); });
     els.peintureBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
 
     els.levelNum.addEventListener("click", function () {
