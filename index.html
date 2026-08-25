@@ -484,8 +484,9 @@
   }
 
   .paint-stage {
-    width: min(78vw, 62vh, 26rem);
-    height: min(78vw, 62vh, 26rem);
+    width: min(92vw, 36rem);
+    aspect-ratio: 1;
+    max-height: 100%;
     background: #fff8ee;
     border-radius: 1.4rem;
     box-shadow: 0 14px 28px -16px rgba(31, 42, 60, 0.4);
@@ -499,30 +500,28 @@
   .paint-region { cursor: pointer; transition: fill 0.1s ease; }
 
   .paint-reference {
-    position: absolute;
-    top: 0;
-    right: 0;
+    flex: 0 0 auto;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.2rem;
+    gap: 0.3rem;
   }
 
   .paint-reference[hidden] { display: none; }
 
   .paint-reference-label {
-    font-size: 0.72rem;
+    font-size: 0.8rem;
     font-weight: 800;
     color: var(--white);
     text-shadow: 0 2px 0 rgba(31, 42, 60, 0.25);
   }
 
   .paint-reference-stage {
-    width: clamp(3.2rem, 12vw, 4.5rem);
-    height: clamp(3.2rem, 12vw, 4.5rem);
+    width: min(46vw, 32vh, 11rem);
+    height: min(46vw, 32vh, 11rem);
     background: #fff8ee;
-    border-radius: 0.8rem;
-    box-shadow: 0 8px 16px -10px rgba(31, 42, 60, 0.5);
+    border-radius: 1rem;
+    box-shadow: 0 10px 20px -10px rgba(31, 42, 60, 0.5);
     overflow: hidden;
   }
 
@@ -1271,8 +1270,9 @@
     /* Peinture Malin : hauteur très limitée, la tuile doit rester sous la
        barre du haut plutôt que suivre sa taille pensée pour le portrait. */
     .paint-screen { gap: clamp(0.2rem, 1vh, 0.4rem); padding-top: 0.2rem; }
-    .paint-stage { width: min(32vw, 38vh, 9rem); height: min(32vw, 38vh, 9rem); }
-    .paint-reference-stage { width: clamp(2rem, 8vh, 2.6rem); height: clamp(2rem, 8vh, 2.6rem); }
+    .paint-reference { flex-direction: row; gap: 0.4rem; }
+    .paint-stage { width: min(38vw, 60vh, 14rem); }
+    .paint-reference-stage { width: min(22vw, 30vh, 4.6rem); height: min(22vw, 30vh, 4.6rem); }
     .paint-reference-label { font-size: 0.6rem; }
     .paint-swatch { width: clamp(1.5rem, 5vh, 1.9rem); height: clamp(1.5rem, 5vh, 1.9rem); }
     .paint-feedback { font-size: clamp(0.8rem, 3vh, 0.95rem); min-height: 1rem; }
@@ -1316,12 +1316,12 @@
   <section class="answers" id="answers" aria-label="Choix de réponses"></section>
 
   <section class="paint-screen" id="paintScreen" hidden>
+    <div class="paint-reference" id="paintReference" hidden>
+      <span class="paint-reference-label">Modèle</span>
+      <div class="paint-reference-stage" id="paintReferenceStage"></div>
+    </div>
     <div class="paint-stage-wrap">
       <div class="paint-stage" id="paintStage"></div>
-      <div class="paint-reference" id="paintReference" hidden>
-        <span class="paint-reference-label">Modèle</span>
-        <div class="paint-reference-stage" id="paintReferenceStage"></div>
-      </div>
     </div>
     <p class="paint-feedback" id="paintFeedback" aria-live="polite"></p>
     <div class="paint-palette" id="paintPalette"></div>
@@ -1605,7 +1605,7 @@
         </button>
         <button class="category-card category-card-dessine" type="button" id="dessineCard">
           <span class="icon emoji">✏️</span>
-          <span>Dessine libre</span>
+          <span>Dessin libre</span>
           <span class="level-badge">Dès 3 ans</span>
         </button>
       </div>
@@ -1965,65 +1965,158 @@
     var SEQUENCE_LEVELS = { maxStart: [8, 15, 25, 40, 60], step: [1, 1, 2, 2, 5] };
 
     // Peinture Malin : palette de couleurs partagée par les 3 jeux, et 5
-    // gabarits de coloriage (un par niveau, de 3 à 7 zones à colorier).
+    // paliers de coloriage (un par niveau, de 3 à 7 zones à colorier), avec
+    // 2 dessins au choix par palier pour changer d'image à chaque étoile.
     // Chaque zone porte un attribut data-region="N" ; le tableau
     // targetColors[N] donne sa couleur "modèle" dans le jeu "Peins comme
     // le modèle" (même ordre que PAINT_PALETTE, pour un rendu harmonieux).
     var PAINT_PALETTE = ["#e63946", "#ffd400", "#43b98a", "#3d7fe0", "#8e5ce6", "#ef5da8", "#ff8c3d", "#ffffff"];
 
     var PAINT_TEMPLATES = [
-      {
-        name: "Le ballon",
-        targetColors: ["#e63946", "#ffd400", "#43b98a"],
-        svg: '<ellipse class="paint-region" data-region="0" cx="100" cy="85" rx="55" ry="65" fill="#fff8ee" stroke="#1f2a3c" stroke-width="4"/>' +
-          '<circle class="paint-region" data-region="1" cx="80" cy="60" r="14" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
-          '<polygon class="paint-region" data-region="2" points="100,150 92,165 108,165" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
-          '<path d="M100 165 Q95 185 100 195" fill="none" stroke="#1f2a3c" stroke-width="3"/>'
-      },
-      {
-        name: "La fleur",
-        targetColors: ["#e63946", "#ffd400", "#43b98a", "#3d7fe0"],
-        svg: '<g class="paint-region" data-region="0" fill="#fff8ee">' +
-          '<ellipse cx="100" cy="60" rx="18" ry="30" stroke="#1f2a3c" stroke-width="3"/>' +
-          '<ellipse cx="100" cy="60" rx="18" ry="30" stroke="#1f2a3c" stroke-width="3" transform="rotate(72 100 90)"/>' +
-          '<ellipse cx="100" cy="60" rx="18" ry="30" stroke="#1f2a3c" stroke-width="3" transform="rotate(144 100 90)"/>' +
-          '<ellipse cx="100" cy="60" rx="18" ry="30" stroke="#1f2a3c" stroke-width="3" transform="rotate(216 100 90)"/>' +
-          '<ellipse cx="100" cy="60" rx="18" ry="30" stroke="#1f2a3c" stroke-width="3" transform="rotate(288 100 90)"/>' +
-          '</g>' +
-          '<circle class="paint-region" data-region="1" cx="100" cy="90" r="18" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
-          '<rect class="paint-region" data-region="2" x="95" y="108" width="10" height="55" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
-          '<path class="paint-region" data-region="3" d="M100 140 Q75 140 70 160 Q90 158 100 140 Z" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>'
-      },
-      {
-        name: "Le poisson",
-        targetColors: ["#e63946", "#ffd400", "#43b98a", "#3d7fe0", "#8e5ce6"],
-        svg: '<ellipse class="paint-region" data-region="0" cx="95" cy="100" rx="60" ry="38" fill="#fff8ee" stroke="#1f2a3c" stroke-width="4"/>' +
-          '<polygon class="paint-region" data-region="1" points="155,100 190,75 190,125" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
-          '<path class="paint-region" data-region="2" d="M75 68 Q95 40 115 68 Q95 78 75 68 Z" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
-          '<path class="paint-region" data-region="3" d="M55 105 Q95 118 135 105 Q95 128 55 105 Z" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
-          '<circle class="paint-region" data-region="4" cx="55" cy="92" r="8" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>'
-      },
-      {
-        name: "La maison",
-        targetColors: ["#e63946", "#ffd400", "#43b98a", "#3d7fe0", "#8e5ce6", "#ef5da8"],
-        svg: '<circle class="paint-region" data-region="0" cx="165" cy="35" r="18" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
-          '<polygon class="paint-region" data-region="1" points="40,95 100,45 160,95" fill="#fff8ee" stroke="#1f2a3c" stroke-width="4"/>' +
-          '<rect class="paint-region" data-region="2" x="50" y="95" width="100" height="80" fill="#fff8ee" stroke="#1f2a3c" stroke-width="4"/>' +
-          '<rect class="paint-region" data-region="3" x="90" y="135" width="26" height="40" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
-          '<rect class="paint-region" data-region="4" x="60" y="110" width="24" height="24" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
-          '<rect class="paint-region" data-region="5" x="118" y="65" width="14" height="26" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>'
-      },
-      {
-        name: "La fusée",
-        targetColors: ["#e63946", "#ffd400", "#43b98a", "#3d7fe0", "#8e5ce6", "#ef5da8", "#ff8c3d"],
-        svg: '<circle class="paint-region" data-region="0" cx="40" cy="40" r="10" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
-          '<path class="paint-region" data-region="1" d="M100 20 Q120 50 120 90 L80 90 Q80 50 100 20 Z" fill="#fff8ee" stroke="#1f2a3c" stroke-width="4"/>' +
-          '<rect class="paint-region" data-region="2" x="80" y="90" width="40" height="60" fill="#fff8ee" stroke="#1f2a3c" stroke-width="4"/>' +
-          '<polygon class="paint-region" data-region="3" points="80,110 55,155 80,150" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
-          '<polygon class="paint-region" data-region="4" points="120,110 145,155 120,150" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
-          '<circle class="paint-region" data-region="5" cx="100" cy="65" r="14" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
-          '<path class="paint-region" data-region="6" d="M85 150 Q100 190 115 150 Q100 165 85 150 Z" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>'
-      }
+      [
+        {
+          name: "Le ballon",
+          targetColors: ["#e63946", "#ffd400", "#43b98a"],
+          svg: '<ellipse class="paint-region" data-region="0" cx="100" cy="85" rx="55" ry="65" fill="#fff8ee" stroke="#1f2a3c" stroke-width="4"/>' +
+            '<circle class="paint-region" data-region="1" cx="80" cy="60" r="14" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
+            '<polygon class="paint-region" data-region="2" points="100,150 92,165 108,165" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
+            '<path d="M100 165 Q95 185 100 195" fill="none" stroke="#1f2a3c" stroke-width="3"/>'
+        },
+        {
+          name: "Le soleil",
+          targetColors: ["#ffd400", "#3d7fe0", "#43b98a"],
+          svg: '<g class="paint-region" data-region="0" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3">' +
+            '<polygon points="97,53 103,53 100,25"/>' +
+            '<polygon points="97,53 103,53 100,25" transform="rotate(45 100 95)"/>' +
+            '<polygon points="97,53 103,53 100,25" transform="rotate(90 100 95)"/>' +
+            '<polygon points="97,53 103,53 100,25" transform="rotate(135 100 95)"/>' +
+            '<polygon points="97,53 103,53 100,25" transform="rotate(180 100 95)"/>' +
+            '<polygon points="97,53 103,53 100,25" transform="rotate(225 100 95)"/>' +
+            '<polygon points="97,53 103,53 100,25" transform="rotate(270 100 95)"/>' +
+            '<polygon points="97,53 103,53 100,25" transform="rotate(315 100 95)"/>' +
+            '</g>' +
+            '<circle class="paint-region" data-region="1" cx="100" cy="95" r="40" fill="#fff8ee" stroke="#1f2a3c" stroke-width="4"/>' +
+            '<path class="paint-region" data-region="2" d="M35 178 Q33 158 55 158 Q60 145 78 152 Q88 140 100 150 Q98 162 100 168 Q100 180 85 180 Z" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>'
+        }
+      ],
+      [
+        {
+          name: "La fleur",
+          targetColors: ["#e63946", "#ffd400", "#43b98a", "#3d7fe0"],
+          svg: '<g class="paint-region" data-region="0" fill="#fff8ee">' +
+            '<ellipse cx="100" cy="60" rx="18" ry="30" stroke="#1f2a3c" stroke-width="3"/>' +
+            '<ellipse cx="100" cy="60" rx="18" ry="30" stroke="#1f2a3c" stroke-width="3" transform="rotate(72 100 90)"/>' +
+            '<ellipse cx="100" cy="60" rx="18" ry="30" stroke="#1f2a3c" stroke-width="3" transform="rotate(144 100 90)"/>' +
+            '<ellipse cx="100" cy="60" rx="18" ry="30" stroke="#1f2a3c" stroke-width="3" transform="rotate(216 100 90)"/>' +
+            '<ellipse cx="100" cy="60" rx="18" ry="30" stroke="#1f2a3c" stroke-width="3" transform="rotate(288 100 90)"/>' +
+            '</g>' +
+            '<circle class="paint-region" data-region="1" cx="100" cy="90" r="18" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
+            '<rect class="paint-region" data-region="2" x="95" y="108" width="10" height="55" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
+            '<path class="paint-region" data-region="3" d="M100 140 Q75 140 70 160 Q90 158 100 140 Z" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>'
+        },
+        {
+          name: "Le papillon",
+          targetColors: ["#e63946", "#3d7fe0", "#ffd400", "#8e5ce6"],
+          svg: '<path d="M100 55 Q90 40 78 32" fill="none" stroke="#1f2a3c" stroke-width="2.5" stroke-linecap="round"/>' +
+            '<path d="M100 55 Q110 40 122 32" fill="none" stroke="#1f2a3c" stroke-width="2.5" stroke-linecap="round"/>' +
+            '<g class="paint-region" data-region="0" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3">' +
+            '<ellipse cx="65" cy="78" rx="32" ry="27" transform="rotate(-15 65 78)"/>' +
+            '<ellipse cx="70" cy="120" rx="25" ry="21" transform="rotate(-10 70 120)"/>' +
+            '</g>' +
+            '<g class="paint-region" data-region="1" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3">' +
+            '<ellipse cx="135" cy="78" rx="32" ry="27" transform="rotate(15 135 78)"/>' +
+            '<ellipse cx="130" cy="120" rx="25" ry="21" transform="rotate(10 130 120)"/>' +
+            '</g>' +
+            '<rect class="paint-region" data-region="2" x="95" y="58" width="10" height="86" rx="5" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
+            '<g class="paint-region" data-region="3" fill="#fff8ee" stroke="#1f2a3c" stroke-width="2.5">' +
+            '<circle cx="65" cy="78" r="7"/>' +
+            '<circle cx="135" cy="78" r="7"/>' +
+            '</g>'
+        }
+      ],
+      [
+        {
+          name: "Le poisson",
+          targetColors: ["#e63946", "#ffd400", "#43b98a", "#3d7fe0", "#8e5ce6"],
+          svg: '<ellipse class="paint-region" data-region="0" cx="95" cy="100" rx="60" ry="38" fill="#fff8ee" stroke="#1f2a3c" stroke-width="4"/>' +
+            '<polygon class="paint-region" data-region="1" points="155,100 190,75 190,125" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
+            '<path class="paint-region" data-region="2" d="M75 68 Q95 40 115 68 Q95 78 75 68 Z" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
+            '<path class="paint-region" data-region="3" d="M55 105 Q95 118 135 105 Q95 128 55 105 Z" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
+            '<circle class="paint-region" data-region="4" cx="55" cy="92" r="8" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>'
+        },
+        {
+          name: "Le chat",
+          targetColors: ["#ff8c3d", "#e63946", "#43b98a", "#1f2a3c", "#8e5ce6"],
+          svg: '<g class="paint-region" data-region="0" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3.5" stroke-linejoin="round">' +
+            '<polygon points="55,75 38,22 88,58"/>' +
+            '<polygon points="145,75 162,22 112,58"/>' +
+            '</g>' +
+            '<circle class="paint-region" data-region="1" cx="100" cy="118" r="55" fill="#fff8ee" stroke="#1f2a3c" stroke-width="4"/>' +
+            '<g class="paint-region" data-region="2" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3">' +
+            '<ellipse cx="78" cy="108" rx="10" ry="13"/>' +
+            '<ellipse cx="122" cy="108" rx="10" ry="13"/>' +
+            '</g>' +
+            '<polygon class="paint-region" data-region="3" points="93,133 107,133 100,143" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3" stroke-linejoin="round"/>' +
+            '<rect class="paint-region" data-region="4" x="68" y="168" width="64" height="14" rx="7" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>'
+        }
+      ],
+      [
+        {
+          name: "La maison",
+          targetColors: ["#e63946", "#ffd400", "#43b98a", "#3d7fe0", "#8e5ce6", "#ef5da8"],
+          svg: '<circle class="paint-region" data-region="0" cx="165" cy="35" r="18" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
+            '<polygon class="paint-region" data-region="1" points="40,95 100,45 160,95" fill="#fff8ee" stroke="#1f2a3c" stroke-width="4"/>' +
+            '<rect class="paint-region" data-region="2" x="50" y="95" width="100" height="80" fill="#fff8ee" stroke="#1f2a3c" stroke-width="4"/>' +
+            '<rect class="paint-region" data-region="3" x="90" y="135" width="26" height="40" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
+            '<rect class="paint-region" data-region="4" x="60" y="110" width="24" height="24" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
+            '<rect class="paint-region" data-region="5" x="118" y="65" width="14" height="26" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>'
+        },
+        {
+          name: "Le camion",
+          targetColors: ["#e63946", "#3d7fe0", "#43b98a", "#8e5ce6", "#ff8c3d", "#ffd400"],
+          svg: '<rect class="paint-region" data-region="0" x="18" y="88" width="75" height="58" fill="#fff8ee" stroke="#1f2a3c" stroke-width="4"/>' +
+            '<rect class="paint-region" data-region="1" x="93" y="100" width="48" height="46" fill="#fff8ee" stroke="#1f2a3c" stroke-width="4"/>' +
+            '<rect class="paint-region" data-region="2" x="100" y="108" width="24" height="19" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
+            '<g class="paint-region" data-region="3" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3">' +
+            '<circle cx="48" cy="156" r="17"/>' +
+            '<circle cx="118" cy="156" r="17"/>' +
+            '</g>' +
+            '<rect class="paint-region" data-region="4" x="136" y="132" width="10" height="14" fill="#fff8ee" stroke="#1f2a3c" stroke-width="2.5"/>' +
+            '<circle class="paint-region" data-region="5" cx="136" cy="115" r="7" fill="#fff8ee" stroke="#1f2a3c" stroke-width="2.5"/>'
+        }
+      ],
+      [
+        {
+          name: "La fusée",
+          targetColors: ["#e63946", "#ffd400", "#43b98a", "#3d7fe0", "#8e5ce6", "#ef5da8", "#ff8c3d"],
+          svg: '<circle class="paint-region" data-region="0" cx="40" cy="40" r="10" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
+            '<path class="paint-region" data-region="1" d="M100 20 Q120 50 120 90 L80 90 Q80 50 100 20 Z" fill="#fff8ee" stroke="#1f2a3c" stroke-width="4"/>' +
+            '<rect class="paint-region" data-region="2" x="80" y="90" width="40" height="60" fill="#fff8ee" stroke="#1f2a3c" stroke-width="4"/>' +
+            '<polygon class="paint-region" data-region="3" points="80,110 55,155 80,150" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
+            '<polygon class="paint-region" data-region="4" points="120,110 145,155 120,150" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
+            '<circle class="paint-region" data-region="5" cx="100" cy="65" r="14" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
+            '<path class="paint-region" data-region="6" d="M85 150 Q100 190 115 150 Q100 165 85 150 Z" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>'
+        },
+        {
+          name: "Le bonhomme de neige",
+          targetColors: ["#3d7fe0", "#43b98a", "#8e5ce6", "#ff8c3d", "#ef5da8", "#ffd400", "#e63946"],
+          svg: '<path d="M100 75 L65 65 M100 105 L138 100" fill="none" stroke="#8a5a34" stroke-width="3" stroke-linecap="round"/>' +
+            '<circle class="paint-region" data-region="0" cx="100" cy="155" r="40" fill="#fff8ee" stroke="#1f2a3c" stroke-width="4"/>' +
+            '<circle class="paint-region" data-region="1" cx="100" cy="100" r="30" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3.5"/>' +
+            '<circle class="paint-region" data-region="2" cx="100" cy="55" r="22" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3.5"/>' +
+            '<g class="paint-region" data-region="3" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3" stroke-linejoin="round">' +
+            '<rect x="74" y="30" width="52" height="7"/>' +
+            '<rect x="84" y="8" width="32" height="24"/>' +
+            '</g>' +
+            '<rect class="paint-region" data-region="4" x="80" y="72" width="40" height="11" rx="5" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3"/>' +
+            '<g class="paint-region" data-region="5" fill="#fff8ee" stroke="#1f2a3c" stroke-width="2.5">' +
+            '<circle cx="100" cy="90" r="5"/>' +
+            '<circle cx="100" cy="115" r="5"/>' +
+            '<circle cx="100" cy="140" r="5"/>' +
+            '</g>' +
+            '<polygon class="paint-region" data-region="6" points="92,57 108,57 100,68" fill="#fff8ee" stroke="#1f2a3c" stroke-width="3" stroke-linejoin="round"/>'
+        }
+      ]
     ];
 
     // Calcul costaud : 3 termes, 2 opérations tirées indépendamment (donc
@@ -2047,6 +2140,7 @@
       paintColor: PAINT_PALETTE[0],
       paintFills: [],
       paintTouched: [],
+      paintVariant: 0,
       paintLocked: false,
       brushSize: 10,
       eraserOn: false,
@@ -3020,7 +3114,8 @@
 
     function currentPaintTemplate() {
       var levelIdx = Math.min(Math.max(state.level, MIN_LEVEL), MAX_LEVEL) - 1;
-      return PAINT_TEMPLATES[levelIdx];
+      var variants = PAINT_TEMPLATES[levelIdx];
+      return variants[state.paintVariant % variants.length];
     }
 
     function renderPaintPalette() {
@@ -3208,6 +3303,9 @@
       state.paintLocked = true;
       state.wrongStreak = 0;
       state.correctStreak++;
+      // Propose un dessin différent à chaque nouvelle étoile plutôt que de
+      // répéter systématiquement le même modèle pour ce niveau.
+      state.paintVariant = 1 - state.paintVariant;
       var leveledUp = false;
       var justWon = false;
       if (state.correctStreak >= starsToLevelUp(state.mode)) {
