@@ -395,6 +395,35 @@
     max-width: 85vw;
   }
 
+  /* ---------- jeu "aigu ou grave ?" : 3 boutons pour écouter chaque son
+     avant de répondre (contrairement aux nombres, un son ne reste pas
+     visible : il faut pouvoir le réécouter autant de fois que nécessaire) ---------- */
+
+  .pitch-listen-row {
+    display: flex;
+    gap: clamp(0.6rem, 3vw, 1rem);
+    justify-content: center;
+    margin-top: clamp(0.8rem, 3vw, 1.3rem);
+  }
+
+  .pitch-listen-btn {
+    appearance: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 800;
+    font-size: clamp(1rem, 4vw, 1.3rem);
+    color: var(--white);
+    background: var(--candy-blue);
+    border-radius: 999px;
+    padding: clamp(0.6rem, 2.5vw, 0.9rem) clamp(1rem, 4vw, 1.4rem);
+    border-bottom: clamp(3px, 1vw, 4px) solid rgba(0, 0, 0, 0.22);
+    box-shadow: 0 8px 16px -10px rgba(31, 42, 60, 0.45);
+  }
+
+  .pitch-listen-btn:active { transform: translateY(2px); border-bottom-width: 2px; }
+  .pitch-listen-btn:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+
   /* ---------- jeu "complète la suite" : virgules entre les nombres connus ---------- */
 
   .seq-comma {
@@ -648,6 +677,59 @@
     border-bottom-width: 2px;
     filter: brightness(1.15);
   }
+
+  /* ---------- Musique Malin : "Répète le rythme" (façon Simon) ---------- */
+
+  .rhythm-screen {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.6rem, 2.2vw, 1rem);
+    min-height: 0;
+    width: 100%;
+  }
+
+  .rhythm-screen[hidden] { display: none; }
+
+  .rhythm-feedback {
+    min-height: 1.6rem;
+    margin: 0;
+    text-align: center;
+    font-size: clamp(1rem, 4vw, 1.3rem);
+    font-weight: 800;
+    color: var(--correct);
+    text-shadow: 0 2px 0 rgba(255, 255, 255, 0.6);
+  }
+
+  .rhythm-pads {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(0.6rem, 3vw, 1rem);
+    width: min(82vw, 28rem);
+    aspect-ratio: 1;
+    max-height: 100%;
+  }
+
+  .rhythm-pad {
+    appearance: none;
+    border: none;
+    cursor: pointer;
+    border-radius: clamp(1.2rem, 4vw, 1.8rem);
+    box-shadow: 0 12px 22px -12px rgba(31, 42, 60, 0.5);
+    border-bottom: clamp(5px, 1.4vw, 8px) solid rgba(0, 0, 0, 0.22);
+    transition: transform 0.1s ease, filter 0.1s ease;
+    opacity: 0.85;
+  }
+
+  .rhythm-pad.active {
+    transform: scale(0.94);
+    filter: brightness(1.35);
+    opacity: 1;
+  }
+
+  .rhythm-pad:disabled { cursor: default; }
 
   /* mobile portrait : on pousse encore les tailles pour profiter de l'écran étroit et haut */
   @media (max-width: 640px) and (orientation: portrait) {
@@ -1170,6 +1252,8 @@
   .category-card-dessine { background: linear-gradient(135deg, #43b98a, #2a9d6f); }
   .category-card-musiquelibre { background: linear-gradient(135deg, #ef5da8, #8e5ce6); }
   .category-card-instruments { background: linear-gradient(135deg, #33c2c2, #3454d1); }
+  .category-card-rythme { background: linear-gradient(135deg, #ff7a59, #ff3d77); }
+  .category-card-pitch { background: linear-gradient(135deg, #ffc93c, #f2994a); }
   .category-card-animals { background: linear-gradient(135deg, #f2994a, #d9724c); }
   .category-card-numbers { background: linear-gradient(135deg, #4fb3e8, #3d7fe0); }
   .category-card-body { background: linear-gradient(135deg, #8e5ce6, #6a4c93); }
@@ -1371,6 +1455,11 @@
 
   <section class="music-screen" id="musicScreen" hidden>
     <div class="music-stage" id="musicStage"></div>
+  </section>
+
+  <section class="rhythm-screen" id="rhythmScreen" hidden>
+    <p class="rhythm-feedback" id="rhythmFeedback" aria-live="polite"></p>
+    <div class="rhythm-pads" id="rhythmPads"></div>
   </section>
 
   <div class="menu-overlay" id="menuOverlay">
@@ -1670,6 +1759,16 @@
           <span class="icon emoji">🎧</span>
           <span>Quel instrument ?</span>
           <span class="level-badge">MS-CP</span>
+        </button>
+        <button class="category-card category-card-rythme" type="button" id="rythmeCard">
+          <span class="icon emoji">🔁</span>
+          <span>Répète le rythme</span>
+          <span class="level-badge">GS-CE1</span>
+        </button>
+        <button class="category-card category-card-pitch" type="button" id="pitchCard">
+          <span class="icon emoji">📈</span>
+          <span>Aigu ou grave ?</span>
+          <span class="level-badge">MS-GS</span>
         </button>
       </div>
     </div>
@@ -2182,16 +2281,16 @@
       ]
     ];
 
-    // Musique Malin : gamme pentatonique (do-ré-mi-sol-la), pour que toute
-    // combinaison de touches tapées au hasard sonne toujours agréable.
+    // Musique Malin : gamme de do majeur, une octave complète (do ré mi fa
+    // sol la si), les 7 notes que l'enfant connaît par leur nom.
     var MUSIC_NOTES = [
-      { freq: 261.63, color: "#e63946" },
-      { freq: 293.66, color: "#ffd400" },
-      { freq: 329.63, color: "#43b98a" },
-      { freq: 392.0, color: "#3d7fe0" },
-      { freq: 440.0, color: "#8e5ce6" },
-      { freq: 523.25, color: "#ef5da8" },
-      { freq: 587.33, color: "#ff8c3d" }
+      { freq: 261.63, color: "#e63946" }, // do
+      { freq: 293.66, color: "#ffd400" }, // ré
+      { freq: 329.63, color: "#43b98a" }, // mi
+      { freq: 349.23, color: "#3d7fe0" }, // fa
+      { freq: 392.0, color: "#8e5ce6" },  // sol
+      { freq: 440.0, color: "#ef5da8" },  // la
+      { freq: 493.88, color: "#ff8c3d" }  // si
     ];
 
     // "Quel instrument ?" : chaque instrument a son propre son synthétisé
@@ -2211,6 +2310,17 @@
       ["tambour", "piano", "trompette", "flute", "clochette"],
       ["tambour", "piano", "trompette", "flute", "clochette"]
     ];
+
+    // "Répète le rythme" : 4 pastilles colorées, chacune avec sa propre
+    // note ; l'appli joue une séquence que l'enfant doit retaper à
+    // l'identique. La séquence s'allonge avec le niveau.
+    var RHYTHM_PADS = [
+      { color: "#e63946", freq: 261.63 },
+      { color: "#ffd400", freq: 329.63 },
+      { color: "#43b98a", freq: 392.0 },
+      { color: "#3d7fe0", freq: 523.25 }
+    ];
+    var RHYTHM_LEVELS = { length: [2, 3, 4, 5, 6] };
 
     // Calcul costaud : 3 termes, 2 opérations tirées indépendamment (donc
     // potentiellement différentes) parmi +, −, ×, ÷, enchaînées de gauche à
@@ -2237,7 +2347,10 @@
       paintLocked: false,
       brushSize: 10,
       eraserOn: false,
-      drawing: false
+      drawing: false,
+      rhythmSequence: [],
+      rhythmInputIndex: 0,
+      rhythmLocked: true
     };
 
     var PROGRESS_KEY = "calculMalinProgress";
@@ -2388,6 +2501,34 @@
         compareMode: compareMode,
         answer: answer,
         choices: numbers.slice()
+      };
+    }
+
+    // "Aigu ou grave ?" : 3 sons à écouter (boutons "Son 1/2/3"), il faut
+    // retrouver le plus aigu (ou le plus grave, tiré au hasard) des trois.
+    // Les 3 hauteurs sont plus rapprochées à mesure que le niveau monte.
+    var PITCH_LEVELS = [
+      [196.0, 392.0, 783.99],
+      [246.94, 440.0, 783.99],
+      [261.63, 349.23, 523.25],
+      [293.66, 349.23, 415.3],
+      [349.23, 392.0, 440.0]
+    ];
+
+    function generatePitchProblem(levelIdx) {
+      var pitches = shuffle(PITCH_LEVELS[levelIdx].slice());
+      var compareMode = Math.random() < 0.5 ? "aigu" : "grave";
+      var targetIdx = 0;
+      for (var i = 1; i < pitches.length; i++) {
+        var beats = compareMode === "aigu" ? pitches[i] > pitches[targetIdx] : pitches[i] < pitches[targetIdx];
+        if (beats) targetIdx = i;
+      }
+      return {
+        kind: "pitch",
+        pitches: pitches,
+        compareMode: compareMode,
+        answer: targetIdx,
+        choices: [0, 1, 2]
       };
     }
 
@@ -2620,6 +2761,12 @@
         var cn2 = p2.numbers.slice().sort(function (a, b) { return a - b; }).join(",");
         return cn1 === cn2;
       }
+      if (p1.kind === "pitch" || p2.kind === "pitch") {
+        if (p1.kind !== "pitch" || p2.kind !== "pitch" || p1.compareMode !== p2.compareMode) return false;
+        var cp1 = p1.pitches.slice().sort(function (a, b) { return a - b; }).join(",");
+        var cp2 = p2.pitches.slice().sort(function (a, b) { return a - b; }).join(",");
+        return cp1 === cp2;
+      }
       if (p1.kind === "sequence" || p2.kind === "sequence") {
         return p1.kind === "sequence" && p2.kind === "sequence" &&
           JSON.stringify(p1.sequence) === JSON.stringify(p2.sequence) && p1.answer === p2.answer;
@@ -2679,6 +2826,9 @@
       }
       if (state.mode === "instruments") {
         return generateInstrumentsProblem(levelIdx);
+      }
+      if (state.mode === "pitch") {
+        return generatePitchProblem(levelIdx);
       }
       if (state.mode === "reading") {
         return generateReadingProblem(levelIdx);
@@ -2754,6 +2904,8 @@
       dessineCard: document.getElementById("dessineCard"),
       musiqueLibreCard: document.getElementById("musiqueLibreCard"),
       instrumentsCard: document.getElementById("instrumentsCard"),
+      rythmeCard: document.getElementById("rythmeCard"),
+      pitchCard: document.getElementById("pitchCard"),
       modeCards: document.querySelectorAll(".mode-card"),
       levelPill: document.getElementById("levelPill"),
       levelNum: document.getElementById("levelNum"),
@@ -2774,6 +2926,9 @@
       paintTools: document.getElementById("paintTools"),
       musicScreen: document.getElementById("musicScreen"),
       musicStage: document.getElementById("musicStage"),
+      rhythmScreen: document.getElementById("rhythmScreen"),
+      rhythmPads: document.getElementById("rhythmPads"),
+      rhythmFeedback: document.getElementById("rhythmFeedback"),
       levelUpOverlay: document.getElementById("levelUpOverlay"),
       levelUpNum: document.getElementById("levelUpNum"),
       levelUpConfetti: document.getElementById("levelUpConfetti"),
@@ -2991,6 +3146,30 @@
         return;
       }
 
+      if (p.kind === "pitch") {
+        els.problem.removeAttribute("data-terms");
+        var pitchInstr = document.createElement("span");
+        pitchInstr.className = "instruction-prompt";
+        pitchInstr.textContent = p.compareMode === "aigu" ? "Quel son est le plus aigu ?" : "Quel son est le plus grave ?";
+        els.problem.appendChild(pitchInstr);
+        var pitchRow = document.createElement("div");
+        pitchRow.className = "pitch-listen-row";
+        p.pitches.forEach(function (freq, idx) {
+          var listenBtn = document.createElement("button");
+          listenBtn.type = "button";
+          listenBtn.className = "pitch-listen-btn";
+          listenBtn.textContent = "🔊 " + (idx + 1);
+          listenBtn.setAttribute("aria-label", "Écouter le son " + (idx + 1));
+          listenBtn.addEventListener("click", function () { playMusicNote(freq); });
+          pitchRow.appendChild(listenBtn);
+        });
+        els.problem.appendChild(pitchRow);
+        els.problem.classList.remove("pop");
+        void els.problem.offsetWidth;
+        els.problem.classList.add("pop");
+        return;
+      }
+
       if (p.kind === "sequence") {
         els.problem.removeAttribute("data-terms");
         p.sequence.forEach(function (val, idx) {
@@ -3174,6 +3353,21 @@
           btn.setAttribute("data-value", word);
           btn.setAttribute("aria-label", "Répondre " + word);
           btn.addEventListener("click", function () { onAnswer(word, btn); });
+          els.answers.appendChild(btn);
+        });
+        return;
+      }
+
+      if (state.problem.kind === "pitch") {
+        var pitchPalette = shuffle(CANDY_COLORS.slice());
+        state.problem.choices.forEach(function (idx, i) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "answer-btn " + pitchPalette[i % pitchPalette.length];
+          btn.textContent = "Son " + (idx + 1);
+          btn.setAttribute("data-value", idx);
+          btn.setAttribute("aria-label", "Répondre son " + (idx + 1));
+          btn.addEventListener("click", function () { onAnswer(idx, btn); });
           els.answers.appendChild(btn);
         });
         return;
@@ -3625,6 +3819,95 @@
       });
     }
 
+    // "Répète le rythme" : construit les 4 pastilles une seule fois (leur
+    // nombre ne change jamais, contrairement aux gabarits de Peinture
+    // Malin), puis joue/écoute la séquence du niveau en cours.
+    function renderRhythmPads() {
+      els.rhythmPads.innerHTML = "";
+      RHYTHM_PADS.forEach(function (pad, idx) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "rhythm-pad";
+        btn.style.background = pad.color;
+        btn.setAttribute("aria-label", "Pastille " + (idx + 1));
+        btn.addEventListener("click", function () { onRhythmPadTap(idx); });
+        els.rhythmPads.appendChild(btn);
+      });
+    }
+
+    function flashRhythmPad(idx) {
+      var pad = els.rhythmPads.children[idx];
+      playMusicNote(RHYTHM_PADS[idx].freq);
+      if (!pad) return;
+      pad.classList.add("active");
+      window.setTimeout(function () { pad.classList.remove("active"); }, 380);
+    }
+
+    function playRhythmSequence() {
+      state.rhythmLocked = true;
+      state.rhythmInputIndex = 0;
+      els.rhythmFeedback.textContent = "";
+      var seq = state.rhythmSequence;
+      seq.forEach(function (padIdx, i) {
+        window.setTimeout(function () { flashRhythmPad(padIdx); }, 500 + i * 700);
+      });
+      window.setTimeout(function () { state.rhythmLocked = false; }, 500 + seq.length * 700);
+    }
+
+    function startRhythmProblem() {
+      var levelIdx = Math.min(Math.max(state.level, MIN_LEVEL), MAX_LEVEL) - 1;
+      var length = RHYTHM_LEVELS.length[levelIdx];
+      var seq = [];
+      for (var i = 0; i < length; i++) seq.push(randInt(0, RHYTHM_PADS.length - 1));
+      state.rhythmSequence = seq;
+      renderRhythmPads();
+      playRhythmSequence();
+      saveProgress();
+    }
+
+    function onRhythmPadTap(idx) {
+      if (state.rhythmLocked) return;
+      flashRhythmPad(idx);
+      var expected = state.rhythmSequence[state.rhythmInputIndex];
+      if (idx === expected) {
+        state.rhythmInputIndex++;
+        if (state.rhythmInputIndex === state.rhythmSequence.length) onRhythmWin();
+        return;
+      }
+      // Pas de pénalité : on réécoute simplement la même séquence depuis le
+      // début, dans le même esprit que "Peins comme le modèle".
+      state.rhythmLocked = true;
+      els.rhythmFeedback.textContent = "On réécoute ! 🎧";
+      window.setTimeout(playRhythmSequence, 900);
+    }
+
+    function onRhythmWin() {
+      state.rhythmLocked = true;
+      state.wrongStreak = 0;
+      state.correctStreak++;
+      var leveledUp = false;
+      var justWon = false;
+      if (state.correctStreak >= starsToLevelUp(state.mode)) {
+        if (state.level < MAX_LEVEL) {
+          state.level++;
+          leveledUp = true;
+        } else {
+          justWon = true;
+        }
+        state.correctStreak = 0;
+      }
+      if (!leveledUp && !justWon) renderLevel();
+      saveProgress();
+      els.rhythmFeedback.textContent = "Bravo ! Bien joué ! 🎉";
+      if (leveledUp) {
+        window.setTimeout(function () { showLevelUp(state.level); }, 1100);
+      } else if (justWon) {
+        window.setTimeout(showWin, 1100);
+      } else {
+        window.setTimeout(startRhythmProblem, 1400);
+      }
+    }
+
     var CONFETTI_COLORS = ["var(--green-add)", "var(--orange-sub)", "var(--candy-blue)", "var(--candy-pink)", "var(--gold)"];
 
     function spawnConfetti(container, count) {
@@ -3670,7 +3953,7 @@
       if (mode === "colors" || mode === "animals" || mode === "numbers" || mode === "body") return "anglais";
       if (mode === "reading" || mode === "letters" || mode === "syllables" || mode === "rhymes") return "lire";
       if (isPaintMode(mode)) return "peinture";
-      if (mode === "musiquelibre" || mode === "instruments") return "musique";
+      if (mode === "musiquelibre" || mode === "instruments" || mode === "pitch" || mode === "rythme") return "musique";
       return null;
     }
 
@@ -3734,10 +4017,12 @@
 
       var paint = isPaintMode(mode);
       var music = mode === "musiquelibre";
-      els.problemZone.hidden = paint || music;
-      els.answers.hidden = paint || music;
+      var rhythm = mode === "rythme";
+      els.problemZone.hidden = paint || music || rhythm;
+      els.answers.hidden = paint || music || rhythm;
       els.paintScreen.hidden = !paint;
       els.musicScreen.hidden = !music;
+      els.rhythmScreen.hidden = !rhythm;
       els.levelPill.hidden = mode === "dessine" || music;
       if (paint) {
         state.problem = null;
@@ -3748,6 +4033,11 @@
       if (music) {
         state.problem = null;
         renderMusicScreen();
+        return;
+      }
+      if (rhythm) {
+        state.problem = null;
+        startRhythmProblem();
         return;
       }
 
@@ -3783,6 +4073,8 @@
     els.dessineCard.addEventListener("click", function () { selectMode("dessine"); });
     els.musiqueLibreCard.addEventListener("click", function () { selectMode("musiquelibre"); });
     els.instrumentsCard.addEventListener("click", function () { selectMode("instruments"); });
+    els.rythmeCard.addEventListener("click", function () { selectMode("rythme"); });
+    els.pitchCard.addEventListener("click", function () { selectMode("pitch"); });
     els.calcBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
     els.terms2BackBtn.addEventListener("click", function () { showMenuScreen("calc"); });
     els.terms3BackBtn.addEventListener("click", function () { showMenuScreen("calc"); });
@@ -3808,14 +4100,14 @@
       state.locked = false;
       renderLevel();
       saveProgress();
-      if (isPaintMode(state.mode)) { startPaintProblem(); } else { nextProblem(); }
+      if (isPaintMode(state.mode)) { startPaintProblem(); } else if (state.mode === "rythme") { startRhythmProblem(); } else { nextProblem(); }
     });
 
     els.levelUpContinueBtn.addEventListener("click", function () {
       els.levelUpOverlay.hidden = true;
       setThemeColor(THEME_COLOR_BAR);
       renderLevel();
-      if (isPaintMode(state.mode)) { startPaintProblem(); } else { nextProblem(); }
+      if (isPaintMode(state.mode)) { startPaintProblem(); } else if (state.mode === "rythme") { startRhythmProblem(); } else { nextProblem(); }
     });
 
     els.winReplayBtn.addEventListener("click", function () {
@@ -3826,7 +4118,7 @@
       state.wrongStreak = 0;
       renderLevel();
       saveProgress();
-      if (isPaintMode(state.mode)) { startPaintProblem(); } else { nextProblem(); }
+      if (isPaintMode(state.mode)) { startPaintProblem(); } else if (state.mode === "rythme") { startRhythmProblem(); } else { nextProblem(); }
     });
 
     els.winMenuBtn.addEventListener("click", function () {
