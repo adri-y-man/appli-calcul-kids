@@ -1273,11 +1273,10 @@
   .category-card-body { background: linear-gradient(135deg, #8e5ce6, #6a4c93); }
 
   #menuHome .category-grid {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: flex-start;
-    gap: clamp(1rem, 5vw, 1.8rem);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    align-items: start;
+    gap: clamp(0.7rem, 3.5vw, 1.4rem) clamp(0.4rem, 2vw, 1rem);
   }
 
   .category-card-app {
