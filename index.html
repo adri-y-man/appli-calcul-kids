@@ -1254,6 +1254,10 @@
   .category-card-instruments { background: linear-gradient(135deg, #33c2c2, #3454d1); }
   .category-card-rythme { background: linear-gradient(135deg, #ff7a59, #ff3d77); }
   .category-card-pitch { background: linear-gradient(135deg, #ffc93c, #f2994a); }
+  .category-card-animalname { background: linear-gradient(135deg, #43b98a, #2a9d6f); }
+  .category-card-babies { background: linear-gradient(135deg, #ffb648, #f2994a); }
+  .category-card-habitat { background: linear-gradient(135deg, #598ce6, #3454d1); }
+  .category-card-diet { background: linear-gradient(135deg, #ef5da8, #d9418c); }
   .category-card-animals { background: linear-gradient(135deg, #f2994a, #d9724c); }
   .category-card-numbers { background: linear-gradient(135deg, #4fb3e8, #3d7fe0); }
   .category-card-body { background: linear-gradient(135deg, #8e5ce6, #6a4c93); }
@@ -1573,6 +1577,19 @@
           </span>
           <span class="app-icon-label">Musique Malin</span>
         </button>
+        <button class="category-card category-card-app" type="button" data-category="animaux">
+          <span class="app-icon-tile">
+            <svg viewBox="0 0 120 120" aria-hidden="true">
+              <rect x="4" y="4" width="112" height="112" rx="30" fill="#fff8ee" />
+              <ellipse cx="60" cy="82" rx="27" ry="21" fill="#f2994a" />
+              <circle cx="29" cy="47" r="13.5" fill="#f2994a" />
+              <circle cx="54" cy="29" r="13.5" fill="#f2994a" />
+              <circle cx="83" cy="29" r="13.5" fill="#f2994a" />
+              <circle cx="96" cy="52" r="13.5" fill="#f2994a" />
+            </svg>
+          </span>
+          <span class="app-icon-label">Animaux Malin</span>
+        </button>
       </div>
       <div class="fox-walk-lane" aria-hidden="true">
         <svg class="fox-walker" viewBox="0 0 100 70">
@@ -1769,6 +1786,39 @@
           <span class="icon emoji">📈</span>
           <span>Aigu ou grave ?</span>
           <span class="level-badge">MS-GS</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="menu-panel" id="menuAnimaux" hidden>
+      <div class="menu-header">
+        <button class="menu-back" id="animauxBackBtn" type="button" aria-label="Retour">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 4 L7 12 L15 20" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+        <h1 class="menu-title">Animaux Malin</h1>
+      </div>
+      <div class="category-grid">
+        <button class="category-card category-card-animalname" type="button" id="animalNameCard">
+          <span class="icon emoji">🐾</span>
+          <span>Quel est cet animal ?</span>
+          <span class="level-badge">PS-MS</span>
+        </button>
+        <button class="category-card category-card-babies" type="button" id="babiesCard">
+          <span class="icon emoji">🐣</span>
+          <span>Maman et son petit</span>
+          <span class="level-badge">MS-GS</span>
+        </button>
+        <button class="category-card category-card-habitat" type="button" id="habitatCard">
+          <span class="icon emoji">🏡</span>
+          <span>Où habite cet animal ?</span>
+          <span class="level-badge">GS-CP</span>
+        </button>
+        <button class="category-card category-card-diet" type="button" id="dietCard">
+          <span class="icon emoji">🥕</span>
+          <span>Que mange cet animal ?</span>
+          <span class="level-badge">GS-CP</span>
         </button>
       </div>
     </div>
@@ -2060,19 +2110,21 @@
       ["a", "in", "ou", "i", "on", "omme"]
     ];
 
+    // "fr" est utilisé par Animaux Malin (jeu "Quel est cet animal ?"),
+    // partagé avec les mêmes animaux/emoji que le jeu d'anglais ci-dessous.
     var ANIMAL_DEFS = {
-      cat: { en: "Cat", emoji: "🐱" },
-      dog: { en: "Dog", emoji: "🐶" },
-      cow: { en: "Cow", emoji: "🐮" },
-      duck: { en: "Duck", emoji: "🦆" },
-      horse: { en: "Horse", emoji: "🐴" },
-      rabbit: { en: "Rabbit", emoji: "🐰" },
-      bird: { en: "Bird", emoji: "🐦" },
-      fish: { en: "Fish", emoji: "🐟" },
-      pig: { en: "Pig", emoji: "🐷" },
-      sheep: { en: "Sheep", emoji: "🐑" },
-      lion: { en: "Lion", emoji: "🦁" },
-      elephant: { en: "Elephant", emoji: "🐘" }
+      cat: { en: "Cat", fr: "Le chat", emoji: "🐱" },
+      dog: { en: "Dog", fr: "Le chien", emoji: "🐶" },
+      cow: { en: "Cow", fr: "La vache", emoji: "🐮" },
+      duck: { en: "Duck", fr: "Le canard", emoji: "🦆" },
+      horse: { en: "Horse", fr: "Le cheval", emoji: "🐴" },
+      rabbit: { en: "Rabbit", fr: "Le lapin", emoji: "🐰" },
+      bird: { en: "Bird", fr: "L'oiseau", emoji: "🐦" },
+      fish: { en: "Fish", fr: "Le poisson", emoji: "🐟" },
+      pig: { en: "Pig", fr: "Le cochon", emoji: "🐷" },
+      sheep: { en: "Sheep", fr: "Le mouton", emoji: "🐑" },
+      lion: { en: "Lion", fr: "Le lion", emoji: "🦁" },
+      elephant: { en: "Elephant", fr: "L'éléphant", emoji: "🐘" }
     };
     // Le lot d'animaux disponibles s'agrandit à chaque niveau, comme pour
     // les couleurs.
@@ -2082,6 +2134,79 @@
       ["cat", "dog", "cow", "duck", "horse", "rabbit", "bird", "fish"],
       ["cat", "dog", "cow", "duck", "horse", "rabbit", "bird", "fish", "pig", "sheep"],
       ["cat", "dog", "cow", "duck", "horse", "rabbit", "bird", "fish", "pig", "sheep", "lion", "elephant"]
+    ];
+
+    // Animaux Malin — "Maman et son petit" : chaque parent a un nom de
+    // petit bien distinct des autres, pour pouvoir tirer les 2 mauvaises
+    // réponses directement parmi les autres animaux du même niveau.
+    var ANIMAL_BABY_DEFS = {
+      vache: { emoji: "🐮", baby: "Le veau" },
+      chien: { emoji: "🐶", baby: "Le chiot" },
+      chat: { emoji: "🐱", baby: "Le chaton" },
+      poule: { emoji: "🐔", baby: "Le poussin" },
+      cheval: { emoji: "🐴", baby: "Le poulain" },
+      mouton: { emoji: "🐑", baby: "L'agneau" },
+      canard: { emoji: "🦆", baby: "Le caneton" },
+      cochon: { emoji: "🐷", baby: "Le porcelet" },
+      lion: { emoji: "🦁", baby: "Le lionceau" },
+      ours: { emoji: "🐻", baby: "L'ourson" },
+      chevre: { emoji: "🐐", baby: "Le chevreau" },
+      grenouille: { emoji: "🐸", baby: "Le têtard" }
+    };
+    var ANIMAL_BABY_LEVEL_POOL = [
+      ["vache", "chien", "chat", "poule"],
+      ["vache", "chien", "chat", "poule", "cheval", "mouton"],
+      ["vache", "chien", "chat", "poule", "cheval", "mouton", "canard", "cochon"],
+      ["vache", "chien", "chat", "poule", "cheval", "mouton", "canard", "cochon", "lion", "ours"],
+      ["vache", "chien", "chat", "poule", "cheval", "mouton", "canard", "cochon", "lion", "ours", "chevre", "grenouille"]
+    ];
+
+    // Animaux Malin — "Où habite cet animal ?" : chaque habitat est unique
+    // dans la liste (même logique que ci-dessus pour les mauvaises réponses).
+    var ANIMAL_HABITAT_DEFS = {
+      poisson: { emoji: "🐟", habitat: "La mer" },
+      ourspolaire: { emoji: "🐻‍❄️", habitat: "La banquise" },
+      singe: { emoji: "🐒", habitat: "La forêt" },
+      vache: { emoji: "🐮", habitat: "La ferme" },
+      chameau: { emoji: "🐫", habitat: "Le désert" },
+      lion: { emoji: "🦁", habitat: "La savane" },
+      grenouille: { emoji: "🐸", habitat: "L'étang" },
+      abeille: { emoji: "🐝", habitat: "La ruche" },
+      poule: { emoji: "🐔", habitat: "Le poulailler" },
+      fourmi: { emoji: "🐜", habitat: "La fourmilière" },
+      renne: { emoji: "🦌", habitat: "La toundra" },
+      chauvesouris: { emoji: "🦇", habitat: "La grotte" }
+    };
+    var ANIMAL_HABITAT_LEVEL_POOL = [
+      ["poisson", "ourspolaire", "singe", "vache"],
+      ["poisson", "ourspolaire", "singe", "vache", "chameau", "lion"],
+      ["poisson", "ourspolaire", "singe", "vache", "chameau", "lion", "grenouille", "abeille"],
+      ["poisson", "ourspolaire", "singe", "vache", "chameau", "lion", "grenouille", "abeille", "poule", "fourmi"],
+      ["poisson", "ourspolaire", "singe", "vache", "chameau", "lion", "grenouille", "abeille", "poule", "fourmi", "renne", "chauvesouris"]
+    ];
+
+    // Animaux Malin — "Que mange cet animal ?" : chaque régime alimentaire
+    // est unique dans la liste, même logique.
+    var ANIMAL_DIET_DEFS = {
+      vache: { emoji: "🐮", food: "De l'herbe" },
+      lion: { emoji: "🦁", food: "De la viande" },
+      lapin: { emoji: "🐰", food: "Des carottes" },
+      souris: { emoji: "🐭", food: "Du fromage" },
+      ours: { emoji: "🐻", food: "Du miel" },
+      oiseau: { emoji: "🐦", food: "Des graines" },
+      singe: { emoji: "🐒", food: "Des bananes" },
+      chat: { emoji: "🐱", food: "Des croquettes" },
+      elephant: { emoji: "🐘", food: "Des feuilles" },
+      ecureuil: { emoji: "🐿️", food: "Des noisettes" },
+      poisson: { emoji: "🐟", food: "Des algues" },
+      abeille: { emoji: "🐝", food: "Du nectar" }
+    };
+    var ANIMAL_DIET_LEVEL_POOL = [
+      ["vache", "lion", "lapin", "souris"],
+      ["vache", "lion", "lapin", "souris", "ours", "oiseau"],
+      ["vache", "lion", "lapin", "souris", "ours", "oiseau", "singe", "chat"],
+      ["vache", "lion", "lapin", "souris", "ours", "oiseau", "singe", "chat", "elephant", "ecureuil"],
+      ["vache", "lion", "lapin", "souris", "ours", "oiseau", "singe", "chat", "elephant", "ecureuil", "poisson", "abeille"]
     ];
 
     var BODY_DEFS = {
@@ -2642,6 +2767,70 @@
       };
     }
 
+    // Animaux Malin : les 4 jeux ci-dessous partagent la même forme —
+    // l'image de l'animal comme indice (comme "lettres"/"syllabes"), et le
+    // texte en français comme réponse (le rendu générique de renderAnswers
+    // affiche déjà n'importe quel texte, donc aucun rendu dédié requis).
+    function generateAnimalNameProblem(levelIdx) {
+      var pool = ANIMAL_LEVEL_POOL[levelIdx];
+      var targetKey = pool[randInt(0, pool.length - 1)];
+      var targetFr = ANIMAL_DEFS[targetKey].fr;
+      var otherNames = shuffle(pool.filter(function (k) { return k !== targetKey; }).map(function (k) { return ANIMAL_DEFS[k].fr; })).slice(0, 2);
+      var choices = shuffle(otherNames.concat([targetFr]));
+      return {
+        kind: "animalname",
+        pictureKey: targetKey,
+        emoji: ANIMAL_DEFS[targetKey].emoji,
+        answer: targetFr,
+        choices: choices
+      };
+    }
+
+    function generateBabiesProblem(levelIdx) {
+      var pool = ANIMAL_BABY_LEVEL_POOL[levelIdx];
+      var targetKey = pool[randInt(0, pool.length - 1)];
+      var targetBaby = ANIMAL_BABY_DEFS[targetKey].baby;
+      var otherBabies = shuffle(pool.filter(function (k) { return k !== targetKey; }).map(function (k) { return ANIMAL_BABY_DEFS[k].baby; })).slice(0, 2);
+      var choices = shuffle(otherBabies.concat([targetBaby]));
+      return {
+        kind: "babies",
+        pictureKey: targetKey,
+        emoji: ANIMAL_BABY_DEFS[targetKey].emoji,
+        answer: targetBaby,
+        choices: choices
+      };
+    }
+
+    function generateHabitatProblem(levelIdx) {
+      var pool = ANIMAL_HABITAT_LEVEL_POOL[levelIdx];
+      var targetKey = pool[randInt(0, pool.length - 1)];
+      var targetHabitat = ANIMAL_HABITAT_DEFS[targetKey].habitat;
+      var otherHabitats = shuffle(pool.filter(function (k) { return k !== targetKey; }).map(function (k) { return ANIMAL_HABITAT_DEFS[k].habitat; })).slice(0, 2);
+      var choices = shuffle(otherHabitats.concat([targetHabitat]));
+      return {
+        kind: "habitat",
+        pictureKey: targetKey,
+        emoji: ANIMAL_HABITAT_DEFS[targetKey].emoji,
+        answer: targetHabitat,
+        choices: choices
+      };
+    }
+
+    function generateDietProblem(levelIdx) {
+      var pool = ANIMAL_DIET_LEVEL_POOL[levelIdx];
+      var targetKey = pool[randInt(0, pool.length - 1)];
+      var targetFood = ANIMAL_DIET_DEFS[targetKey].food;
+      var otherFoods = shuffle(pool.filter(function (k) { return k !== targetKey; }).map(function (k) { return ANIMAL_DIET_DEFS[k].food; })).slice(0, 2);
+      var choices = shuffle(otherFoods.concat([targetFood]));
+      return {
+        kind: "diet",
+        pictureKey: targetKey,
+        emoji: ANIMAL_DIET_DEFS[targetKey].emoji,
+        answer: targetFood,
+        choices: choices
+      };
+    }
+
     function generateBodyProblem(levelIdx) {
       var pool = BODY_LEVEL_POOL[levelIdx];
       var targetKey = pool[randInt(0, pool.length - 1)];
@@ -2795,6 +2984,18 @@
       if (p1.kind === "rhymes" || p2.kind === "rhymes") {
         return p1.kind === "rhymes" && p2.kind === "rhymes" && p1.wordKey === p2.wordKey;
       }
+      if (p1.kind === "animalname" || p2.kind === "animalname") {
+        return p1.kind === "animalname" && p2.kind === "animalname" && p1.pictureKey === p2.pictureKey;
+      }
+      if (p1.kind === "babies" || p2.kind === "babies") {
+        return p1.kind === "babies" && p2.kind === "babies" && p1.pictureKey === p2.pictureKey;
+      }
+      if (p1.kind === "habitat" || p2.kind === "habitat") {
+        return p1.kind === "habitat" && p2.kind === "habitat" && p1.pictureKey === p2.pictureKey;
+      }
+      if (p1.kind === "diet" || p2.kind === "diet") {
+        return p1.kind === "diet" && p2.kind === "diet" && p1.pictureKey === p2.pictureKey;
+      }
       if (p1.ops.length !== p2.ops.length || p1.terms.length !== p2.terms.length) return false;
       for (var i = 0; i < p1.ops.length; i++) {
         if (p1.ops[i] !== p2.ops[i]) return false;
@@ -2823,6 +3024,18 @@
       }
       if (state.mode === "body") {
         return generateBodyProblem(levelIdx);
+      }
+      if (state.mode === "animalname") {
+        return generateAnimalNameProblem(levelIdx);
+      }
+      if (state.mode === "babies") {
+        return generateBabiesProblem(levelIdx);
+      }
+      if (state.mode === "habitat") {
+        return generateHabitatProblem(levelIdx);
+      }
+      if (state.mode === "diet") {
+        return generateDietProblem(levelIdx);
       }
       if (state.mode === "instruments") {
         return generateInstrumentsProblem(levelIdx);
@@ -2884,6 +3097,7 @@
       menuLire: document.getElementById("menuLire"),
       menuPeinture: document.getElementById("menuPeinture"),
       menuMusique: document.getElementById("menuMusique"),
+      menuAnimaux: document.getElementById("menuAnimaux"),
       categoryCards: document.querySelectorAll(".category-card"),
       calcBackBtn: document.getElementById("calcBackBtn"),
       terms2BackBtn: document.getElementById("terms2BackBtn"),
@@ -2892,6 +3106,7 @@
       lireBackBtn: document.getElementById("lireBackBtn"),
       peintureBackBtn: document.getElementById("peintureBackBtn"),
       musiqueBackBtn: document.getElementById("musiqueBackBtn"),
+      animauxBackBtn: document.getElementById("animauxBackBtn"),
       colorsCard: document.getElementById("colorsCard"),
       animalsCard: document.getElementById("animalsCard"),
       bodyCard: document.getElementById("bodyCard"),
@@ -2906,6 +3121,10 @@
       instrumentsCard: document.getElementById("instrumentsCard"),
       rythmeCard: document.getElementById("rythmeCard"),
       pitchCard: document.getElementById("pitchCard"),
+      animalNameCard: document.getElementById("animalNameCard"),
+      babiesCard: document.getElementById("babiesCard"),
+      habitatCard: document.getElementById("habitatCard"),
+      dietCard: document.getElementById("dietCard"),
       modeCards: document.querySelectorAll(".mode-card"),
       levelPill: document.getElementById("levelPill"),
       levelNum: document.getElementById("levelNum"),
@@ -3098,7 +3317,7 @@
         return;
       }
 
-      if (p.kind === "letters" || p.kind === "syllables") {
+      if (p.kind === "letters" || p.kind === "syllables" || p.kind === "animalname" || p.kind === "babies" || p.kind === "habitat" || p.kind === "diet") {
         els.problem.removeAttribute("data-terms");
         var pic = document.createElement("span");
         pic.className = "picture-prompt emoji";
@@ -3954,6 +4173,7 @@
       if (mode === "reading" || mode === "letters" || mode === "syllables" || mode === "rhymes") return "lire";
       if (isPaintMode(mode)) return "peinture";
       if (mode === "musiquelibre" || mode === "instruments" || mode === "pitch" || mode === "rythme") return "musique";
+      if (mode === "animalname" || mode === "babies" || mode === "habitat" || mode === "diet") return "animaux";
       return null;
     }
 
@@ -3966,6 +4186,7 @@
       els.menuLire.hidden = screen !== "lire";
       els.menuPeinture.hidden = screen !== "peinture";
       els.menuMusique.hidden = screen !== "musique";
+      els.menuAnimaux.hidden = screen !== "animaux";
     }
 
     // Vers quel écran de menu revenir avec le bouton retour Android, pour
@@ -3977,7 +4198,8 @@
       anglais: "home",
       lire: "home",
       peinture: "home",
-      musique: "home"
+      musique: "home",
+      animaux: "home"
     };
 
     function currentMenuScreen() {
@@ -3988,6 +4210,7 @@
       if (!els.menuLire.hidden) return "lire";
       if (!els.menuPeinture.hidden) return "peinture";
       if (!els.menuMusique.hidden) return "musique";
+      if (!els.menuAnimaux.hidden) return "animaux";
       return "home";
     }
 
@@ -4075,6 +4298,10 @@
     els.instrumentsCard.addEventListener("click", function () { selectMode("instruments"); });
     els.rythmeCard.addEventListener("click", function () { selectMode("rythme"); });
     els.pitchCard.addEventListener("click", function () { selectMode("pitch"); });
+    els.animalNameCard.addEventListener("click", function () { selectMode("animalname"); });
+    els.babiesCard.addEventListener("click", function () { selectMode("babies"); });
+    els.habitatCard.addEventListener("click", function () { selectMode("habitat"); });
+    els.dietCard.addEventListener("click", function () { selectMode("diet"); });
     els.calcBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
     els.terms2BackBtn.addEventListener("click", function () { showMenuScreen("calc"); });
     els.terms3BackBtn.addEventListener("click", function () { showMenuScreen("calc"); });
@@ -4082,6 +4309,7 @@
     els.lireBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
     els.peintureBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
     els.musiqueBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
+    els.animauxBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
 
     els.levelNum.addEventListener("click", function () {
       if (!state.mode) return;
