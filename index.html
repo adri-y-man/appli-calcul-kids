@@ -1466,6 +1466,30 @@
     .brush-size-btn { width: 1.7rem; height: 1.7rem; }
     .paint-palette { gap: 0.3rem; }
     .paint-tools { gap: 0.3rem; }
+
+    /* Écrans "Bravo !" / "Tu as gagné !" / "Recommencer ?" : leurs tailles
+       de police étaient pensées en vw (largeur), correctes en portrait
+       mais bien trop grandes une fois la hauteur très réduite en paysage
+       — le contenu dépassait alors de l'écran. On repasse en vh comme le
+       reste de ce bloc, et on ajoute un défilement de secours au cas où
+       ça ne suffise toujours pas (même filet de sécurité que .menu-overlay
+       ci-dessus). */
+    .celebrate-overlay {
+      overflow-y: auto;
+      padding: clamp(0.6rem, 3vh, 1rem) clamp(0.8rem, 3vw, 1.2rem);
+    }
+    .celebrate-panel {
+      gap: 0.3rem;
+      padding: clamp(0.8rem, 4vh, 1.2rem) clamp(1rem, 4vw, 1.5rem);
+    }
+    .celebrate-badge { font-size: clamp(1.8rem, 9vh, 2.6rem); }
+    .celebrate-title { font-size: clamp(1.15rem, 6vh, 1.5rem); }
+    .celebrate-sub { font-size: clamp(0.85rem, 3.6vh, 1rem); }
+    .celebrate-btn {
+      margin-top: 0.3rem;
+      padding: 0.5rem 1.1rem;
+      font-size: clamp(0.85rem, 3.4vh, 1rem);
+    }
   }
 </style>
 
