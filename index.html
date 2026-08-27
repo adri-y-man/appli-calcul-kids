@@ -793,6 +793,11 @@
       --fs-op: clamp(2.35rem, 12.3vw, 3.6rem);
       gap: clamp(0.08rem, 0.5vw, 0.2rem);
     }
+
+    /* le titre "Calcul Malin" est sinon trop collé au logo/nom de l'appli
+       en haut de l'écran, dans ce menu qui a moins d'air au-dessus du
+       titre que les autres sous-menus. */
+    #menuCalc .menu-header { margin-top: 1.6rem; }
   }
 
   .answer-btn {
@@ -1280,6 +1285,29 @@
     opacity: 0.9;
   }
 
+  /* ---------- Calcul Malin : "Compte les objets" / "Plus grand ou plus
+     petit ?" / "Complète la suite", alignées comme les tuiles de
+     .category-card (gauche, même taille d'emoji, sans sous-titre) plutôt
+     que comme les tuiles .mode-wide (centrées, sous-titre) ---------- */
+
+  .mode-flat {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.9rem;
+    text-align: left;
+    padding: clamp(1.1rem, 4.5vw, 1.6rem) clamp(3.4rem, 10vw, 4.2rem) clamp(1.1rem, 4.5vw, 1.6rem) clamp(1.2rem, 4.5vw, 1.6rem);
+    border-radius: clamp(1.3rem, 4vw, 1.8rem);
+    font-size: clamp(1.15rem, 4.6vw, 1.5rem);
+  }
+
+  .mode-flat .icon { font-size: clamp(2.2rem, 8vw, 2.8rem); flex: none; }
+
+  .mode-flat[data-mode="count"] { background: linear-gradient(135deg, #ffc93c, #f2994a); }
+  .mode-flat[data-mode="compare"] { background: linear-gradient(135deg, #598ce6, #3454d1); }
+  .mode-flat[data-mode="sequence"] { background: linear-gradient(135deg, #43b98a, #2a9d6f); }
+
   .category-grid {
     width: 100%;
     display: flex;
@@ -1455,6 +1483,12 @@
 
     .mode-costaud .icon,
     .mode-wide .icon { font-size: clamp(1rem, 4vh, 1.3rem); }
+
+    .mode-flat {
+      padding: clamp(0.45rem, 2vh, 0.7rem) 0.8rem;
+      font-size: clamp(0.85rem, 3.4vh, 1.05rem);
+    }
+    .mode-flat .icon { font-size: clamp(1.3rem, 5vh, 1.6rem); }
 
     .category-grid { gap: clamp(0.35rem, 1.6vh, 0.5rem); }
     .category-card {
@@ -1747,7 +1781,7 @@
       </div>
       <div class="category-grid">
         <button class="category-card" type="button" data-category="2">
-          <span class="icon emoji">🧮</span>
+          <span class="icon emoji">➕</span>
           <span>Calculs à 2 termes</span>
           <span class="level-badge">GS-CE1</span>
         </button>
@@ -1757,19 +1791,19 @@
           <span class="level-badge">CE1-CE2</span>
         </button>
       </div>
-      <button class="mode-card mode-wide" type="button" data-mode="count">
+      <button class="mode-card mode-flat" type="button" data-mode="count">
         <span class="icon emoji">🍎</span>
-        <span class="costaud-text">Compte les objets<span class="costaud-sub">combien y en a-t-il ?</span></span>
+        <span>Compte les objets</span>
         <span class="level-badge">PS-MS</span>
       </button>
-      <button class="mode-card mode-wide" type="button" data-mode="compare">
+      <button class="mode-card mode-flat" type="button" data-mode="compare">
         <span class="icon emoji">⚖️</span>
-        <span class="costaud-text">Plus grand ou plus petit ?<span class="costaud-sub">trouve le bon nombre</span></span>
+        <span>Plus grand ou plus petit ?</span>
         <span class="level-badge">MS-GS</span>
       </button>
-      <button class="mode-card mode-wide" type="button" data-mode="sequence">
+      <button class="mode-card mode-flat" type="button" data-mode="sequence">
         <span class="icon emoji">🔢</span>
-        <span class="costaud-text">Complète la suite<span class="costaud-sub">quel nombre manque ?</span></span>
+        <span>Complète la suite</span>
         <span class="level-badge">GS-CE1</span>
       </button>
     </div>
