@@ -584,10 +584,10 @@
 
   .paint-palette {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     justify-content: center;
-    gap: clamp(0.5rem, 2vw, 0.8rem);
+    gap: clamp(0.3rem, 1.5vw, 0.8rem);
     max-width: 30rem;
   }
 
@@ -595,8 +595,9 @@
     appearance: none;
     border: 3px solid rgba(31, 42, 60, 0.25);
     cursor: pointer;
-    width: clamp(2.4rem, 8vw, 3.1rem);
-    height: clamp(2.4rem, 8vw, 3.1rem);
+    flex: none;
+    width: clamp(1.9rem, 7.5vw, 3.1rem);
+    height: clamp(1.9rem, 7.5vw, 3.1rem);
     border-radius: 50%;
     box-shadow: 0 6px 14px -8px rgba(31, 42, 60, 0.5);
     transition: transform 0.12s ease;
