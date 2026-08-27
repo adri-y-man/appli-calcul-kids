@@ -2202,16 +2202,23 @@
       pig: { en: "Pig", fr: "COCHON", emoji: "🐷", photo: "cochon" },
       sheep: { en: "Sheep", fr: "MOUTON", emoji: "🐑", photo: "mouton" },
       lion: { en: "Lion", fr: "LION", emoji: "🦁", photo: "lion" },
-      elephant: { en: "Elephant", fr: "ÉLÉPHANT", emoji: "🐘", photo: "elephant" }
+      elephant: { en: "Elephant", fr: "ÉLÉPHANT", emoji: "🐘", photo: "elephant" },
+      giraffe: { en: "Giraffe", fr: "GIRAFE", emoji: "🦒" },
+      zebra: { en: "Zebra", fr: "ZÈBRE", emoji: "🦓" },
+      monkey: { en: "Monkey", fr: "SINGE", emoji: "🐒" },
+      tiger: { en: "Tiger", fr: "TIGRE", emoji: "🐯" },
+      polarbear: { en: "Polar bear", fr: "OURS POLAIRE", emoji: "🐻‍❄️" }
     };
     // Le lot d'animaux disponibles s'agrandit à chaque niveau, comme pour
-    // les couleurs.
+    // les couleurs. Les animaux de savane/jungle n'arrivent qu'au niveau
+    // max, comme lion/éléphant avant eux : ce sont les plus exotiques.
     var ANIMAL_LEVEL_POOL = [
       ["cat", "dog", "cow", "duck"],
       ["cat", "dog", "cow", "duck", "horse", "rabbit"],
       ["cat", "dog", "cow", "duck", "horse", "rabbit", "bird", "fish"],
       ["cat", "dog", "cow", "duck", "horse", "rabbit", "bird", "fish", "pig", "sheep"],
-      ["cat", "dog", "cow", "duck", "horse", "rabbit", "bird", "fish", "pig", "sheep", "lion", "elephant"]
+      ["cat", "dog", "cow", "duck", "horse", "rabbit", "bird", "fish", "pig", "sheep", "lion", "elephant",
+        "giraffe", "zebra", "monkey", "tiger", "polarbear"]
     ];
 
     // Animaux Malin — "Maman et son petit" : chaque parent a un nom de
@@ -2229,14 +2236,17 @@
       lion: { emoji: "🦁", baby: "LIONCEAU", photo: "lion" },
       ours: { emoji: "🐻", baby: "OURSON", photo: "ours" },
       chevre: { emoji: "🐐", baby: "CHEVREAU", photo: "chevre" },
-      grenouille: { emoji: "🐸", baby: "TÊTARD" }
+      grenouille: { emoji: "🐸", baby: "TÊTARD" },
+      girafe: { emoji: "🦒", baby: "GIRAFON" },
+      tigre: { emoji: "🐯", baby: "TIGREAU" }
     };
     var ANIMAL_BABY_LEVEL_POOL = [
       ["vache", "chien", "chat", "poule"],
       ["vache", "chien", "chat", "poule", "cheval", "mouton"],
       ["vache", "chien", "chat", "poule", "cheval", "mouton", "canard", "cochon"],
       ["vache", "chien", "chat", "poule", "cheval", "mouton", "canard", "cochon", "lion", "ours"],
-      ["vache", "chien", "chat", "poule", "cheval", "mouton", "canard", "cochon", "lion", "ours", "chevre", "grenouille"]
+      ["vache", "chien", "chat", "poule", "cheval", "mouton", "canard", "cochon", "lion", "ours", "chevre", "grenouille",
+        "girafe", "tigre"]
     ];
 
     // Animaux Malin — "Où habite cet animal ?" : chaque habitat est unique
@@ -2253,14 +2263,16 @@
       poule: { emoji: "🐔", habitat: "POULAILLER", photo: "poule" },
       fourmi: { emoji: "🐜", habitat: "FOURMILIÈRE" },
       renne: { emoji: "🦌", habitat: "TOUNDRA" },
-      chauvesouris: { emoji: "🦇", habitat: "GROTTE" }
+      chauvesouris: { emoji: "🦇", habitat: "GROTTE" },
+      tigre: { emoji: "🐯", habitat: "JUNGLE" }
     };
     var ANIMAL_HABITAT_LEVEL_POOL = [
       ["poisson", "ourspolaire", "singe", "vache"],
       ["poisson", "ourspolaire", "singe", "vache", "chameau", "lion"],
       ["poisson", "ourspolaire", "singe", "vache", "chameau", "lion", "grenouille", "abeille"],
       ["poisson", "ourspolaire", "singe", "vache", "chameau", "lion", "grenouille", "abeille", "poule", "fourmi"],
-      ["poisson", "ourspolaire", "singe", "vache", "chameau", "lion", "grenouille", "abeille", "poule", "fourmi", "renne", "chauvesouris"]
+      ["poisson", "ourspolaire", "singe", "vache", "chameau", "lion", "grenouille", "abeille", "poule", "fourmi", "renne", "chauvesouris",
+        "tigre"]
     ];
 
     // Animaux Malin — "Que mange cet animal ?" : chaque régime alimentaire
@@ -2277,14 +2289,16 @@
       elephant: { emoji: "🐘", food: "FEUILLES", photo: "elephant" },
       ecureuil: { emoji: "🐿️", food: "NOISETTES" },
       poisson: { emoji: "🐟", food: "ALGUES", photo: "poisson" },
-      abeille: { emoji: "🐝", food: "NECTAR" }
+      abeille: { emoji: "🐝", food: "NECTAR" },
+      ourspolaire: { emoji: "🐻‍❄️", food: "POISSON" }
     };
     var ANIMAL_DIET_LEVEL_POOL = [
       ["vache", "lion", "lapin", "souris"],
       ["vache", "lion", "lapin", "souris", "ours", "oiseau"],
       ["vache", "lion", "lapin", "souris", "ours", "oiseau", "singe", "chat"],
       ["vache", "lion", "lapin", "souris", "ours", "oiseau", "singe", "chat", "elephant", "ecureuil"],
-      ["vache", "lion", "lapin", "souris", "ours", "oiseau", "singe", "chat", "elephant", "ecureuil", "poisson", "abeille"]
+      ["vache", "lion", "lapin", "souris", "ours", "oiseau", "singe", "chat", "elephant", "ecureuil", "poisson", "abeille",
+        "ourspolaire"]
     ];
 
     var BODY_DEFS = {
