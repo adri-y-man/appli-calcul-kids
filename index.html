@@ -354,6 +354,24 @@
     line-height: 1;
   }
 
+  /* ---------- jeu "Animaux" (Anglais Malin) : vraie photo au lieu de
+     l'emoji dans les boutons de réponse ---------- */
+
+  .photo-btn {
+    padding: 0.3rem;
+    display: flex;
+  }
+
+  .answer-btn-photo {
+    width: 100%;
+    height: 100%;
+    min-height: 3.6rem;
+    object-fit: cover;
+    border-radius: clamp(0.9rem, 3vw, 1.5rem);
+    display: block;
+    border: 3px solid rgba(255, 255, 255, 0.85);
+  }
+
   /* ---------- jeu des chiffres en anglais : objets répétés à compter ---------- */
 
   .count-btn {
@@ -3779,8 +3797,18 @@
           var def = ANIMAL_DEFS[key];
           var btn = document.createElement("button");
           btn.type = "button";
-          btn.className = "answer-btn picture-btn emoji " + animalPalette[idx % animalPalette.length];
-          btn.textContent = def.emoji;
+          var animalPhotoList = def.photo ? ANIMAL_PHOTOS[def.photo] : null;
+          if (animalPhotoList && animalPhotoList.length) {
+            btn.className = "answer-btn photo-btn " + animalPalette[idx % animalPalette.length];
+            var animalPhoto = document.createElement("img");
+            animalPhoto.className = "answer-btn-photo";
+            animalPhoto.src = animalPhotoList[randInt(0, animalPhotoList.length - 1)];
+            animalPhoto.alt = "";
+            btn.appendChild(animalPhoto);
+          } else {
+            btn.className = "answer-btn picture-btn emoji " + animalPalette[idx % animalPalette.length];
+            btn.textContent = def.emoji;
+          }
           btn.setAttribute("data-value", key);
           btn.setAttribute("aria-label", "Répondre " + def.en);
           btn.addEventListener("click", function () { onAnswer(key, btn); });
