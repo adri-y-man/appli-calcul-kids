@@ -372,8 +372,8 @@
 
   .picture-prompt-photo {
     display: block;
-    width: clamp(9rem, 40vw, 14rem);
-    height: clamp(9rem, 40vw, 14rem);
+    width: clamp(10.5rem, 46vw, 16.5rem);
+    height: clamp(10.5rem, 46vw, 16.5rem);
     object-fit: cover;
     border-radius: 1.5rem;
     box-shadow: 0 14px 26px -14px rgba(31, 42, 60, 0.45);
@@ -1467,6 +1467,12 @@
     .brush-size-btn { width: 1.7rem; height: 1.7rem; }
     .paint-palette { gap: 0.3rem; }
     .paint-tools { gap: 0.3rem; }
+
+    /* Photo/emoji d'Animaux Malin, Lire Malin... : dimensionnées en vw
+       (largeur), elles débordent une fois la hauteur très réduite en
+       paysage. On repasse en vh comme le reste de ce bloc. */
+    .picture-prompt-photo { width: clamp(6rem, 30vh, 9rem); height: clamp(6rem, 30vh, 9rem); }
+    .picture-prompt { font-size: clamp(3.2rem, 26vh, 5.5rem); }
 
     /* Écrans "Bravo !" / "Tu as gagné !" / "Recommencer ?" : leurs tailles
        de police étaient pensées en vw (largeur), correctes en portrait
