@@ -2707,7 +2707,7 @@
     // Mots courts et très courants d'abord, mots plus longs (2-3 syllabes,
     // moins fréquents) ajoutés progressivement au fil des niveaux.
     var WORD_LEVEL_POOL = [
-      ["chat", "chien", "velo", "ballon"],
+      ["chat", "chien", "velo", "ballon", "maison", "soleil"],
       ["chat", "chien", "velo", "ballon", "maison", "bateau", "gateau", "soleil"],
       ["chat", "chien", "velo", "ballon", "maison", "bateau", "gateau", "soleil", "lapin", "canard", "cheval", "oiseau"],
       ["chat", "chien", "velo", "ballon", "maison", "bateau", "gateau", "soleil", "lapin", "canard", "cheval", "oiseau",
@@ -3308,7 +3308,7 @@
     // "Remets les syllabes" : comme "Reforme le mot", mais avec des
     // morceaux de syllabes au lieu de lettres isolées, pour des mots plus
     // longs (progressivement 2 puis 3 syllabes selon le niveau).
-    var SYLLABLE_WORDS = {
+    var SYLLORDRE_WORDS = {
       chat2: { emoji: "🐱", syllables: ["CHA", "TON"] },
       ballon: { emoji: "⚽", syllables: ["BAL", "LON"] },
       bateau: { emoji: "⛵", syllables: ["BA", "TEAU"] },
@@ -3328,13 +3328,13 @@
       elephant2: { emoji: "🐘", syllables: ["É", "LÉ", "PHANT"] },
       escargot: { emoji: "🐌", syllables: ["ES", "CAR", "GOT"] }
     };
-    var SYLLABLE_LEVEL_POOL = [
+    var SYLLORDRE_LEVEL_POOL = [
       ["chat2", "ballon", "bateau", "gateau"],
       ["chat2", "ballon", "bateau", "gateau", "soleil", "lapin", "canard", "cheval"],
       ["chat2", "ballon", "bateau", "gateau", "soleil", "lapin", "canard", "cheval", "robot", "fusee", "tomate", "banane", "chateau"],
       ["chat2", "ballon", "bateau", "gateau", "soleil", "lapin", "canard", "cheval", "robot", "fusee", "tomate", "banane", "chateau",
         "papillon", "crocodile"],
-      Object.keys(SYLLABLE_WORDS)
+      Object.keys(SYLLORDRE_WORDS)
     ];
 
     // "Trace la lettre" : formes simplifiées (viewBox 0 0 200 200), pensées
@@ -3403,6 +3403,12 @@
       spellUnits: [],
       spellFillIndex: 0,
       spellEmoji: "",
+      lastMotKey: "",
+      lastSyllordreKey: "",
+      motBag: [],
+      motBagPool: null,
+      syllordreBag: [],
+      syllordreBagPool: null,
       traceLetter: ""
     };
 
@@ -5810,7 +5816,7 @@
     // syllabes selon le mode) qu'il faut toucher dans le bon ordre pour
     // reconstituer le mot.
     function currentSpellPool(levelIdx) {
-      return state.mode === "syllordre" ? SYLLABLE_LEVEL_POOL[levelIdx] : WORD_LEVEL_POOL[levelIdx];
+      return state.mode === "syllordre" ? SYLLORDRE_LEVEL_POOL[levelIdx] : WORD_LEVEL_POOL[levelIdx];
     }
 
     function renderSpellScreen() {
@@ -5833,12 +5839,37 @@
       });
     }
 
+    // Pioche dans une "pile mélangée" (comme un jeu de cartes qu'on
+    // rebrasse une fois épuisé) plutôt qu'un tirage indépendant à chaque
+    // fois : garantit qu'un mot ne revient jamais avant que tous les
+    // autres du niveau ne soient passés, y compris juste après un
+    // rebrassage (le mot qui vient de sortir ne peut pas rouvrir la
+    // pile suivante).
+    function drawSpellKey(pool, bagField, bagPoolField, lastKeyField) {
+      if (state[bagPoolField] !== pool || state[bagField].length === 0) {
+        var bag = shuffle(pool.slice());
+        if (bag.length > 1 && bag[0] === state[lastKeyField]) {
+          var swapIdx = 1 + randInt(0, bag.length - 2);
+          var tmp = bag[0];
+          bag[0] = bag[swapIdx];
+          bag[swapIdx] = tmp;
+        }
+        state[bagField] = bag;
+        state[bagPoolField] = pool;
+      }
+      return state[bagField].shift();
+    }
+
     function startSpellProblem() {
       var levelIdx = Math.min(Math.max(state.level, MIN_LEVEL), MAX_LEVEL) - 1;
       var pool = currentSpellPool(levelIdx);
-      var key = pool[randInt(0, pool.length - 1)];
       var isSyll = state.mode === "syllordre";
-      var def = isSyll ? SYLLABLE_WORDS[key] : WORD_DEFS[key];
+      var lastKeyField = isSyll ? "lastSyllordreKey" : "lastMotKey";
+      var key = isSyll
+        ? drawSpellKey(pool, "syllordreBag", "syllordreBagPool", lastKeyField)
+        : drawSpellKey(pool, "motBag", "motBagPool", lastKeyField);
+      state[lastKeyField] = key;
+      var def = isSyll ? SYLLORDRE_WORDS[key] : WORD_DEFS[key];
       state.spellKey = key;
       state.spellUnits = isSyll ? def.syllables.slice() : def.word.toUpperCase().split("");
       state.spellFillIndex = 0;
