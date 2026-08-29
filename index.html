@@ -780,6 +780,89 @@
 
   .rhythm-pad:disabled { cursor: default; }
 
+  /* ---------- Mémoire Malin : "Paires cachées" ---------- */
+
+  .memory-screen {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.6rem, 2.2vw, 1rem);
+    min-height: 0;
+    width: 100%;
+  }
+
+  .memory-screen[hidden] { display: none; }
+
+  .memory-board {
+    --memory-columns: 4;
+    display: grid;
+    grid-template-columns: repeat(var(--memory-columns), 1fr);
+    gap: clamp(0.4rem, 2vw, 0.8rem);
+    width: min(92vw, 30rem);
+    max-height: 100%;
+    overflow-y: auto;
+  }
+
+  .memory-card {
+    appearance: none;
+    border: none;
+    padding: 0;
+    background: none;
+    cursor: pointer;
+    aspect-ratio: 1;
+    perspective: 60rem;
+  }
+
+  .memory-card-inner {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.4s cubic-bezier(0.4, 0.2, 0.2, 1);
+    transform-style: preserve-3d;
+  }
+
+  .memory-card.flipped .memory-card-inner,
+  .memory-card.matched .memory-card-inner {
+    transform: rotateY(180deg);
+  }
+
+  .memory-card-face {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backface-visibility: hidden;
+    border-radius: clamp(0.7rem, 2.6vw, 1.2rem);
+    box-shadow: 0 8px 16px -10px rgba(31, 42, 60, 0.5);
+  }
+
+  .memory-card-back {
+    background: linear-gradient(135deg, var(--candy-blue), var(--candy-teal));
+  }
+
+  .memory-card-back::after {
+    content: "?";
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: clamp(1.2rem, 5.5vw, 2rem);
+  }
+
+  .memory-card-front {
+    background: var(--white);
+    transform: rotateY(180deg);
+    font-size: clamp(1.4rem, 6.5vw, 2.4rem);
+  }
+
+  .memory-card.matched .memory-card-front {
+    background: var(--green-add-light);
+  }
+
+  .memory-card:disabled { cursor: default; }
+
   /* mobile portrait : on pousse encore les tailles pour profiter de l'écran étroit et haut */
   @media (max-width: 640px) and (orientation: portrait) {
     :root {
@@ -1380,6 +1463,7 @@
   .category-card-animals { background: linear-gradient(135deg, #f2994a, #d9724c); }
   .category-card-numbers { background: linear-gradient(135deg, #4fb3e8, #3d7fe0); }
   .category-card-body { background: linear-gradient(135deg, #8e5ce6, #6a4c93); }
+  .category-card-paires { background: linear-gradient(135deg, #33c2c2, #598ce6); }
 
   #menuHome .category-grid {
     display: grid;
@@ -1557,6 +1641,21 @@
       height: clamp(4.5rem, 24vh, 7rem);
     }
 
+    /* "Paires cachées" (Mémoire Malin) : jusqu'à 5 rangées de cartes au
+       niveau max, pensées pour la largeur disponible en portrait. En
+       paysage c'est la hauteur qui manque, donc on fixe la taille des
+       cartes en vh (colonnes non extensibles) plutôt que de les laisser
+       s'étirer sur toute la largeur. */
+    .memory-board {
+      grid-template-columns: repeat(var(--memory-columns), clamp(2rem, 9vh, 3.4rem));
+      justify-content: center;
+      width: auto;
+      gap: clamp(0.25rem, 1.2vh, 0.5rem);
+    }
+    .memory-card-face { border-radius: clamp(0.3rem, 1.2vh, 0.55rem); }
+    .memory-card-back::after { font-size: clamp(0.8rem, 3.5vh, 1.3rem); }
+    .memory-card-front { font-size: clamp(0.9rem, 4vh, 1.5rem); }
+
     /* Écrans "Bravo !" / "Tu as gagné !" / "Recommencer ?" : leurs tailles
        de police étaient pensées en vw (largeur), correctes en portrait
        mais bien trop grandes une fois la hauteur très réduite en paysage
@@ -1635,6 +1734,11 @@
   <section class="rhythm-screen" id="rhythmScreen" hidden>
     <p class="rhythm-feedback" id="rhythmFeedback" aria-live="polite"></p>
     <div class="rhythm-pads" id="rhythmPads"></div>
+  </section>
+
+  <section class="memory-screen" id="memoryScreen" hidden>
+    <p class="rhythm-feedback" id="memoryFeedback" aria-live="polite"></p>
+    <div class="memory-board" id="memoryBoard"></div>
   </section>
 
   <div class="menu-overlay" id="menuOverlay">
@@ -1760,6 +1864,21 @@
             </svg>
           </span>
           <span class="app-icon-label">Animaux Malin</span>
+        </button>
+        <button class="category-card category-card-app" type="button" data-category="memoire">
+          <span class="app-icon-tile">
+            <svg viewBox="0 0 120 120" aria-hidden="true">
+              <rect x="4" y="4" width="112" height="112" rx="30" fill="#fff8ee" />
+              <rect x="16" y="30" width="38" height="52" rx="10" fill="#33c2c2" />
+              <circle cx="26" cy="42" r="3" fill="#fff" opacity="0.7" />
+              <circle cx="44" cy="42" r="3" fill="#fff" opacity="0.7" />
+              <circle cx="26" cy="70" r="3" fill="#fff" opacity="0.7" />
+              <circle cx="44" cy="70" r="3" fill="#fff" opacity="0.7" />
+              <rect x="66" y="30" width="38" height="52" rx="10" fill="#fff8ee" stroke="#ef5da8" stroke-width="4.5" />
+              <polygon points="85,44 89,54 100,54 91,61 94,72 85,65 76,72 79,61 70,54 81,54" fill="#ef5da8" />
+            </svg>
+          </span>
+          <span class="app-icon-label">Mémoire Malin</span>
         </button>
       </div>
       <div class="fox-walk-lane" aria-hidden="true">
@@ -1990,6 +2109,24 @@
           <span class="icon emoji">🥕</span>
           <span>Que mange cet animal ?</span>
           <span class="level-badge">GS-CP</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="menu-panel" id="menuMemoire" hidden>
+      <div class="menu-header">
+        <button class="menu-back" id="memoireBackBtn" type="button" aria-label="Retour">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 4 L7 12 L15 20" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+        <h1 class="menu-title">Mémoire Malin</h1>
+      </div>
+      <div class="category-grid">
+        <button class="category-card category-card-paires" type="button" id="pairesCard">
+          <span class="icon emoji">🃏</span>
+          <span>Paires cachées</span>
+          <span class="level-badge">PS-GS</span>
         </button>
       </div>
     </div>
@@ -2748,6 +2885,18 @@
     ];
     var RHYTHM_LEVELS = { length: [2, 3, 4, 5, 6] };
 
+    // "Paires cachées" : un lot de 10 symboles distincts, dans lequel on
+    // pioche le nombre de paires demandé par le niveau (les niveaux les
+    // plus faciles n'utilisent donc pas toujours les mêmes symboles d'une
+    // partie à l'autre). Le nombre de colonnes est choisi pour que le
+    // plateau reste un joli rectangle plutôt qu'une dernière ligne à moitié
+    // vide.
+    var MEMORY_SYMBOL_POOL = ["🐱", "🐶", "⚽", "☀️", "🐰", "🦆", "🐟", "🤖", "🚀", "🍌"];
+    var MEMORY_LEVELS = {
+      pairs: [3, 4, 6, 8, 10],
+      columns: [3, 4, 4, 4, 4]
+    };
+
     // Calcul costaud : 3 termes, 2 opérations tirées indépendamment (donc
     // potentiellement différentes) parmi +, −, ×, ÷, enchaînées de gauche à
     // droite. Chaque étape est bornée pour rester positive, entière, et sous
@@ -2776,7 +2925,10 @@
       drawing: false,
       rhythmSequence: [],
       rhythmInputIndex: 0,
-      rhythmLocked: true
+      rhythmLocked: true,
+      memoryCards: [],
+      memoryFlipped: [],
+      memoryLocked: false
     };
 
     var PROGRESS_KEY = "calculMalinProgress";
@@ -3406,6 +3558,7 @@
       menuPeinture: document.getElementById("menuPeinture"),
       menuMusique: document.getElementById("menuMusique"),
       menuAnimaux: document.getElementById("menuAnimaux"),
+      menuMemoire: document.getElementById("menuMemoire"),
       categoryCards: document.querySelectorAll(".category-card"),
       calcBackBtn: document.getElementById("calcBackBtn"),
       terms2BackBtn: document.getElementById("terms2BackBtn"),
@@ -3415,6 +3568,7 @@
       peintureBackBtn: document.getElementById("peintureBackBtn"),
       musiqueBackBtn: document.getElementById("musiqueBackBtn"),
       animauxBackBtn: document.getElementById("animauxBackBtn"),
+      memoireBackBtn: document.getElementById("memoireBackBtn"),
       colorsCard: document.getElementById("colorsCard"),
       animalsCard: document.getElementById("animalsCard"),
       bodyCard: document.getElementById("bodyCard"),
@@ -3433,6 +3587,7 @@
       babiesCard: document.getElementById("babiesCard"),
       habitatCard: document.getElementById("habitatCard"),
       dietCard: document.getElementById("dietCard"),
+      pairesCard: document.getElementById("pairesCard"),
       modeCards: document.querySelectorAll(".mode-card"),
       levelPill: document.getElementById("levelPill"),
       levelNum: document.getElementById("levelNum"),
@@ -3456,6 +3611,9 @@
       rhythmScreen: document.getElementById("rhythmScreen"),
       rhythmPads: document.getElementById("rhythmPads"),
       rhythmFeedback: document.getElementById("rhythmFeedback"),
+      memoryScreen: document.getElementById("memoryScreen"),
+      memoryBoard: document.getElementById("memoryBoard"),
+      memoryFeedback: document.getElementById("memoryFeedback"),
       levelUpOverlay: document.getElementById("levelUpOverlay"),
       levelUpNum: document.getElementById("levelUpNum"),
       levelUpConfetti: document.getElementById("levelUpConfetti"),
@@ -4552,6 +4710,112 @@
       }
     }
 
+    function renderMemoryBoard() {
+      var levelIdx = Math.min(Math.max(state.level, MIN_LEVEL), MAX_LEVEL) - 1;
+      els.memoryBoard.style.setProperty("--memory-columns", MEMORY_LEVELS.columns[levelIdx]);
+      els.memoryBoard.innerHTML = "";
+      state.memoryCards.forEach(function (card, idx) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "memory-card";
+        btn.setAttribute("aria-label", "Carte " + (idx + 1));
+        var inner = document.createElement("span");
+        inner.className = "memory-card-inner";
+        var back = document.createElement("span");
+        back.className = "memory-card-face memory-card-back";
+        var front = document.createElement("span");
+        front.className = "memory-card-face memory-card-front emoji";
+        front.textContent = card.symbol;
+        inner.appendChild(back);
+        inner.appendChild(front);
+        btn.appendChild(inner);
+        btn.addEventListener("click", function () { onMemoryCardTap(idx); });
+        els.memoryBoard.appendChild(btn);
+      });
+    }
+
+    function startMemoryProblem() {
+      var levelIdx = Math.min(Math.max(state.level, MIN_LEVEL), MAX_LEVEL) - 1;
+      var pairsCount = MEMORY_LEVELS.pairs[levelIdx];
+      var chosenSymbols = shuffle(MEMORY_SYMBOL_POOL.slice()).slice(0, pairsCount);
+      var cards = shuffle(chosenSymbols.concat(chosenSymbols)).map(function (symbol) {
+        return { symbol: symbol, matched: false };
+      });
+      state.memoryCards = cards;
+      state.memoryFlipped = [];
+      state.memoryLocked = false;
+      els.memoryFeedback.textContent = "";
+      renderMemoryBoard();
+      saveProgress();
+    }
+
+    function onMemoryCardTap(idx) {
+      if (state.memoryLocked) return;
+      var card = state.memoryCards[idx];
+      if (card.matched || state.memoryFlipped.indexOf(idx) !== -1) return;
+
+      state.memoryFlipped.push(idx);
+      var cardEl = els.memoryBoard.children[idx];
+      if (cardEl) cardEl.classList.add("flipped");
+      if (state.memoryFlipped.length < 2) return;
+
+      state.memoryLocked = true;
+      var i1 = state.memoryFlipped[0];
+      var i2 = state.memoryFlipped[1];
+      var isMatch = state.memoryCards[i1].symbol === state.memoryCards[i2].symbol;
+
+      if (isMatch) {
+        state.memoryCards[i1].matched = true;
+        state.memoryCards[i2].matched = true;
+        var el1 = els.memoryBoard.children[i1];
+        var el2 = els.memoryBoard.children[i2];
+        if (el1) el1.classList.add("matched");
+        if (el2) el2.classList.add("matched");
+        state.memoryFlipped = [];
+        state.memoryLocked = false;
+        if (state.memoryCards.every(function (c) { return c.matched; })) onMemoryWin();
+        return;
+      }
+
+      // Pas de pénalité, comme "Répète le rythme" : on laisse juste le temps
+      // de regarder les 2 cartes avant de les retourner face cachée.
+      window.setTimeout(function () {
+        var elA = els.memoryBoard.children[i1];
+        var elB = els.memoryBoard.children[i2];
+        if (elA) elA.classList.remove("flipped");
+        if (elB) elB.classList.remove("flipped");
+        state.memoryFlipped = [];
+        state.memoryLocked = false;
+      }, 900);
+    }
+
+    function onMemoryWin() {
+      state.memoryLocked = true;
+      state.wrongStreak = 0;
+      state.correctStreak++;
+      var leveledUp = false;
+      var justWon = false;
+      if (state.correctStreak >= starsToLevelUp(state.mode)) {
+        if (state.level < MAX_LEVEL) {
+          state.level++;
+          leveledUp = true;
+        } else {
+          justWon = true;
+        }
+        state.correctStreak = 0;
+      }
+      if (!leveledUp && !justWon) renderLevel();
+      saveProgress();
+      els.memoryFeedback.textContent = "Bravo ! Toutes les paires trouvées ! 🎉";
+      if (leveledUp) {
+        window.setTimeout(function () { showLevelUp(state.level); }, 1100);
+      } else if (justWon) {
+        window.setTimeout(showWin, 1100);
+      } else {
+        window.setTimeout(startMemoryProblem, 1400);
+      }
+    }
+
     var CONFETTI_COLORS = ["var(--green-add)", "var(--orange-sub)", "var(--candy-blue)", "var(--candy-pink)", "var(--gold)"];
 
     function spawnConfetti(container, count) {
@@ -4599,6 +4863,7 @@
       if (isPaintMode(mode)) return "peinture";
       if (mode === "musiquelibre" || mode === "instruments" || mode === "pitch" || mode === "rythme") return "musique";
       if (mode === "animalname" || mode === "babies" || mode === "habitat" || mode === "diet") return "animaux";
+      if (mode === "paires") return "memoire";
       return null;
     }
 
@@ -4612,6 +4877,7 @@
       els.menuPeinture.hidden = screen !== "peinture";
       els.menuMusique.hidden = screen !== "musique";
       els.menuAnimaux.hidden = screen !== "animaux";
+      els.menuMemoire.hidden = screen !== "memoire";
     }
 
     // Vers quel écran de menu revenir avec le bouton retour Android, pour
@@ -4624,7 +4890,8 @@
       lire: "home",
       peinture: "home",
       musique: "home",
-      animaux: "home"
+      animaux: "home",
+      memoire: "home"
     };
 
     function currentMenuScreen() {
@@ -4636,6 +4903,7 @@
       if (!els.menuPeinture.hidden) return "peinture";
       if (!els.menuMusique.hidden) return "musique";
       if (!els.menuAnimaux.hidden) return "animaux";
+      if (!els.menuMemoire.hidden) return "memoire";
       return "home";
     }
 
@@ -4666,11 +4934,13 @@
       var paint = isPaintMode(mode);
       var music = mode === "musiquelibre";
       var rhythm = mode === "rythme";
-      els.problemZone.hidden = paint || music || rhythm;
-      els.answers.hidden = paint || music || rhythm;
+      var memory = mode === "paires";
+      els.problemZone.hidden = paint || music || rhythm || memory;
+      els.answers.hidden = paint || music || rhythm || memory;
       els.paintScreen.hidden = !paint;
       els.musicScreen.hidden = !music;
       els.rhythmScreen.hidden = !rhythm;
+      els.memoryScreen.hidden = !memory;
       els.levelPill.hidden = mode === "dessine" || music;
       if (paint) {
         state.problem = null;
@@ -4686,6 +4956,11 @@
       if (rhythm) {
         state.problem = null;
         startRhythmProblem();
+        return;
+      }
+      if (memory) {
+        state.problem = null;
+        startMemoryProblem();
         return;
       }
 
@@ -4727,6 +5002,7 @@
     els.babiesCard.addEventListener("click", function () { selectMode("babies"); });
     els.habitatCard.addEventListener("click", function () { selectMode("habitat"); });
     els.dietCard.addEventListener("click", function () { selectMode("diet"); });
+    els.pairesCard.addEventListener("click", function () { selectMode("paires"); });
     els.calcBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
     els.terms2BackBtn.addEventListener("click", function () { showMenuScreen("calc"); });
     els.terms3BackBtn.addEventListener("click", function () { showMenuScreen("calc"); });
@@ -4735,6 +5011,7 @@
     els.peintureBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
     els.musiqueBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
     els.animauxBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
+    els.memoireBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
 
     els.levelNum.addEventListener("click", function () {
       if (!state.mode) return;
@@ -4753,14 +5030,14 @@
       state.locked = false;
       renderLevel();
       saveProgress();
-      if (isPaintMode(state.mode)) { startPaintProblem(); } else if (state.mode === "rythme") { startRhythmProblem(); } else { nextProblem(); }
+      if (isPaintMode(state.mode)) { startPaintProblem(); } else if (state.mode === "rythme") { startRhythmProblem(); } else if (state.mode === "paires") { startMemoryProblem(); } else { nextProblem(); }
     });
 
     els.levelUpContinueBtn.addEventListener("click", function () {
       els.levelUpOverlay.hidden = true;
       setThemeColor(THEME_COLOR_BAR);
       renderLevel();
-      if (isPaintMode(state.mode)) { startPaintProblem(); } else if (state.mode === "rythme") { startRhythmProblem(); } else { nextProblem(); }
+      if (isPaintMode(state.mode)) { startPaintProblem(); } else if (state.mode === "rythme") { startRhythmProblem(); } else if (state.mode === "paires") { startMemoryProblem(); } else { nextProblem(); }
     });
 
     els.winReplayBtn.addEventListener("click", function () {
@@ -4771,7 +5048,7 @@
       state.wrongStreak = 0;
       renderLevel();
       saveProgress();
-      if (isPaintMode(state.mode)) { startPaintProblem(); } else if (state.mode === "rythme") { startRhythmProblem(); } else { nextProblem(); }
+      if (isPaintMode(state.mode)) { startPaintProblem(); } else if (state.mode === "rythme") { startRhythmProblem(); } else if (state.mode === "paires") { startMemoryProblem(); } else { nextProblem(); }
     });
 
     els.winMenuBtn.addEventListener("click", function () {
