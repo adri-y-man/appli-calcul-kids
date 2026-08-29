@@ -5976,7 +5976,45 @@
       saveProgress();
     }
 
+    // Vérifie que le tracé suit à peu près les pointillés du guide, plutôt
+    // que de valider n'importe quoi dès que le bouton est touché : on
+    // échantillonne des points le long du vrai tracé SVG (getPointAtLength,
+    // gère nativement les lettres à plusieurs traits comme "T" ou "A") et on
+    // regarde s'il y a de l'encre à proximité de chacun, avec une tolérance
+    // large pour rester adapté à un tout petit qui trace encore mal.
+    function hasTracedLetter() {
+      if (!traceCtx || !els.traceGuidePath.getTotalLength) return true;
+      var totalLength = els.traceGuidePath.getTotalLength();
+      if (!totalLength) return true;
+      var scale = TRACE_CANVAS_SIZE / 200;
+      var radius = 45;
+      var sampleCount = 24;
+      var data = traceCtx.getImageData(0, 0, TRACE_CANVAS_SIZE, TRACE_CANVAS_SIZE).data;
+      function hasInkNear(cx, cy) {
+        var minX = Math.max(0, Math.floor(cx - radius));
+        var maxX = Math.min(TRACE_CANVAS_SIZE - 1, Math.ceil(cx + radius));
+        var minY = Math.max(0, Math.floor(cy - radius));
+        var maxY = Math.min(TRACE_CANVAS_SIZE - 1, Math.ceil(cy + radius));
+        for (var y = minY; y <= maxY; y += 4) {
+          for (var x = minX; x <= maxX; x += 4) {
+            if (data[(y * TRACE_CANVAS_SIZE + x) * 4 + 3] > 40) return true;
+          }
+        }
+        return false;
+      }
+      var covered = 0;
+      for (var i = 0; i < sampleCount; i++) {
+        var pt = els.traceGuidePath.getPointAtLength((i / (sampleCount - 1)) * totalLength);
+        if (hasInkNear(pt.x * scale, pt.y * scale)) covered++;
+      }
+      return covered / sampleCount >= 0.65;
+    }
+
     function onTraceDone() {
+      if (!hasTracedLetter()) {
+        els.traceFeedback.textContent = "Essaie encore, en suivant bien les pointillés ! ✏️";
+        return;
+      }
       state.wrongStreak = 0;
       state.correctStreak++;
       var leveledUp = false;
