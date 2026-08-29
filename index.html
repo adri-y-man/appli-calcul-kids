@@ -250,6 +250,30 @@
 
   .max-badge[hidden] { display: none; }
 
+  /* ---------- message bravo/réessaie des jeux "écran personnalisé"
+     (rythme, suite lumineuse, retiens l'ordre, paires cachées, trace la
+     lettre) : calé juste sous le bloc des étoiles, dans une pastille bien
+     visible plutôt qu'un simple texte flottant au milieu de l'écran. ---------- */
+
+  .game-feedback {
+    flex: 0 0 auto;
+    align-self: center;
+    max-width: 90vw;
+    margin: 0;
+    padding: 0.45rem 1.2rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 8px 16px -10px rgba(31, 42, 60, 0.45);
+    text-align: center;
+    font-size: clamp(1.15rem, 5vw, 1.6rem);
+    font-weight: 900;
+    color: var(--correct);
+  }
+
+  .game-feedback[hidden] { display: none; }
+
+  .game-feedback[data-tone="wrong"] { color: var(--wrong); }
+
   /* ---------- problem ---------- */
 
   .problem-zone {
@@ -804,16 +828,6 @@
   }
 
   .rhythm-screen[hidden] { display: none; }
-
-  .rhythm-feedback {
-    min-height: 1.6rem;
-    margin: 0;
-    text-align: center;
-    font-size: clamp(1rem, 4vw, 1.3rem);
-    font-weight: 800;
-    color: var(--correct);
-    text-shadow: 0 2px 0 rgba(255, 255, 255, 0.6);
-  }
 
   .rhythm-pads {
     display: grid;
@@ -1802,6 +1816,8 @@
       padding: calc(env(safe-area-inset-top) + 0.25rem) clamp(0.8rem, 3vw, 1.2rem) 0.35rem;
     }
 
+    .game-feedback { font-size: clamp(0.85rem, 6vh, 1.15rem); padding: 0.3rem 0.9rem; }
+
     .answer-btn { min-height: 2.6rem; }
 
     .menu-overlay {
@@ -1967,6 +1983,7 @@
     </div>
   </header>
   <p class="max-badge" id="maxBadge" hidden><span class="emoji">🌟</span> Niveau maximum atteint</p>
+  <p class="game-feedback" id="gameFeedback" aria-live="polite"></p>
 
   <main class="problem-zone" id="problemZone">
     <div class="problem" id="problem"></div>
@@ -1996,22 +2013,18 @@
   </section>
 
   <section class="rhythm-screen" id="rhythmScreen" hidden>
-    <p class="rhythm-feedback" id="rhythmFeedback" aria-live="polite"></p>
     <div class="rhythm-pads" id="rhythmPads"></div>
   </section>
 
   <section class="memory-screen" id="memoryScreen" hidden>
-    <p class="rhythm-feedback" id="memoryFeedback" aria-live="polite"></p>
     <div class="memory-board" id="memoryBoard"></div>
   </section>
 
   <section class="rhythm-screen" id="suitelumScreen" hidden>
-    <p class="rhythm-feedback" id="suitelumFeedback" aria-live="polite"></p>
     <div class="rhythm-pads" id="suitelumPads"></div>
   </section>
 
   <section class="rhythm-screen" id="ordreScreen" hidden>
-    <p class="rhythm-feedback" id="ordreFeedback" aria-live="polite"></p>
     <div class="ordre-board" id="ordreBoard"></div>
   </section>
 
@@ -2022,7 +2035,6 @@
   </section>
 
   <section class="trace-screen" id="traceScreen" hidden>
-    <p class="rhythm-feedback" id="traceFeedback" aria-live="polite"></p>
     <div class="trace-stage" id="traceStage">
       <svg class="trace-guide" id="traceGuide" viewBox="0 0 200 200" aria-hidden="true">
         <path id="traceGuidePath" d="" fill="none" stroke="rgba(31, 42, 60, 0.32)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 15"/>
@@ -4206,6 +4218,7 @@
       levelNum: document.getElementById("levelNum"),
       stars: document.getElementById("stars"),
       maxBadge: document.getElementById("maxBadge"),
+      gameFeedback: document.getElementById("gameFeedback"),
       problemZone: document.getElementById("problemZone"),
       problem: document.getElementById("problem"),
       feedback: document.getElementById("feedback"),
@@ -4223,22 +4236,17 @@
       musicStage: document.getElementById("musicStage"),
       rhythmScreen: document.getElementById("rhythmScreen"),
       rhythmPads: document.getElementById("rhythmPads"),
-      rhythmFeedback: document.getElementById("rhythmFeedback"),
       memoryScreen: document.getElementById("memoryScreen"),
       memoryBoard: document.getElementById("memoryBoard"),
-      memoryFeedback: document.getElementById("memoryFeedback"),
       suitelumScreen: document.getElementById("suitelumScreen"),
       suitelumPads: document.getElementById("suitelumPads"),
-      suitelumFeedback: document.getElementById("suitelumFeedback"),
       ordreScreen: document.getElementById("ordreScreen"),
       ordreBoard: document.getElementById("ordreBoard"),
-      ordreFeedback: document.getElementById("ordreFeedback"),
       spellScreen: document.getElementById("spellScreen"),
       spellPic: document.getElementById("spellPic"),
       spellSlots: document.getElementById("spellSlots"),
       spellTiles: document.getElementById("spellTiles"),
       traceScreen: document.getElementById("traceScreen"),
-      traceFeedback: document.getElementById("traceFeedback"),
       traceStage: document.getElementById("traceStage"),
       traceGuidePath: document.getElementById("traceGuidePath"),
       traceCanvas: document.getElementById("traceCanvas"),
@@ -4708,6 +4716,21 @@
       els.feedback.setAttribute("data-tone", tone || "");
       els.feedbackLine1.innerHTML = line1 ? withEmojiSpans(line1) : "";
       els.feedbackLine2.innerHTML = line2 ? withEmojiSpans(line2) : "";
+    }
+
+    // Message bravo/réessaie partagé par les jeux "écran personnalisé"
+    // (rythme, suite lumineuse, retiens l'ordre, paires cachées, trace la
+    // lettre) : calé juste sous le bloc des étoiles plutôt que centré au
+    // milieu de l'écran (position qui variait selon la hauteur du jeu), et
+    // coloré selon la réussite plutôt qu'en vert dans tous les cas.
+    function setGameFeedback(text, tone) {
+      els.gameFeedback.textContent = text || "";
+      if (text) {
+        els.gameFeedback.setAttribute("data-tone", tone || "correct");
+        els.gameFeedback.hidden = false;
+      } else {
+        els.gameFeedback.hidden = true;
+      }
     }
 
     function renderAnswers() {
@@ -5459,7 +5482,7 @@
     function playRhythmSequence() {
       state.rhythmLocked = true;
       state.rhythmInputIndex = 0;
-      els.rhythmFeedback.textContent = "";
+      setGameFeedback("");
       var seq = state.rhythmSequence;
       seq.forEach(function (padIdx, i) {
         window.setTimeout(function () { flashRhythmPad(padIdx); }, 500 + i * 700);
@@ -5490,7 +5513,7 @@
       // Pas de pénalité : on réécoute simplement la même séquence depuis le
       // début, dans le même esprit que "Peins comme le modèle".
       state.rhythmLocked = true;
-      els.rhythmFeedback.textContent = "On réécoute ! 🎧";
+      setGameFeedback("On réécoute ! 🎧", "wrong");
       window.setTimeout(playRhythmSequence, 900);
     }
 
@@ -5511,7 +5534,7 @@
       }
       if (!leveledUp && !justWon) renderLevel();
       saveProgress();
-      els.rhythmFeedback.textContent = "Bravo ! Bien joué ! 🎉";
+      setGameFeedback("Bravo ! Bien joué ! 🎉", "correct");
       if (leveledUp) {
         window.setTimeout(function () { showLevelUp(state.level); }, 1100);
       } else if (justWon) {
@@ -5546,7 +5569,7 @@
     function playSuitelumSequence() {
       state.suitelumLocked = true;
       state.suitelumInputIndex = 0;
-      els.suitelumFeedback.textContent = "";
+      setGameFeedback("");
       var seq = state.suitelumSequence;
       seq.forEach(function (padIdx, i) {
         window.setTimeout(function () { flashSuitelumPad(padIdx); }, 500 + i * 650);
@@ -5576,7 +5599,7 @@
       }
       // Pas de pénalité : on rejoue simplement la même séquence depuis le début.
       state.suitelumLocked = true;
-      els.suitelumFeedback.textContent = "On regarde encore ! 👀";
+      setGameFeedback("On regarde encore ! 👀", "wrong");
       window.setTimeout(playSuitelumSequence, 900);
     }
 
@@ -5597,7 +5620,7 @@
       }
       if (!leveledUp && !justWon) renderLevel();
       saveProgress();
-      els.suitelumFeedback.textContent = "Bravo ! Bien joué ! 🎉";
+      setGameFeedback("Bravo ! Bien joué ! 🎉", "correct");
       if (leveledUp) {
         window.setTimeout(function () { showLevelUp(state.level); }, 1100);
       } else if (justWon) {
@@ -5656,7 +5679,7 @@
       state.memoryCards = cards;
       state.memoryFlipped = [];
       state.memoryLocked = false;
-      els.memoryFeedback.textContent = "";
+      setGameFeedback("");
       renderMemoryBoard();
       saveProgress();
     }
@@ -5718,7 +5741,7 @@
       }
       if (!leveledUp && !justWon) renderLevel();
       saveProgress();
-      els.memoryFeedback.textContent = "Bravo ! Toutes les paires trouvées ! 🎉";
+      setGameFeedback("Bravo ! Toutes les paires trouvées ! 🎉", "correct");
       if (leveledUp) {
         window.setTimeout(function () { showLevelUp(state.level); }, 1100);
       } else if (justWon) {
@@ -5756,7 +5779,7 @@
     function playOrdreFlash() {
       state.ordreLocked = true;
       state.ordreInputIndex = 0;
-      els.ordreFeedback.textContent = "";
+      setGameFeedback("");
       renderOrdreBoard(state.ordreSequence);
       var seq = state.ordreSequence;
       seq.forEach(function (sym, i) {
@@ -5789,7 +5812,7 @@
       // Pas de pénalité : on rejoue simplement la même séquence depuis le début.
       state.ordreLocked = true;
       btn.classList.add("shake");
-      els.ordreFeedback.textContent = "On regarde encore ! 👀";
+      setGameFeedback("On regarde encore ! 👀", "wrong");
       window.setTimeout(playOrdreFlash, 900);
     }
 
@@ -5810,7 +5833,7 @@
       }
       if (!leveledUp && !justWon) renderLevel();
       saveProgress();
-      els.ordreFeedback.textContent = "Bravo ! Bien joué ! 🎉";
+      setGameFeedback("Bravo ! Bien joué ! 🎉", "correct");
       if (leveledUp) {
         window.setTimeout(function () { showLevelUp(state.level); }, 1100);
       } else if (justWon) {
@@ -5979,7 +6002,7 @@
       var pool = TRACE_LEVEL_POOL[levelIdx];
       state.traceLetter = pool[randInt(0, pool.length - 1)];
       els.traceGuidePath.setAttribute("d", TRACE_LETTER_PATHS[state.traceLetter]);
-      els.traceFeedback.textContent = "";
+      setGameFeedback("");
       clearTraceCanvas();
       saveProgress();
     }
@@ -6038,7 +6061,7 @@
 
     function onTraceDone() {
       if (!hasTracedLetter()) {
-        els.traceFeedback.textContent = "Essaie encore, en suivant bien les pointillés ! ✏️";
+        setGameFeedback("Essaie encore, en suivant bien les pointillés ! ✏️", "wrong");
         return;
       }
       state.wrongStreak = 0;
@@ -6056,7 +6079,7 @@
       }
       if (!leveledUp && !justWon) renderLevel();
       saveProgress();
-      els.traceFeedback.textContent = "Bravo ! Bien tracé ! 🎉";
+      setGameFeedback("Bravo ! Bien tracé ! 🎉", "correct");
       if (leveledUp) {
         window.setTimeout(function () { showLevelUp(state.level); }, 900);
       } else if (justWon) {
@@ -6184,6 +6207,7 @@
       closeMenu();
       setThemeColor(THEME_COLOR_BAR);
       renderLevel();
+      setGameFeedback("");
 
       var paint = isPaintMode(mode);
       var music = mode === "musiquelibre";
