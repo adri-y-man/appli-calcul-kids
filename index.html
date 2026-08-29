@@ -1127,10 +1127,6 @@
       gap: clamp(0.08rem, 0.5vw, 0.2rem);
     }
 
-    /* le titre "Calcul Malin" est sinon trop collé au logo/nom de l'appli
-       en haut de l'écran, dans ce menu qui a moins d'air au-dessus du
-       titre que les autres sous-menus. */
-    #menuCalc .menu-header { margin-top: 1.6rem; }
   }
 
   .answer-btn {
@@ -1404,11 +1400,17 @@
     inset: 0;
     z-index: 20;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    padding: clamp(1rem, 4vw, 2rem) clamp(1rem, 4vw, 2rem) clamp(5rem, 16vh, 8rem);
+    padding: clamp(6rem, 20vh, 9.5rem) clamp(1rem, 4vw, 2rem) clamp(5rem, 16vh, 8rem);
+    overflow-y: auto;
     background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 100%);
   }
+
+  /* l'écran d'accueil (choix de la section) reste centré verticalement,
+     contrairement aux sous-menus qui se calent tous au même niveau,
+     un peu sous le titre de l'appli, pour être uniformes entre eux. */
+  #menuHome { align-self: center; }
 
   .menu-overlay[hidden] { display: none; }
 
@@ -1805,6 +1807,11 @@
       padding: clamp(2.6rem, 13vh, 3.4rem) clamp(0.6rem, 3vw, 1rem) clamp(0.6rem, 3vh, 1rem);
       overflow-y: auto;
     }
+
+    /* trop peu de hauteur pour se permettre de centrer l'accueil comme en
+       portrait : il redevient calé en haut (et défilable) comme les
+       sous-menus, sinon son contenu déborderait de l'écran. */
+    #menuHome { align-self: flex-start; }
 
     /* trop peu de hauteur pour laisser le renard se promener sans gêner
        le contenu du menu, qui défile déjà dans cet espace réduit. */
