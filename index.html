@@ -3629,21 +3629,14 @@
 
       if (p.kind === "rhymes") {
         els.problem.removeAttribute("data-terms");
-        var rhymeBtn = document.createElement("button");
-        rhymeBtn.type = "button";
-        rhymeBtn.className = "color-word";
-        rhymeBtn.setAttribute("aria-label", "Écouter le mot " + p.word);
+        var rhymeWord = document.createElement("span");
+        rhymeWord.className = "color-word reading-word";
         var rhymeText = document.createElement("span");
         rhymeText.className = "color-word-text";
         rhymeText.textContent = p.word;
-        var rhymeIcon = document.createElement("span");
-        rhymeIcon.className = "color-word-icon";
-        rhymeIcon.textContent = "🔊";
-        rhymeBtn.appendChild(rhymeText);
-        rhymeBtn.appendChild(rhymeIcon);
-        rhymeBtn.addEventListener("click", function () { speakWord(p.word, "fr-FR"); });
-        els.problem.appendChild(rhymeBtn);
-        fitWordText(rhymeBtn, rhymeText);
+        rhymeWord.appendChild(rhymeText);
+        els.problem.appendChild(rhymeWord);
+        fitWordText(rhymeWord, rhymeText);
         els.problem.classList.remove("pop");
         void els.problem.offsetWidth;
         els.problem.classList.add("pop");
@@ -3918,16 +3911,32 @@
 
       if (state.problem.kind === "rhymes") {
         var wordPalette = shuffle(CANDY_COLORS.slice());
+        var pendingRhymeFits = [];
         state.problem.choices.forEach(function (word, idx) {
+          var row = document.createElement("div");
+          row.className = "answer-row";
           var btn = document.createElement("button");
           btn.type = "button";
           btn.className = "answer-btn word-btn " + wordPalette[idx % wordPalette.length];
-          btn.textContent = word;
+          var btnText = document.createElement("span");
+          btnText.className = "answer-btn-text";
+          btnText.textContent = word;
+          btn.appendChild(btnText);
           btn.setAttribute("data-value", word);
           btn.setAttribute("aria-label", "Répondre " + word);
           btn.addEventListener("click", function () { onAnswer(word, btn); });
-          els.answers.appendChild(btn);
+          var listenBtn = document.createElement("button");
+          listenBtn.type = "button";
+          listenBtn.className = "answer-listen-btn";
+          listenBtn.setAttribute("aria-label", "Écouter le mot " + word);
+          listenBtn.textContent = "🔊";
+          listenBtn.addEventListener("click", function () { speakWord(word, "fr-FR"); });
+          row.appendChild(btn);
+          row.appendChild(listenBtn);
+          els.answers.appendChild(row);
+          pendingRhymeFits.push([btn, btnText]);
         });
+        pendingRhymeFits.forEach(function (pair) { fitButtonText(pair[0], pair[1]); });
         return;
       }
 
