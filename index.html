@@ -4612,10 +4612,22 @@
 
       if (p.kind === "compare") {
         els.problem.removeAttribute("data-terms");
-        var instr = document.createElement("span");
-        instr.className = "instruction-prompt";
-        instr.textContent = p.compareMode === "max" ? "Quel est le plus grand nombre ?" : "Quel est le plus petit nombre ?";
-        els.problem.appendChild(instr);
+        var compareLabel = p.compareMode === "max" ? "Plus grand" : "Plus petit";
+        var compareBtn = document.createElement("button");
+        compareBtn.type = "button";
+        compareBtn.className = "color-word";
+        compareBtn.setAttribute("aria-label", "Écouter : " + compareLabel);
+        var compareText = document.createElement("span");
+        compareText.className = "color-word-text";
+        compareText.textContent = compareLabel;
+        var compareIcon = document.createElement("span");
+        compareIcon.className = "color-word-icon";
+        compareIcon.textContent = "🔊";
+        compareBtn.appendChild(compareText);
+        compareBtn.appendChild(compareIcon);
+        compareBtn.addEventListener("click", function () { speakWord(compareLabel, "fr-FR"); });
+        els.problem.appendChild(compareBtn);
+        fitWordText(compareBtn, compareText);
         els.problem.classList.remove("pop");
         void els.problem.offsetWidth;
         els.problem.classList.add("pop");
