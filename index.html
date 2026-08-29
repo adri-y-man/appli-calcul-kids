@@ -3564,9 +3564,30 @@
       textEl.style.whiteSpace = "";
     }
 
+    // "Complète la suite" : 4 nombres à largeur variable (1 ou 2 chiffres)
+    // sur une seule ligne obligatoire (contrairement au calcul costaud, on
+    // ne veut jamais qu'elle passe à la ligne) — on force flex-wrap:nowrap
+    // et on réduit la police jusqu'à ce que la rangée tienne.
+    function fitSequenceRow() {
+      if (typeof window.getComputedStyle !== "function") return;
+      els.problem.style.flexWrap = "nowrap";
+      var maxWidth = Math.min(window.innerWidth || 9999, document.documentElement.clientWidth || 9999) * 0.92;
+      var size = parseFloat(window.getComputedStyle(els.problem).fontSize);
+      if (!size) return;
+      var minSize = 24;
+      var guard = 0;
+      while (els.problem.scrollWidth > maxWidth && size > minSize && guard < 40) {
+        size -= 3;
+        els.problem.style.fontSize = size + "px";
+        guard++;
+      }
+    }
+
     function renderProblem() {
       var p = state.problem;
       els.problem.innerHTML = "";
+      els.problem.style.fontSize = "";
+      els.problem.style.flexWrap = "";
 
       if (p.kind === "colors" || p.kind === "animals" || p.kind === "body") {
         els.problem.removeAttribute("data-terms");
@@ -3748,6 +3769,7 @@
             els.problem.appendChild(seqNumEl);
           }
         });
+        fitSequenceRow();
         els.problem.classList.remove("pop");
         void els.problem.offsetWidth;
         els.problem.classList.add("pop");
