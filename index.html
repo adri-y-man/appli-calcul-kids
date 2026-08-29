@@ -430,6 +430,35 @@
     border: 4px solid var(--white);
   }
 
+  /* ---------- Formes Malin : "Quelle forme ?" (icône pleine dans la
+     zone de question) et "Complète le puzzle" (paire connue/manquante) ---------- */
+
+  .shape-prompt {
+    display: block;
+    width: clamp(9rem, 40vw, 13.5rem);
+    height: clamp(9rem, 40vw, 13.5rem);
+    filter: drop-shadow(0 10px 16px rgba(31, 42, 60, 0.3));
+  }
+
+  .shape-prompt svg { display: block; width: 100%; height: 100%; }
+
+  .puzzle-prompt {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.8rem, 4vw, 1.6rem);
+  }
+
+  .puzzle-slot {
+    display: block;
+    width: clamp(6.5rem, 28vw, 9.5rem);
+    height: clamp(6.5rem, 28vw, 9.5rem);
+  }
+
+  .puzzle-slot svg { display: block; width: 100%; height: 100%; }
+
+  .puzzle-slot-missing { opacity: 0.85; }
+
   /* ---------- jeu "compte les objets" : rangée d'objets à dénombrer ---------- */
 
   .count-objects {
@@ -610,6 +639,34 @@
     grid-template-columns: repeat(2, 1fr);
     grid-auto-rows: 1fr;
     width: 90%;
+  }
+
+  /* ---------- Formes Malin : "Trouve l'intrus" — grille de 4 à 9 formes
+     tactiles, 3 colonnes fixes quel que soit le nombre de cases ---------- */
+
+  .answers.answers-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: 1fr;
+    width: 92%;
+    gap: clamp(0.4rem, 1.8vw, 0.8rem);
+  }
+
+  .shape-icon-btn {
+    width: min(34vw, 10rem);
+    height: min(34vw, 10rem);
+    align-self: center;
+    justify-self: center;
+    padding: 0.4rem;
+    display: flex;
+  }
+
+  .shape-icon-btn svg { display: block; width: 100%; height: 100%; }
+
+  .shape-icon-btn-small {
+    width: min(22vw, 6rem);
+    height: min(22vw, 6rem);
+    padding: 0.3rem;
   }
 
   @media (min-width: 640px) {
@@ -1113,6 +1170,52 @@
     color: var(--white);
     background: var(--green-add);
   }
+
+  /* ---------- Formes Malin : "Remplis la forme" ---------- */
+
+  .fillforme-screen {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.6rem, 2.5vh, 1.1rem);
+    min-height: 0;
+    width: 100%;
+  }
+
+  .fillforme-screen[hidden] { display: none; }
+
+  .fillforme-stage {
+    appearance: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    width: min(72vw, 60vh, 20rem);
+    aspect-ratio: 1;
+    background: var(--white);
+    border-radius: clamp(1rem, 4vw, 1.6rem);
+    box-shadow: 0 12px 24px -14px rgba(31, 42, 60, 0.45);
+    transition: transform 0.1s ease;
+  }
+
+  .fillforme-stage:active { transform: scale(0.97); }
+  .fillforme-stage:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
+
+  .fillforme-stage svg { display: block; width: 100%; height: 100%; }
+
+  .fillforme-fill-rect { transition: transform 0.25s ease; }
+
+  .fillforme-tap-hint {
+    margin: 0;
+    text-align: center;
+    font-weight: 800;
+    font-size: clamp(1rem, 4vw, 1.3rem);
+    color: var(--white);
+    text-shadow: 0 3px 0 rgba(31, 42, 60, 0.25);
+  }
+
+  .fillforme-tap-hint[hidden] { display: none; }
 
   /* mobile portrait : on pousse encore les tailles pour profiter de l'écran étroit et haut */
   @media (max-width: 640px) and (orientation: portrait) {
@@ -1727,6 +1830,11 @@
   .category-card-trace { background: linear-gradient(135deg, #f2994a, #d9724c); }
   .category-card-casse { background: linear-gradient(135deg, #ef5da8, #d9418c); }
   .category-card-syllordre { background: linear-gradient(135deg, #43b98a, #2a9d6f); }
+  .category-card-traceforme { background: linear-gradient(135deg, #33c2c2, #598ce6); }
+  .category-card-shapes { background: linear-gradient(135deg, #f2994a, #e63946); }
+  .category-card-fillforme { background: linear-gradient(135deg, #ef5da8, #8e5ce6); }
+  .category-card-intrus { background: linear-gradient(135deg, #ffc93c, #f2994a); }
+  .category-card-puzzle { background: linear-gradient(135deg, #43b98a, #33c2c2); }
 
   #menuHome .category-grid {
     display: grid;
@@ -2047,6 +2155,19 @@
     </div>
   </section>
 
+  <section class="fillforme-screen" id="fillFormeScreen" hidden>
+    <button type="button" class="fillforme-stage" id="fillFormeStage" aria-label="Touche pour colorier la forme">
+      <svg viewBox="0 0 200 200" aria-hidden="true">
+        <defs><clipPath id="fillFormeClip"></clipPath></defs>
+        <g clip-path="url(#fillFormeClip)">
+          <rect id="fillFormeFillRect" class="fillforme-fill-rect" x="0" y="0" width="200" height="200" />
+        </g>
+        <g id="fillFormeOutline"></g>
+      </svg>
+    </button>
+    <p class="fillforme-tap-hint" id="fillFormeHint">Touche pour colorier !</p>
+  </section>
+
   <div class="menu-overlay" id="menuOverlay">
     <div class="menu-brand">
       <svg class="menu-logo" viewBox="0 0 120 120" aria-hidden="true">
@@ -2206,6 +2327,17 @@
             </svg>
           </span>
           <span class="app-icon-label">Mémoire Malin</span>
+        </button>
+        <button class="category-card category-card-app" type="button" data-category="formes">
+          <span class="app-icon-tile">
+            <svg viewBox="0 0 120 120" aria-hidden="true">
+              <rect x="4" y="4" width="112" height="112" rx="30" fill="#fff8ee" />
+              <circle cx="46" cy="46" r="30" fill="#33c2c2" opacity="0.92" />
+              <rect x="52" y="34" width="46" height="46" rx="14" fill="#ef5da8" opacity="0.92" transform="rotate(-6 75 57)" />
+              <polygon points="46,60 78,92 14,92" fill="#ffd400" opacity="0.92" />
+            </svg>
+          </span>
+          <span class="app-icon-label">Formes Malin</span>
         </button>
       </div>
       <div class="fox-walk-lane" aria-hidden="true">
@@ -2511,6 +2643,44 @@
         <button class="category-card category-card-syllordre" type="button" id="syllordreCard">
           <span class="icon emoji">🏰</span>
           <span>Remets les syllabes</span>
+          <span class="level-badge">CP-CE1</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="menu-panel" id="menuFormes" hidden>
+      <div class="menu-header">
+        <button class="menu-back" id="formesBackBtn" type="button" aria-label="Retour">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 4 L7 12 L15 20" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+        <h1 class="menu-title">Formes Malin</h1>
+      </div>
+      <div class="category-grid">
+        <button class="category-card category-card-traceforme" type="button" id="traceformeCard">
+          <span class="icon emoji">🖍️</span>
+          <span>Trace la forme</span>
+          <span class="level-badge">PS-MS</span>
+        </button>
+        <button class="category-card category-card-shapes" type="button" id="shapesCard">
+          <span class="icon emoji">🔷</span>
+          <span>Quelle forme ?</span>
+          <span class="level-badge">MS-GS</span>
+        </button>
+        <button class="category-card category-card-fillforme" type="button" id="fillFormeCard">
+          <span class="icon emoji">🪣</span>
+          <span>Remplis la forme</span>
+          <span class="level-badge">PS-MS</span>
+        </button>
+        <button class="category-card category-card-intrus" type="button" id="intrusCard">
+          <span class="icon emoji">🔍</span>
+          <span>Trouve l'intrus</span>
+          <span class="level-badge">GS-CP</span>
+        </button>
+        <button class="category-card category-card-puzzle" type="button" id="puzzleCard">
+          <span class="icon emoji">🧩</span>
+          <span>Complète le puzzle</span>
           <span class="level-badge">CP-CE1</span>
         </button>
       </div>
@@ -3396,6 +3566,97 @@
       ["L", "I", "T", "O", "C", "A", "V", "U", "E", "S"]
     ];
 
+    // Formes Malin : géométrie de chaque forme, une seule fois, dans le même
+    // repère (viewBox 0 0 200 200, centre 100,100) que le guide de "Trace la
+    // lettre" — réutilisée telle quelle pour dessiner l'icône pleine (quiz,
+    // pièces de puzzle, grille "trouve l'intrus"), le contour à remplir
+    // (Remplis la forme) et le tracé pointillé (Trace la forme).
+    var SHAPE_DEFS = {
+      rond: { fr: "Rond", type: "circle", cx: 100, cy: 100, r: 76 },
+      carre: { fr: "Carré", type: "rect", x: 24, y: 24, w: 152, h: 152 },
+      triangle: { fr: "Triangle", type: "polygon", points: "100,20 180,164 20,164" },
+      rectangle: { fr: "Rectangle", type: "rect", x: 16, y: 48, w: 168, h: 104 },
+      losange: { fr: "Losange", type: "polygon", points: "100,16 184,100 100,184 16,100" },
+      ovale: { fr: "Ovale", type: "ellipse", cx: 100, cy: 100, rx: 84, ry: 56 },
+      etoile: { fr: "Étoile", type: "polygon", points: "100,20 117.6,75.8 176,75.2 128.6,109.2 147,164.8 100,130 53,164.8 71.4,109.2 24,75.2 82.4,75.8" },
+      hexagone: { fr: "Hexagone", type: "polygon", points: "100,20 169.2,60 169.2,140 100,180 30.8,140 30.8,60" },
+      pentagone: { fr: "Pentagone", type: "polygon", points: "100,20 176,75.2 147,164.8 53,164.8 24,75.2" },
+      coeur: { fr: "Cœur", type: "path", d: "M100 164 C40 120 16 80 16 52 C16 24 40 8 64 8 C84 8 100 24 100 44 C100 24 116 8 136 8 C160 8 184 24 184 52 C184 80 160 120 100 164 Z" }
+    };
+
+    function shapeFillSvgInner(key, fill) {
+      var d = SHAPE_DEFS[key];
+      if (d.type === "circle") return '<circle cx="' + d.cx + '" cy="' + d.cy + '" r="' + d.r + '" fill="' + fill + '"/>';
+      if (d.type === "ellipse") return '<ellipse cx="' + d.cx + '" cy="' + d.cy + '" rx="' + d.rx + '" ry="' + d.ry + '" fill="' + fill + '"/>';
+      if (d.type === "rect") return '<rect x="' + d.x + '" y="' + d.y + '" width="' + d.w + '" height="' + d.h + '" rx="20" fill="' + fill + '"/>';
+      if (d.type === "polygon") return '<polygon points="' + d.points + '" fill="' + fill + '"/>';
+      return '<path d="' + d.d + '" fill="' + fill + '"/>';
+    }
+
+    function shapeOutlineSvgInner(key, stroke, dashed) {
+      var d = SHAPE_DEFS[key];
+      var extra = ' fill="none" stroke="' + stroke + '" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"' + (dashed ? ' stroke-dasharray="6 9"' : '');
+      if (d.type === "circle") return '<circle cx="' + d.cx + '" cy="' + d.cy + '" r="' + d.r + '"' + extra + '/>';
+      if (d.type === "ellipse") return '<ellipse cx="' + d.cx + '" cy="' + d.cy + '" rx="' + d.rx + '" ry="' + d.ry + '"' + extra + '/>';
+      if (d.type === "rect") return '<rect x="' + d.x + '" y="' + d.y + '" width="' + d.w + '" height="' + d.h + '" rx="20"' + extra + '/>';
+      if (d.type === "polygon") return '<polygon points="' + d.points + '"' + extra + '/>';
+      return '<path d="' + d.d + '"' + extra + '/>';
+    }
+
+    // Fond neutre derrière une forme pleine affichée en icône (quiz, grille
+    // "trouve l'intrus", pièces de puzzle) : sans lui, une forme tirée dans
+    // une des couleurs de SHAPE_QUIZ_COLORS peut tomber exactement sur la
+    // même couleur que le fond du bouton-réponse (le turquoise des deux
+    // palettes se recoupe) et devenir invisible. N'est volontairement pas
+    // utilisé pour la pièce de clip de "Remplis la forme" (jamais peinte,
+    // seulement sa géométrie compte) ni pour le tracé au clavier.
+    function shapeIconMarkup(key, fill) {
+      return '<circle cx="100" cy="100" r="94" fill="#fff8ee"/>' + shapeFillSvgInner(key, fill);
+    }
+
+    // Chemin unique (commandes M/L/A) utilisable comme "d" d'un <path> :
+    // c'est ce que veut le guide pointillé de "Trace la forme" (même
+    // élément <path> que "Trace la lettre"), donc les cercles/ellipses
+    // doivent être convertis en deux arcs plutôt que rester des <circle>.
+    function shapeTracePath(key) {
+      var d = SHAPE_DEFS[key];
+      if (d.type === "circle") {
+        return "M" + (d.cx + d.r) + "," + d.cy + " A" + d.r + "," + d.r + " 0 1,0 " + (d.cx - d.r) + "," + d.cy + " A" + d.r + "," + d.r + " 0 1,0 " + (d.cx + d.r) + "," + d.cy + " Z";
+      }
+      if (d.type === "ellipse") {
+        return "M" + (d.cx + d.rx) + "," + d.cy + " A" + d.rx + "," + d.ry + " 0 1,0 " + (d.cx - d.rx) + "," + d.cy + " A" + d.rx + "," + d.ry + " 0 1,0 " + (d.cx + d.rx) + "," + d.cy + " Z";
+      }
+      if (d.type === "rect") {
+        return "M" + d.x + "," + d.y + " L" + (d.x + d.w) + "," + d.y + " L" + (d.x + d.w) + "," + (d.y + d.h) + " L" + d.x + "," + (d.y + d.h) + " Z";
+      }
+      if (d.type === "polygon") {
+        var pts = d.points.split(" ");
+        return "M" + pts[0] + " L" + pts.slice(1).join(" L") + " Z";
+      }
+      return d.d;
+    }
+
+    // Progression partagée par les 5 jeux de Formes Malin : au moins 3
+    // formes dès le niveau 1 (2 distracteurs + la bonne réponse pour les
+    // quiz à 3 choix), jusqu'aux 10 formes définies au niveau 5.
+    var SHAPE_LEVEL_POOL = [
+      ["rond", "carre", "triangle"],
+      ["rond", "carre", "triangle", "rectangle"],
+      ["rond", "carre", "triangle", "rectangle", "losange", "ovale"],
+      ["rond", "carre", "triangle", "rectangle", "losange", "ovale", "etoile", "hexagone"],
+      ["rond", "carre", "triangle", "rectangle", "losange", "ovale", "etoile", "hexagone", "pentagone", "coeur"]
+    ];
+
+    var SHAPE_QUIZ_COLORS = ["#e63946", "#3d7fe0", "#43b98a", "#f2994a", "#8e5ce6", "#ef5da8", "#33c2c2", "#ffd400"];
+
+    // "Trouve l'intrus" : nombre de cases dans la grille pour chaque niveau.
+    var INTRUS_GRID_SIZE = [4, 6, 6, 8, 9];
+
+    // "Remplis la forme" : nombre de touches nécessaires pour remplir
+    // entièrement la forme, croissant avec le niveau.
+    var FILLFORME_TAPS_FOR_LEVEL = [3, 4, 5, 6, 8];
+    var FILLFORME_FILL_COLORS = ["#e63946", "#3d7fe0", "#43b98a", "#f2994a", "#8e5ce6", "#ef5da8"];
+
     // Calcul costaud : 3 termes, 2 opérations tirées indépendamment (donc
     // potentiellement différentes) parmi +, −, ×, ÷, enchaînées de gauche à
     // droite. Chaque étape est bornée pour rester positive, entière, et sous
@@ -3447,7 +3708,23 @@
       syllordreBagPool: null,
       instrumentsBag: [],
       instrumentsBagPool: null,
-      traceLetter: ""
+      traceLetter: "",
+      lastShapeKey: "",
+      shapesBag: [],
+      shapesBagPool: null,
+      lastTraceFormeKey: "",
+      traceFormeBag: [],
+      traceFormeBagPool: null,
+      lastPuzzleKey: "",
+      puzzleBag: [],
+      puzzleBagPool: null,
+      fillFormeKey: "",
+      fillFormeColor: "",
+      fillFormeTaps: 0,
+      fillFormeTapsNeeded: 0,
+      lastFillFormeKey: "",
+      fillFormeBag: [],
+      fillFormeBagPool: null
     };
 
     var PROGRESS_KEY = "calculMalinProgress";
@@ -3835,6 +4112,68 @@
       };
     }
 
+    function generateShapesProblem(levelIdx) {
+      var pool = SHAPE_LEVEL_POOL[levelIdx];
+      var targetKey = drawFromBag(pool, "shapesBag", "shapesBagPool", "lastShapeKey");
+      state.lastShapeKey = targetKey;
+      var distractors = shuffle(pool.filter(function (k) { return k !== targetKey; })).slice(0, 2);
+      var choices = shuffle(distractors.concat([targetKey]));
+      var color = SHAPE_QUIZ_COLORS[randInt(0, SHAPE_QUIZ_COLORS.length - 1)];
+      return {
+        kind: "shapes",
+        shapeKey: targetKey,
+        shapeColor: color,
+        answer: targetKey,
+        choices: choices
+      };
+    }
+
+    // "Trouve l'intrus" : une grille de formes identiques (même forme, même
+    // couleur) sauf une seule, qui a une forme différente — l'enfant doit
+    // taper dessus. La position de l'intrus et la position tirées à part
+    // (pas de pile mélangée ici : la grille change de toute façon à chaque
+    // manche, forme principale ou pas, donc pas le même risque de
+    // répétition perçue que "le même mot deux fois de suite").
+    function generateIntrusProblem(levelIdx) {
+      var pool = SHAPE_LEVEL_POOL[levelIdx];
+      var gridSize = INTRUS_GRID_SIZE[levelIdx];
+      var color = SHAPE_QUIZ_COLORS[randInt(0, SHAPE_QUIZ_COLORS.length - 1)];
+      var mainKey = pool[randInt(0, pool.length - 1)];
+      var others = pool.filter(function (k) { return k !== mainKey; });
+      var oddKey = others[randInt(0, others.length - 1)];
+      var oddIndex = randInt(0, gridSize - 1);
+      var cells = [];
+      for (var i = 0; i < gridSize; i++) cells.push(i === oddIndex ? oddKey : mainKey);
+      return {
+        kind: "intrus",
+        cells: cells,
+        color: color,
+        answer: oddIndex,
+        choices: cells.map(function (_, idx) { return idx; })
+      };
+    }
+
+    // "Complète le puzzle" : une forme pleine à gauche, son contour en
+    // pointillés (la pièce manquante) à droite — l'enfant choisit, parmi 3
+    // formes de la même couleur, celle qui complète la paire. La couleur
+    // est la même sur les 3 choix pour que seule la forme différencie les
+    // réponses (éviter qu'un enfant réponde juste "à la couleur").
+    function generatePuzzleProblem(levelIdx) {
+      var pool = SHAPE_LEVEL_POOL[levelIdx];
+      var targetKey = drawFromBag(pool, "puzzleBag", "puzzleBagPool", "lastPuzzleKey");
+      state.lastPuzzleKey = targetKey;
+      var color = SHAPE_QUIZ_COLORS[randInt(0, SHAPE_QUIZ_COLORS.length - 1)];
+      var distractors = shuffle(pool.filter(function (k) { return k !== targetKey; })).slice(0, 2);
+      var choices = shuffle(distractors.concat([targetKey]));
+      return {
+        kind: "puzzle",
+        shapeKey: targetKey,
+        shapeColor: color,
+        answer: targetKey,
+        choices: choices
+      };
+    }
+
     function generateReadingProblem(levelIdx) {
       var pool = WORD_LEVEL_POOL[levelIdx];
       var targetKey = pool[randInt(0, pool.length - 1)];
@@ -4046,6 +4385,16 @@
       if (p1.kind === "instruments" || p2.kind === "instruments") {
         return p1.kind === "instruments" && p2.kind === "instruments" && p1.instrumentKey === p2.instrumentKey;
       }
+      if (p1.kind === "shapes" || p2.kind === "shapes") {
+        return p1.kind === "shapes" && p2.kind === "shapes" && p1.shapeKey === p2.shapeKey;
+      }
+      if (p1.kind === "intrus" || p2.kind === "intrus") {
+        return p1.kind === "intrus" && p2.kind === "intrus" &&
+          p1.answer === p2.answer && p1.cells.join(",") === p2.cells.join(",");
+      }
+      if (p1.kind === "puzzle" || p2.kind === "puzzle") {
+        return p1.kind === "puzzle" && p2.kind === "puzzle" && p1.shapeKey === p2.shapeKey;
+      }
       if (p1.kind === "reading" || p2.kind === "reading") {
         return p1.kind === "reading" && p2.kind === "reading" && p1.wordKey === p2.wordKey;
       }
@@ -4126,6 +4475,15 @@
       if (state.mode === "instruments") {
         return generateInstrumentsProblem(levelIdx);
       }
+      if (state.mode === "shapes") {
+        return generateShapesProblem(levelIdx);
+      }
+      if (state.mode === "intrus") {
+        return generateIntrusProblem(levelIdx);
+      }
+      if (state.mode === "puzzle") {
+        return generatePuzzleProblem(levelIdx);
+      }
       if (state.mode === "pitch") {
         return generatePitchProblem(levelIdx);
       }
@@ -4198,6 +4556,7 @@
       menuAnimaux: document.getElementById("menuAnimaux"),
       menuMemoire: document.getElementById("menuMemoire"),
       menuEcriture: document.getElementById("menuEcriture"),
+      menuFormes: document.getElementById("menuFormes"),
       categoryCards: document.querySelectorAll(".category-card"),
       calcBackBtn: document.getElementById("calcBackBtn"),
       terms2BackBtn: document.getElementById("terms2BackBtn"),
@@ -4209,6 +4568,7 @@
       animauxBackBtn: document.getElementById("animauxBackBtn"),
       memoireBackBtn: document.getElementById("memoireBackBtn"),
       ecritureBackBtn: document.getElementById("ecritureBackBtn"),
+      formesBackBtn: document.getElementById("formesBackBtn"),
       colorsCard: document.getElementById("colorsCard"),
       animalsCard: document.getElementById("animalsCard"),
       bodyCard: document.getElementById("bodyCard"),
@@ -4237,6 +4597,11 @@
       traceCard: document.getElementById("traceCard"),
       casseCard: document.getElementById("casseCard"),
       syllordreCard: document.getElementById("syllordreCard"),
+      traceformeCard: document.getElementById("traceformeCard"),
+      shapesCard: document.getElementById("shapesCard"),
+      fillFormeCard: document.getElementById("fillFormeCard"),
+      intrusCard: document.getElementById("intrusCard"),
+      puzzleCard: document.getElementById("puzzleCard"),
       modeCards: document.querySelectorAll(".mode-card"),
       levelPill: document.getElementById("levelPill"),
       levelNum: document.getElementById("levelNum"),
@@ -4276,6 +4641,12 @@
       traceCanvas: document.getElementById("traceCanvas"),
       traceClearBtn: document.getElementById("traceClearBtn"),
       traceDoneBtn: document.getElementById("traceDoneBtn"),
+      fillFormeScreen: document.getElementById("fillFormeScreen"),
+      fillFormeStage: document.getElementById("fillFormeStage"),
+      fillFormeOutline: document.getElementById("fillFormeOutline"),
+      fillFormeClipShape: document.getElementById("fillFormeClip"),
+      fillFormeFillRect: document.getElementById("fillFormeFillRect"),
+      fillFormeHint: document.getElementById("fillFormeHint"),
       levelUpOverlay: document.getElementById("levelUpOverlay"),
       levelUpNum: document.getElementById("levelUpNum"),
       levelUpConfetti: document.getElementById("levelUpConfetti"),
@@ -4449,6 +4820,49 @@
         soundBtn.addEventListener("click", function () { playInstrumentSound(p.instrumentKey); });
         els.problem.appendChild(soundBtn);
         fitWordText(soundBtn, soundText);
+        els.problem.classList.remove("pop");
+        void els.problem.offsetWidth;
+        els.problem.classList.add("pop");
+        return;
+      }
+
+      if (p.kind === "shapes") {
+        els.problem.removeAttribute("data-terms");
+        var shapeWrap = document.createElement("span");
+        shapeWrap.className = "shape-prompt";
+        shapeWrap.innerHTML = '<svg viewBox="0 0 200 200" aria-hidden="true">' + shapeIconMarkup(p.shapeKey, p.shapeColor) + "</svg>";
+        els.problem.appendChild(shapeWrap);
+        els.problem.classList.remove("pop");
+        void els.problem.offsetWidth;
+        els.problem.classList.add("pop");
+        return;
+      }
+
+      if (p.kind === "intrus") {
+        els.problem.removeAttribute("data-terms");
+        var intrusPrompt = document.createElement("span");
+        intrusPrompt.className = "instruction-prompt";
+        intrusPrompt.textContent = "Trouve l'intrus !";
+        els.problem.appendChild(intrusPrompt);
+        els.problem.classList.remove("pop");
+        void els.problem.offsetWidth;
+        els.problem.classList.add("pop");
+        return;
+      }
+
+      if (p.kind === "puzzle") {
+        els.problem.removeAttribute("data-terms");
+        var puzzleWrap = document.createElement("div");
+        puzzleWrap.className = "puzzle-prompt";
+        var puzzleKnown = document.createElement("span");
+        puzzleKnown.className = "puzzle-slot";
+        puzzleKnown.innerHTML = '<svg viewBox="0 0 200 200" aria-hidden="true">' + shapeIconMarkup(p.shapeKey, p.shapeColor) + "</svg>";
+        var puzzleMissing = document.createElement("span");
+        puzzleMissing.className = "puzzle-slot puzzle-slot-missing";
+        puzzleMissing.innerHTML = '<svg viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="94" fill="#fff8ee"/>' + shapeOutlineSvgInner(p.shapeKey, "#c7c2b8", true) + "</svg>";
+        puzzleWrap.appendChild(puzzleKnown);
+        puzzleWrap.appendChild(puzzleMissing);
+        els.problem.appendChild(puzzleWrap);
         els.problem.classList.remove("pop");
         void els.problem.offsetWidth;
         els.problem.classList.add("pop");
@@ -4772,6 +5186,7 @@
     function renderAnswers() {
       els.answers.innerHTML = "";
       els.answers.classList.remove("answers-grid-2");
+      els.answers.classList.remove("answers-grid-3");
 
       if (state.problem.kind === "colors") {
         state.problem.choices.forEach(function (key) {
@@ -4857,6 +5272,67 @@
           btn.textContent = def.emoji;
           btn.setAttribute("data-value", key);
           btn.setAttribute("aria-label", "Répondre " + def.fr);
+          btn.addEventListener("click", function () { onAnswer(key, btn); });
+          els.answers.appendChild(btn);
+        });
+        return;
+      }
+
+      if (state.problem.kind === "shapes") {
+        var shapePalette = shuffle(CANDY_COLORS.slice());
+        var pendingShapeFits = [];
+        state.problem.choices.forEach(function (key, idx) {
+          var row = document.createElement("div");
+          row.className = "answer-row";
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "answer-btn word-btn " + shapePalette[idx % shapePalette.length];
+          var btnText = document.createElement("span");
+          btnText.className = "answer-btn-text";
+          btnText.textContent = SHAPE_DEFS[key].fr;
+          btn.appendChild(btnText);
+          btn.setAttribute("data-value", key);
+          btn.setAttribute("aria-label", "Répondre " + SHAPE_DEFS[key].fr);
+          btn.addEventListener("click", function () { onAnswer(key, btn); });
+          var listenBtn = document.createElement("button");
+          listenBtn.type = "button";
+          listenBtn.className = "answer-listen-btn";
+          listenBtn.setAttribute("aria-label", "Écouter " + SHAPE_DEFS[key].fr);
+          listenBtn.textContent = "🔊";
+          listenBtn.addEventListener("click", function () { speakWord(SHAPE_DEFS[key].fr, "fr-FR"); });
+          row.appendChild(btn);
+          row.appendChild(listenBtn);
+          els.answers.appendChild(row);
+          pendingShapeFits.push([btn, btnText]);
+        });
+        pendingShapeFits.forEach(function (pair) { fitButtonText(pair[0], pair[1]); });
+        return;
+      }
+
+      if (state.problem.kind === "intrus") {
+        els.answers.classList.add("answers-grid-3");
+        state.problem.cells.forEach(function (key, idx) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "answer-btn shape-icon-btn shape-icon-btn-small";
+          btn.innerHTML = '<svg viewBox="0 0 200 200" aria-hidden="true">' + shapeIconMarkup(key, state.problem.color) + "</svg>";
+          btn.setAttribute("data-value", idx);
+          btn.setAttribute("aria-label", "Case " + (idx + 1));
+          btn.addEventListener("click", function () { onAnswer(idx, btn); });
+          els.answers.appendChild(btn);
+        });
+        return;
+      }
+
+      if (state.problem.kind === "puzzle") {
+        els.answers.classList.add("answers-grid-2");
+        state.problem.choices.forEach(function (key) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "answer-btn shape-icon-btn";
+          btn.innerHTML = '<svg viewBox="0 0 200 200" aria-hidden="true">' + shapeIconMarkup(key, state.problem.shapeColor) + "</svg>";
+          btn.setAttribute("data-value", key);
+          btn.setAttribute("aria-label", "Répondre " + SHAPE_DEFS[key].fr);
           btn.addEventListener("click", function () { onAnswer(key, btn); });
           els.answers.appendChild(btn);
         });
@@ -5052,6 +5528,12 @@
 
     function isSpellMode(mode) {
       return mode === "mot" || mode === "syllordre";
+    }
+
+    // "Trace la lettre" et "Trace la forme" partagent le même écran/canevas
+    // de traçage : seul le guide affiché change (lettre ou forme).
+    function isTraceMode(mode) {
+      return mode === "trace" || mode === "traceforme";
     }
 
     function currentPaintTemplate() {
@@ -5886,9 +6368,16 @@
 
     function startTraceProblem() {
       var levelIdx = Math.min(Math.max(state.level, MIN_LEVEL), MAX_LEVEL) - 1;
-      var pool = TRACE_LEVEL_POOL[levelIdx];
-      state.traceLetter = pool[randInt(0, pool.length - 1)];
-      els.traceGuidePath.setAttribute("d", TRACE_LETTER_PATHS[state.traceLetter]);
+      if (state.mode === "traceforme") {
+        var shapePool = SHAPE_LEVEL_POOL[levelIdx];
+        state.traceLetter = drawFromBag(shapePool, "traceFormeBag", "traceFormeBagPool", "lastTraceFormeKey");
+        state.lastTraceFormeKey = state.traceLetter;
+        els.traceGuidePath.setAttribute("d", shapeTracePath(state.traceLetter));
+      } else {
+        var pool = TRACE_LEVEL_POOL[levelIdx];
+        state.traceLetter = pool[randInt(0, pool.length - 1)];
+        els.traceGuidePath.setAttribute("d", TRACE_LETTER_PATHS[state.traceLetter]);
+      }
       setGameFeedback("");
       clearTraceCanvas();
       saveProgress();
@@ -5976,6 +6465,66 @@
       }
     }
 
+    // "Remplis la forme" : l'enfant touche l'écran plusieurs fois de suite
+    // (nombre croissant avec le niveau) pour faire "monter" la couleur dans
+    // le contour de la forme, comme un thermomètre qui se remplit — pas
+    // besoin de viser précisément l'intérieur de la forme, toute la scène
+    // est tactile, ce qui reste adapté à un tout petit.
+    function startFillFormeProblem() {
+      var levelIdx = Math.min(Math.max(state.level, MIN_LEVEL), MAX_LEVEL) - 1;
+      var pool = SHAPE_LEVEL_POOL[levelIdx];
+      state.fillFormeKey = drawFromBag(pool, "fillFormeBag", "fillFormeBagPool", "lastFillFormeKey");
+      state.lastFillFormeKey = state.fillFormeKey;
+      state.fillFormeColor = FILLFORME_FILL_COLORS[randInt(0, FILLFORME_FILL_COLORS.length - 1)];
+      state.fillFormeTaps = 0;
+      state.fillFormeTapsNeeded = FILLFORME_TAPS_FOR_LEVEL[levelIdx];
+      els.fillFormeOutline.innerHTML = shapeOutlineSvgInner(state.fillFormeKey, "#1f2a3c", false);
+      els.fillFormeClipShape.innerHTML = shapeFillSvgInner(state.fillFormeKey, "#000");
+      els.fillFormeFillRect.setAttribute("fill", state.fillFormeColor);
+      els.fillFormeFillRect.setAttribute("transform", "translate(0,200)");
+      els.fillFormeHint.hidden = false;
+      els.fillFormeHint.textContent = "Touche pour colorier !";
+      setGameFeedback("");
+      saveProgress();
+    }
+
+    function onFillFormeTap() {
+      if (state.mode !== "fillforme" || state.fillFormeTaps >= state.fillFormeTapsNeeded) return;
+      state.fillFormeTaps++;
+      var pct = state.fillFormeTaps / state.fillFormeTapsNeeded;
+      els.fillFormeFillRect.setAttribute("transform", "translate(0," + (200 - 200 * pct) + ")");
+      if (state.fillFormeTaps >= state.fillFormeTapsNeeded) {
+        els.fillFormeHint.hidden = true;
+        onFillFormeComplete();
+      }
+    }
+
+    function onFillFormeComplete() {
+      state.wrongStreak = 0;
+      state.correctStreak++;
+      var leveledUp = false;
+      var justWon = false;
+      if (state.correctStreak >= starsToLevelUp(state.mode)) {
+        if (state.level < MAX_LEVEL) {
+          state.level++;
+          leveledUp = true;
+        } else {
+          justWon = true;
+        }
+        state.correctStreak = 0;
+      }
+      if (!leveledUp && !justWon) renderLevel();
+      saveProgress();
+      setGameFeedback("Bravo ! Bien colorié ! 🎉", "correct");
+      if (leveledUp) {
+        window.setTimeout(function () { showLevelUp(state.level); }, 900);
+      } else if (justWon) {
+        window.setTimeout(showWin, 900);
+      } else {
+        window.setTimeout(startFillFormeProblem, 1100);
+      }
+    }
+
     var CONFETTI_COLORS = ["var(--green-add)", "var(--orange-sub)", "var(--candy-blue)", "var(--candy-pink)", "var(--gold)"];
 
     function spawnConfetti(container, count) {
@@ -6025,6 +6574,7 @@
       if (mode === "animalname" || mode === "babies" || mode === "habitat" || mode === "diet") return "animaux";
       if (mode === "paires" || mode === "disparu" || mode === "ordre" || mode === "change" || mode === "suitelum") return "memoire";
       if (mode === "mot" || mode === "lettreman" || mode === "trace" || mode === "casse" || mode === "syllordre") return "ecriture";
+      if (mode === "traceforme" || mode === "shapes" || mode === "fillforme" || mode === "intrus" || mode === "puzzle") return "formes";
       return null;
     }
 
@@ -6040,6 +6590,7 @@
       els.menuAnimaux.hidden = screen !== "animaux";
       els.menuMemoire.hidden = screen !== "memoire";
       els.menuEcriture.hidden = screen !== "ecriture";
+      els.menuFormes.hidden = screen !== "formes";
     }
 
     // Vers quel écran de menu revenir avec le bouton retour Android, pour
@@ -6054,7 +6605,8 @@
       musique: "home",
       animaux: "home",
       memoire: "home",
-      ecriture: "home"
+      ecriture: "home",
+      formes: "home"
     };
 
     function currentMenuScreen() {
@@ -6068,6 +6620,7 @@
       if (!els.menuAnimaux.hidden) return "animaux";
       if (!els.menuMemoire.hidden) return "memoire";
       if (!els.menuEcriture.hidden) return "ecriture";
+      if (!els.menuFormes.hidden) return "formes";
       return "home";
     }
 
@@ -6103,9 +6656,10 @@
       var suitelum = mode === "suitelum";
       var ordre = mode === "ordre";
       var spell = isSpellMode(mode);
-      var trace = mode === "trace";
-      els.problemZone.hidden = paint || music || rhythm || memory || suitelum || ordre || spell || trace;
-      els.answers.hidden = paint || music || rhythm || memory || suitelum || ordre || spell || trace;
+      var trace = isTraceMode(mode);
+      var fillforme = mode === "fillforme";
+      els.problemZone.hidden = paint || music || rhythm || memory || suitelum || ordre || spell || trace || fillforme;
+      els.answers.hidden = paint || music || rhythm || memory || suitelum || ordre || spell || trace || fillforme;
       els.paintScreen.hidden = !paint;
       els.musicScreen.hidden = !music;
       els.rhythmScreen.hidden = !rhythm;
@@ -6114,6 +6668,7 @@
       els.ordreScreen.hidden = !ordre;
       els.spellScreen.hidden = !spell;
       els.traceScreen.hidden = !trace;
+      els.fillFormeScreen.hidden = !fillforme;
       els.levelPill.hidden = mode === "dessine" || music;
       if (paint) {
         state.problem = null;
@@ -6154,6 +6709,11 @@
       if (trace) {
         state.problem = null;
         startTraceProblem();
+        return;
+      }
+      if (fillforme) {
+        state.problem = null;
+        startFillFormeProblem();
         return;
       }
 
@@ -6205,6 +6765,12 @@
     els.traceCard.addEventListener("click", function () { selectMode("trace"); });
     els.casseCard.addEventListener("click", function () { selectMode("casse"); });
     els.syllordreCard.addEventListener("click", function () { selectMode("syllordre"); });
+    els.traceformeCard.addEventListener("click", function () { selectMode("traceforme"); });
+    els.shapesCard.addEventListener("click", function () { selectMode("shapes"); });
+    els.fillFormeCard.addEventListener("click", function () { selectMode("fillforme"); });
+    els.intrusCard.addEventListener("click", function () { selectMode("intrus"); });
+    els.puzzleCard.addEventListener("click", function () { selectMode("puzzle"); });
+    els.fillFormeStage.addEventListener("click", onFillFormeTap);
     els.traceClearBtn.addEventListener("click", function () { clearTraceCanvas(); });
     els.traceDoneBtn.addEventListener("click", onTraceDone);
     traceCtx = els.traceCanvas.getContext && els.traceCanvas.getContext("2d");
@@ -6219,6 +6785,7 @@
     els.animauxBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
     els.memoireBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
     els.ecritureBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
+    els.formesBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
 
     els.levelNum.addEventListener("click", function () {
       if (!state.mode) return;
@@ -6237,14 +6804,14 @@
       state.locked = false;
       renderLevel();
       saveProgress();
-      if (isPaintMode(state.mode)) { startPaintProblem(); } else if (state.mode === "rythme") { startRhythmProblem(); } else if (state.mode === "paires") { startMemoryProblem(); } else if (state.mode === "suitelum") { startSuitelumProblem(); } else if (state.mode === "ordre") { startOrdreProblem(); } else if (isSpellMode(state.mode)) { startSpellProblem(); } else if (state.mode === "trace") { startTraceProblem(); } else { nextProblem(); }
+      if (isPaintMode(state.mode)) { startPaintProblem(); } else if (state.mode === "rythme") { startRhythmProblem(); } else if (state.mode === "paires") { startMemoryProblem(); } else if (state.mode === "suitelum") { startSuitelumProblem(); } else if (state.mode === "ordre") { startOrdreProblem(); } else if (isSpellMode(state.mode)) { startSpellProblem(); } else if (isTraceMode(state.mode)) { startTraceProblem(); } else if (state.mode === "fillforme") { startFillFormeProblem(); } else { nextProblem(); }
     });
 
     els.levelUpContinueBtn.addEventListener("click", function () {
       els.levelUpOverlay.hidden = true;
       setThemeColor(THEME_COLOR_BAR);
       renderLevel();
-      if (isPaintMode(state.mode)) { startPaintProblem(); } else if (state.mode === "rythme") { startRhythmProblem(); } else if (state.mode === "paires") { startMemoryProblem(); } else if (state.mode === "suitelum") { startSuitelumProblem(); } else if (state.mode === "ordre") { startOrdreProblem(); } else if (isSpellMode(state.mode)) { startSpellProblem(); } else if (state.mode === "trace") { startTraceProblem(); } else { nextProblem(); }
+      if (isPaintMode(state.mode)) { startPaintProblem(); } else if (state.mode === "rythme") { startRhythmProblem(); } else if (state.mode === "paires") { startMemoryProblem(); } else if (state.mode === "suitelum") { startSuitelumProblem(); } else if (state.mode === "ordre") { startOrdreProblem(); } else if (isSpellMode(state.mode)) { startSpellProblem(); } else if (isTraceMode(state.mode)) { startTraceProblem(); } else if (state.mode === "fillforme") { startFillFormeProblem(); } else { nextProblem(); }
     });
 
     els.winReplayBtn.addEventListener("click", function () {
@@ -6255,7 +6822,7 @@
       state.wrongStreak = 0;
       renderLevel();
       saveProgress();
-      if (isPaintMode(state.mode)) { startPaintProblem(); } else if (state.mode === "rythme") { startRhythmProblem(); } else if (state.mode === "paires") { startMemoryProblem(); } else if (state.mode === "suitelum") { startSuitelumProblem(); } else if (state.mode === "ordre") { startOrdreProblem(); } else if (isSpellMode(state.mode)) { startSpellProblem(); } else if (state.mode === "trace") { startTraceProblem(); } else { nextProblem(); }
+      if (isPaintMode(state.mode)) { startPaintProblem(); } else if (state.mode === "rythme") { startRhythmProblem(); } else if (state.mode === "paires") { startMemoryProblem(); } else if (state.mode === "suitelum") { startSuitelumProblem(); } else if (state.mode === "ordre") { startOrdreProblem(); } else if (isSpellMode(state.mode)) { startSpellProblem(); } else if (isTraceMode(state.mode)) { startTraceProblem(); } else if (state.mode === "fillforme") { startFillFormeProblem(); } else { nextProblem(); }
     });
 
     els.winMenuBtn.addEventListener("click", function () {
