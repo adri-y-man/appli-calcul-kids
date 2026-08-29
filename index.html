@@ -3224,7 +3224,10 @@
         word: targetWord,
         answer: correctAnswer,
         choices: choices,
-        wordKey: targetWord + "|" + correctAnswer
+        // juste le mot à deviner (pas "mot|réponse") : dans une famille de 3
+        // mots, tirer un autre "answer" suffirait sinon à faire réapparaître
+        // le même mot à deviner deux fois de suite.
+        wordKey: targetWord
       };
     }
 
