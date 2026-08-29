@@ -4508,97 +4508,176 @@
       osc.stop(now + 0.9);
     }
 
+    // Bruit blanc court, utilisé pour le "clic" d'attaque du tambour et du
+    // piano (un vrai instrument percussif n'est pas qu'une tonalité pure :
+    // il y a toujours un souffle/impact bref au tout début du son).
+    function createNoiseBuffer(ctx, duration) {
+      var length = Math.max(1, Math.floor(ctx.sampleRate * duration));
+      var buffer = ctx.createBuffer(1, length, ctx.sampleRate);
+      var data = buffer.getChannelData(0);
+      for (var i = 0; i < length; i++) data[i] = Math.random() * 2 - 1;
+      return buffer;
+    }
+
+    function playNoiseBurst(ctx, now, duration, peakGain, filterFreq, filterType) {
+      var source = ctx.createBufferSource();
+      source.buffer = createNoiseBuffer(ctx, duration);
+      var filter = ctx.createBiquadFilter();
+      filter.type = filterType || "lowpass";
+      filter.frequency.value = filterFreq;
+      var gain = ctx.createGain();
+      gain.gain.setValueAtTime(peakGain, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+      source.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+      source.start(now);
+      source.stop(now + duration);
+    }
+
     // "Quel instrument ?" : un timbre synthétisé distinct par instrument,
     // pour que chaque son reste reconnaissable à l'oreille sans échantillon
-    // audio à charger.
+    // audio à charger. Chacun combine plusieurs ingrédients (harmoniques,
+    // souffle de bruit filtré, modulation de fréquence...) plutôt qu'une
+    // simple onde pure, pour éviter que tous les instruments se ressemblent.
     function playInstrumentSound(key) {
       var ctx = ensureMusicCtx();
       if (!ctx) return;
       var now = ctx.currentTime;
 
       if (key === "tambour") {
+        // Corps grave qui descend en tonalité (la "peau" du tambour) +
+        // un souffle de bruit très bref filtré grave (l'impact de la frappe).
         var oscT = ctx.createOscillator();
         var gainT = ctx.createGain();
         oscT.type = "sine";
-        oscT.frequency.setValueAtTime(160, now);
-        oscT.frequency.exponentialRampToValueAtTime(45, now + 0.18);
+        oscT.frequency.setValueAtTime(170, now);
+        oscT.frequency.exponentialRampToValueAtTime(48, now + 0.2);
         gainT.gain.setValueAtTime(0.9, now);
-        gainT.gain.exponentialRampToValueAtTime(0.0001, now + 0.25);
+        gainT.gain.exponentialRampToValueAtTime(0.0001, now + 0.28);
         oscT.connect(gainT);
         gainT.connect(ctx.destination);
         oscT.start(now);
-        oscT.stop(now + 0.25);
+        oscT.stop(now + 0.28);
+        playNoiseBurst(ctx, now, 0.07, 0.5, 220, "lowpass");
         return;
       }
 
       if (key === "piano") {
-        var oscP = ctx.createOscillator();
-        var gainP = ctx.createGain();
-        oscP.type = "triangle";
-        oscP.frequency.value = 440;
-        gainP.gain.setValueAtTime(0.0001, now);
-        gainP.gain.exponentialRampToValueAtTime(0.4, now + 0.01);
-        gainP.gain.exponentialRampToValueAtTime(0.0001, now + 0.7);
-        oscP.connect(gainP);
-        gainP.connect(ctx.destination);
-        oscP.start(now);
-        oscP.stop(now + 0.7);
+        // Fondamentale + 2 harmoniques qui s'éteignent plus vite qu'elle
+        // (comme les cordes d'un vrai piano), plus un tout petit clic de
+        // marteau au tout début.
+        [
+          { mult: 1, type: "triangle", peak: 0.34, decay: 0.85 },
+          { mult: 2, type: "sine", peak: 0.13, decay: 0.45 },
+          { mult: 3, type: "sine", peak: 0.06, decay: 0.28 }
+        ].forEach(function (h) {
+          var oscP = ctx.createOscillator();
+          var gainP = ctx.createGain();
+          oscP.type = h.type;
+          oscP.frequency.value = 440 * h.mult;
+          gainP.gain.setValueAtTime(0.0001, now);
+          gainP.gain.exponentialRampToValueAtTime(h.peak, now + 0.006);
+          gainP.gain.exponentialRampToValueAtTime(0.0001, now + h.decay);
+          oscP.connect(gainP);
+          gainP.connect(ctx.destination);
+          oscP.start(now);
+          oscP.stop(now + h.decay);
+        });
+        playNoiseBurst(ctx, now, 0.02, 0.15, 3000, "highpass");
         return;
       }
 
       if (key === "trompette") {
-        var oscTr = ctx.createOscillator();
+        // 2 dents de scie très légèrement désaccordées (chœur cuivré) +
+        // filtre passe-bas résonnant pour la couleur "brass", et un vibrato.
+        var oscTr1 = ctx.createOscillator();
+        var oscTr2 = ctx.createOscillator();
+        var filterTr = ctx.createBiquadFilter();
         var gainTr = ctx.createGain();
         var lfo = ctx.createOscillator();
         var lfoGain = ctx.createGain();
-        oscTr.type = "sawtooth";
-        oscTr.frequency.value = 392;
-        lfo.frequency.value = 6;
-        lfoGain.gain.value = 8;
+        oscTr1.type = "sawtooth";
+        oscTr2.type = "sawtooth";
+        oscTr1.frequency.value = 392;
+        oscTr2.frequency.value = 392 * 1.006;
+        filterTr.type = "lowpass";
+        filterTr.frequency.value = 2100;
+        filterTr.Q.value = 1.4;
+        lfo.frequency.value = 5.5;
+        lfoGain.gain.value = 7;
         lfo.connect(lfoGain);
-        lfoGain.connect(oscTr.frequency);
+        lfoGain.connect(oscTr1.frequency);
+        lfoGain.connect(oscTr2.frequency);
         gainTr.gain.setValueAtTime(0.0001, now);
-        gainTr.gain.linearRampToValueAtTime(0.28, now + 0.08);
-        gainTr.gain.setValueAtTime(0.28, now + 0.42);
+        gainTr.gain.linearRampToValueAtTime(0.26, now + 0.05);
+        gainTr.gain.setValueAtTime(0.26, now + 0.42);
         gainTr.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
-        oscTr.connect(gainTr);
+        oscTr1.connect(filterTr);
+        oscTr2.connect(filterTr);
+        filterTr.connect(gainTr);
         gainTr.connect(ctx.destination);
         lfo.start(now);
-        oscTr.start(now);
+        oscTr1.start(now);
+        oscTr2.start(now);
         lfo.stop(now + 0.6);
-        oscTr.stop(now + 0.6);
+        oscTr1.stop(now + 0.6);
+        oscTr2.stop(now + 0.6);
         return;
       }
 
       if (key === "flute") {
+        // Tonalité pure avec un léger vibrato (comme un vrai souffle qui
+        // varie), plus une pointe de souffle bruité très discrète.
         var oscF = ctx.createOscillator();
         var gainF = ctx.createGain();
+        var lfoF = ctx.createOscillator();
+        var lfoGainF = ctx.createGain();
         oscF.type = "sine";
         oscF.frequency.value = 659.25;
+        lfoF.frequency.value = 5;
+        lfoGainF.gain.value = 5;
+        lfoF.connect(lfoGainF);
+        lfoGainF.connect(oscF.frequency);
         gainF.gain.setValueAtTime(0.0001, now);
         gainF.gain.linearRampToValueAtTime(0.3, now + 0.12);
         gainF.gain.setValueAtTime(0.3, now + 0.45);
         gainF.gain.exponentialRampToValueAtTime(0.0001, now + 0.7);
         oscF.connect(gainF);
         gainF.connect(ctx.destination);
+        lfoF.start(now);
         oscF.start(now);
+        lfoF.stop(now + 0.7);
         oscF.stop(now + 0.7);
+        playNoiseBurst(ctx, now, 0.5, 0.03, 4000, "highpass");
         return;
       }
 
       if (key === "clochette") {
-        [880, 887].forEach(function (f) {
-          var oscC = ctx.createOscillator();
-          var gainC = ctx.createGain();
-          oscC.type = "sine";
-          oscC.frequency.value = f;
-          gainC.gain.setValueAtTime(0.25, now);
-          gainC.gain.exponentialRampToValueAtTime(0.0001, now + 1.4);
-          oscC.connect(gainC);
-          gainC.connect(ctx.destination);
-          oscC.start(now);
-          oscC.stop(now + 1.4);
-        });
+        // Synthèse par modulation de fréquence : un modulateur à un
+        // rapport non-harmonique du porteur crée le timbre "métallique"
+        // caractéristique d'une cloche, impossible à obtenir avec de
+        // simples ondes sinus superposées.
+        var carrier = ctx.createOscillator();
+        var modulator = ctx.createOscillator();
+        var modGain = ctx.createGain();
+        var gainC = ctx.createGain();
+        carrier.type = "sine";
+        carrier.frequency.value = 880;
+        modulator.type = "sine";
+        modulator.frequency.value = 880 * 1.41;
+        modGain.gain.setValueAtTime(500, now);
+        modGain.gain.exponentialRampToValueAtTime(4, now + 1.6);
+        modulator.connect(modGain);
+        modGain.connect(carrier.frequency);
+        gainC.gain.setValueAtTime(0.3, now);
+        gainC.gain.exponentialRampToValueAtTime(0.0001, now + 1.6);
+        carrier.connect(gainC);
+        gainC.connect(ctx.destination);
+        modulator.start(now);
+        carrier.start(now);
+        modulator.stop(now + 1.6);
+        carrier.stop(now + 1.6);
       }
     }
 
