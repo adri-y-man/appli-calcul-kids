@@ -343,6 +343,11 @@
 
   .color-word-icon { font-size: 1.15rem; }
 
+  /* le jeu "majuscule ou minuscule ?" affiche une vraie lettre en
+     minuscule ou majuscule : la casse forcée en majuscule ci-dessus
+     casserait tout l'intérêt du jeu si elle s'appliquait ici aussi. */
+  .casse-word { text-transform: none; }
+
   .color-swatch-btn {
     border: 3px solid rgba(31, 42, 60, 0.3);
   }
@@ -412,6 +417,51 @@
     max-width: 78vw;
     font-size: clamp(1.7rem, 7.5vw, 2.8rem);
     line-height: 1.15;
+  }
+
+  /* ---------- jeu "la lettre manquante" (Écriture Malin) ---------- */
+
+  .letterman-prompt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(0.4rem, 2vh, 0.9rem);
+  }
+
+  .letterman-pic.picture-prompt {
+    font-size: clamp(3rem, 15vw, 5.5rem);
+  }
+
+  .letterman-word {
+    color: var(--white);
+    -webkit-text-stroke: clamp(2px, 0.55vw, 4px) var(--ink);
+    paint-order: stroke fill;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    font-size: clamp(2rem, 10vw, 3.6rem);
+    line-height: 1;
+  }
+
+  /* ---------- jeu "qu'est-ce qui a changé ?" (Mémoire Malin) ---------- */
+
+  .change-prompt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(0.15rem, 1vh, 0.35rem);
+  }
+
+  .change-label {
+    color: var(--white);
+    text-shadow: 0 3px 0 rgba(31, 42, 60, 0.25);
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    font-size: clamp(0.85rem, 3.6vw, 1.1rem);
+  }
+
+  .change-row {
+    font-size: clamp(1.4rem, 6vw, 2.3rem);
+    margin-bottom: clamp(0.2rem, 1vh, 0.5rem);
   }
 
   /* ---------- jeu "plus grand ou plus petit ?" : question en toutes lettres ---------- */
@@ -862,6 +912,185 @@
   }
 
   .memory-card:disabled { cursor: default; }
+
+  /* ---------- Mémoire Malin : "Retiens l'ordre" ---------- */
+
+  .ordre-board {
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(0.5rem, 2.5vw, 0.9rem);
+    justify-content: center;
+    width: min(88vw, 28rem);
+  }
+
+  .ordre-pad {
+    appearance: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    width: clamp(3.6rem, 16vw, 5.2rem);
+    height: clamp(3.6rem, 16vw, 5.2rem);
+    font-size: clamp(1.7rem, 8vw, 2.6rem);
+    border-radius: clamp(1rem, 3.5vw, 1.5rem);
+    background: var(--candy-blue);
+    box-shadow: 0 10px 20px -10px rgba(31, 42, 60, 0.5);
+    border-bottom: clamp(4px, 1.2vw, 7px) solid rgba(0, 0, 0, 0.22);
+    transition: transform 0.1s ease, filter 0.1s ease, opacity 0.2s ease;
+  }
+
+  .ordre-pad.candy-pink { background: var(--candy-pink); }
+  .ordre-pad.candy-teal { background: var(--candy-teal); }
+  .ordre-pad.candy-blue { background: var(--candy-blue); }
+  .ordre-pad.candy-tangerine { background: var(--candy-tangerine); }
+
+  .ordre-pad.active {
+    transform: scale(0.94);
+    filter: brightness(1.35);
+  }
+
+  .ordre-pad.matched {
+    opacity: 0.35;
+    filter: grayscale(0.4);
+  }
+
+  .ordre-pad:disabled { cursor: default; }
+
+  /* ---------- Écriture Malin : "Reforme le mot" / "Remets les syllabes" ---------- */
+
+  .spell-screen {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.8rem, 3.5vh, 1.4rem);
+    min-height: 0;
+    width: 100%;
+  }
+
+  .spell-screen[hidden] { display: none; }
+
+  .spell-pic { font-size: clamp(3.5rem, 16vw, 6rem); line-height: 1; }
+
+  .spell-slots {
+    display: flex;
+    gap: clamp(0.3rem, 1.5vw, 0.5rem);
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 90vw;
+  }
+
+  .spell-slot {
+    width: clamp(2.2rem, 9vw, 3.2rem);
+    height: clamp(2.6rem, 10vw, 3.6rem);
+    border-radius: 0.6rem;
+    border: 3px dashed rgba(31, 42, 60, 0.35);
+    background: rgba(255, 255, 255, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: clamp(1.1rem, 5vw, 1.7rem);
+    color: var(--ink);
+  }
+
+  .spell-tiles {
+    display: flex;
+    gap: clamp(0.4rem, 2vw, 0.6rem);
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 90vw;
+  }
+
+  .spell-tile {
+    appearance: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    min-width: clamp(2.6rem, 10vw, 3.4rem);
+    min-height: clamp(2.8rem, 10vw, 3.6rem);
+    padding: 0 0.3rem;
+    border-radius: 0.8rem;
+    font-weight: 900;
+    font-size: clamp(1.1rem, 5vw, 1.7rem);
+    color: var(--white);
+    background: var(--candy-blue);
+    border-bottom: clamp(3px, 1vw, 5px) solid rgba(0, 0, 0, 0.22);
+    box-shadow: 0 8px 16px -10px rgba(31, 42, 60, 0.4);
+    transition: transform 0.1s ease, opacity 0.2s ease;
+  }
+
+  .spell-tile.candy-pink { background: var(--candy-pink); }
+  .spell-tile.candy-teal { background: var(--candy-teal); }
+  .spell-tile.candy-blue { background: var(--candy-blue); }
+  .spell-tile.candy-tangerine { background: var(--candy-tangerine); }
+
+  .spell-tile:disabled { opacity: 0; pointer-events: none; }
+
+  /* ---------- Écriture Malin : "Trace la lettre" ---------- */
+
+  .trace-screen {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.5rem, 2.5vh, 1rem);
+    min-height: 0;
+    width: 100%;
+  }
+
+  .trace-screen[hidden] { display: none; }
+
+  .trace-stage {
+    position: relative;
+    width: min(72vw, 60vh, 20rem);
+    aspect-ratio: 1;
+  }
+
+  .trace-guide,
+  .trace-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: clamp(1rem, 4vw, 1.6rem);
+  }
+
+  .trace-guide {
+    background: var(--white);
+    box-shadow: 0 12px 24px -14px rgba(31, 42, 60, 0.45);
+  }
+
+  .trace-canvas { touch-action: none; }
+
+  .trace-actions {
+    display: flex;
+    gap: clamp(0.5rem, 2.5vw, 0.8rem);
+  }
+
+  .trace-action-btn {
+    appearance: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 800;
+    font-size: clamp(0.9rem, 3.6vw, 1.1rem);
+    color: var(--ink);
+    background: var(--white);
+    padding: 0.6rem 1.1rem;
+    border-radius: 999px;
+    box-shadow: 0 8px 16px -10px rgba(31, 42, 60, 0.4);
+    border-bottom: clamp(3px, 1vw, 5px) solid rgba(0, 0, 0, 0.15);
+    transition: transform 0.1s ease;
+  }
+
+  .trace-action-btn:active { transform: translateY(2px); }
+
+  .trace-action-primary {
+    color: var(--white);
+    background: var(--green-add);
+  }
 
   /* mobile portrait : on pousse encore les tailles pour profiter de l'écran étroit et haut */
   @media (max-width: 640px) and (orientation: portrait) {
@@ -1464,6 +1693,15 @@
   .category-card-numbers { background: linear-gradient(135deg, #4fb3e8, #3d7fe0); }
   .category-card-body { background: linear-gradient(135deg, #8e5ce6, #6a4c93); }
   .category-card-paires { background: linear-gradient(135deg, #33c2c2, #598ce6); }
+  .category-card-disparu { background: linear-gradient(135deg, #ffc93c, #f2994a); }
+  .category-card-ordre { background: linear-gradient(135deg, #ef5da8, #d9418c); }
+  .category-card-change { background: linear-gradient(135deg, #43b98a, #2a9d6f); }
+  .category-card-suitelum { background: linear-gradient(135deg, #e63946, #ffd400, #43b98a, #3d7fe0); }
+  .category-card-mot { background: linear-gradient(135deg, #598ce6, #3454d1); }
+  .category-card-lettreman { background: linear-gradient(135deg, #8e5ce6, #6a4c93); }
+  .category-card-trace { background: linear-gradient(135deg, #f2994a, #d9724c); }
+  .category-card-casse { background: linear-gradient(135deg, #ef5da8, #d9418c); }
+  .category-card-syllordre { background: linear-gradient(135deg, #43b98a, #2a9d6f); }
 
   #menuHome .category-grid {
     display: grid;
@@ -1623,6 +1861,10 @@
        paysage. On repasse en vh comme le reste de ce bloc. */
     .picture-prompt-photo { width: clamp(6rem, 30vh, 9rem); height: clamp(6rem, 30vh, 9rem); }
     .picture-prompt { font-size: clamp(3.2rem, 26vh, 5.5rem); }
+    .letterman-pic.picture-prompt { font-size: clamp(2.2rem, 16vh, 3.6rem); }
+    .letterman-word { font-size: clamp(1.5rem, 12vh, 2.6rem); }
+    .change-label { font-size: clamp(0.7rem, 4vh, 0.9rem); }
+    .change-row { font-size: clamp(1.1rem, 9vh, 1.7rem); margin-bottom: clamp(0.1rem, 0.6vh, 0.3rem); }
 
     /* jeu "Animaux" (Anglais Malin) : la grille 2x2 est pensée pour la
        largeur disponible, mais la hauteur est ce qui manque en paysage
@@ -1739,6 +1981,36 @@
   <section class="memory-screen" id="memoryScreen" hidden>
     <p class="rhythm-feedback" id="memoryFeedback" aria-live="polite"></p>
     <div class="memory-board" id="memoryBoard"></div>
+  </section>
+
+  <section class="rhythm-screen" id="suitelumScreen" hidden>
+    <p class="rhythm-feedback" id="suitelumFeedback" aria-live="polite"></p>
+    <div class="rhythm-pads" id="suitelumPads"></div>
+  </section>
+
+  <section class="rhythm-screen" id="ordreScreen" hidden>
+    <p class="rhythm-feedback" id="ordreFeedback" aria-live="polite"></p>
+    <div class="ordre-board" id="ordreBoard"></div>
+  </section>
+
+  <section class="spell-screen" id="spellScreen" hidden>
+    <span class="spell-pic emoji" id="spellPic"></span>
+    <div class="spell-slots" id="spellSlots"></div>
+    <div class="spell-tiles" id="spellTiles"></div>
+  </section>
+
+  <section class="trace-screen" id="traceScreen" hidden>
+    <p class="rhythm-feedback" id="traceFeedback" aria-live="polite"></p>
+    <div class="trace-stage" id="traceStage">
+      <svg class="trace-guide" id="traceGuide" viewBox="0 0 200 200" aria-hidden="true">
+        <path id="traceGuidePath" d="" fill="none" stroke="rgba(31, 42, 60, 0.32)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 15"/>
+      </svg>
+      <canvas class="trace-canvas" id="traceCanvas" width="600" height="600"></canvas>
+    </div>
+    <div class="trace-actions">
+      <button type="button" class="trace-action-btn" id="traceClearBtn">Effacer</button>
+      <button type="button" class="trace-action-btn trace-action-primary" id="traceDoneBtn">C'est tracé ! ✓</button>
+    </div>
   </section>
 
   <div class="menu-overlay" id="menuOverlay">
@@ -1886,6 +2158,20 @@
             </svg>
           </span>
           <span class="app-icon-label">Mémoire Malin</span>
+        </button>
+        <button class="category-card category-card-app" type="button" data-category="ecriture">
+          <span class="app-icon-tile">
+            <svg viewBox="0 0 120 120" aria-hidden="true">
+              <rect x="4" y="4" width="112" height="112" rx="30" fill="#fff8ee" />
+              <rect x="12" y="40" width="30" height="36" rx="7" fill="#ef5da8" transform="rotate(-8 27 58)" />
+              <text x="27" y="64" font-family="ui-rounded, sans-serif" font-weight="900" font-size="20" fill="#fff8ee" text-anchor="middle" transform="rotate(-8 27 58)">A</text>
+              <rect x="45" y="34" width="30" height="36" rx="7" fill="#43b98a" />
+              <text x="60" y="58" font-family="ui-rounded, sans-serif" font-weight="900" font-size="20" fill="#fff8ee" text-anchor="middle">B</text>
+              <rect x="78" y="40" width="30" height="36" rx="7" fill="#598ce6" transform="rotate(8 93 58)" />
+              <text x="93" y="64" font-family="ui-rounded, sans-serif" font-weight="900" font-size="20" fill="#fff8ee" text-anchor="middle" transform="rotate(8 93 58)">C</text>
+            </svg>
+          </span>
+          <span class="app-icon-label">Écriture Malin</span>
         </button>
       </div>
       <div class="fox-walk-lane" aria-hidden="true">
@@ -2134,6 +2420,64 @@
           <span class="icon emoji">🃏</span>
           <span>Paires cachées</span>
           <span class="level-badge">PS-GS</span>
+        </button>
+        <button class="category-card category-card-disparu" type="button" id="disparuCard">
+          <span class="icon emoji">❓</span>
+          <span>Qu'est-ce qui a disparu ?</span>
+          <span class="level-badge">MS-GS</span>
+        </button>
+        <button class="category-card category-card-ordre" type="button" id="ordreCard">
+          <span class="icon emoji">🔢</span>
+          <span>Retiens l'ordre</span>
+          <span class="level-badge">GS-CP</span>
+        </button>
+        <button class="category-card category-card-change" type="button" id="changeCard">
+          <span class="icon emoji">🔍</span>
+          <span>Qu'est-ce qui a changé ?</span>
+          <span class="level-badge">GS-CE1</span>
+        </button>
+        <button class="category-card category-card-suitelum" type="button" id="suitelumCard">
+          <span class="icon emoji">🎨</span>
+          <span>Suite lumineuse</span>
+          <span class="level-badge">CP-CE1</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="menu-panel" id="menuEcriture" hidden>
+      <div class="menu-header">
+        <button class="menu-back" id="ecritureBackBtn" type="button" aria-label="Retour">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 4 L7 12 L15 20" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+        <h1 class="menu-title">Écriture Malin</h1>
+      </div>
+      <div class="category-grid">
+        <button class="category-card category-card-mot" type="button" id="motCard">
+          <span class="icon emoji">🐱</span>
+          <span>Reforme le mot</span>
+          <span class="level-badge">MS-CP</span>
+        </button>
+        <button class="category-card category-card-lettreman" type="button" id="lettremanCard">
+          <span class="icon emoji">🧩</span>
+          <span>La lettre manquante</span>
+          <span class="level-badge">GS-CP</span>
+        </button>
+        <button class="category-card category-card-trace" type="button" id="traceCard">
+          <span class="icon emoji">✏️</span>
+          <span>Trace la lettre</span>
+          <span class="level-badge">PS-MS</span>
+        </button>
+        <button class="category-card category-card-casse" type="button" id="casseCard">
+          <span class="icon emoji">Aa</span>
+          <span>Majuscule ou minuscule ?</span>
+          <span class="level-badge">PS-MS</span>
+        </button>
+        <button class="category-card category-card-syllordre" type="button" id="syllordreCard">
+          <span class="icon emoji">🏰</span>
+          <span>Remets les syllabes</span>
+          <span class="level-badge">CP-CE1</span>
         </button>
       </div>
     </div>
@@ -2904,6 +3248,100 @@
       columns: [3, 4, 4, 4, 4]
     };
 
+    // "Qu'est-ce qui a disparu ?" : une rangée de symboles s'affiche, puis
+    // l'un d'eux devient "❓" après un court délai — il faut retrouver
+    // lequel parmi 3 propositions (2 symboles jamais montrés + le bon).
+    var DISPARU_LEVELS = { count: [3, 3, 4, 4, 5] };
+
+    // "Qu'est-ce qui a changé ?" : une rangée "avant" et la même rangée
+    // "après", avec un seul symbole remplacé — les réponses sont les
+    // symboles de la rangée "après" elle-même, à toucher directement.
+    var CHANGE_LEVELS = { count: [3, 4, 4, 5, 5] };
+
+    // "Majuscule ou minuscule ?" : lettres dont la forme change vraiment
+    // entre majuscule et minuscule (pas juste la taille, sinon le jeu
+    // reviendrait à comparer deux tailles du même symbole).
+    var CASE_LETTERS = ["A", "B", "D", "E", "F", "G", "H", "M", "N", "Q", "R", "T", "Y"];
+    var CASE_LEVEL_POOL = [
+      ["A", "B", "D", "E"],
+      ["A", "B", "D", "E", "F", "G"],
+      ["A", "B", "D", "E", "F", "G", "H", "M"],
+      ["A", "B", "D", "E", "F", "G", "H", "M", "N", "Q"],
+      CASE_LETTERS.slice()
+    ];
+
+    // "Suite lumineuse" : reprend le même principe que "Répète le rythme"
+    // (Musique Malin), mais avec 4 pastilles colorées et sans son.
+    var SUITELUM_PADS = [
+      { color: "#e63946" },
+      { color: "#ffd400" },
+      { color: "#3d7fe0" },
+      { color: "#43b98a" }
+    ];
+    var SUITELUM_LEVELS = { length: [2, 3, 4, 5, 6] };
+
+    // "Retiens l'ordre" : des symboles s'allument dans un ordre précis,
+    // puis sont mélangés à l'écran — il faut les toucher dans le même
+    // ordre que celui vu au départ (mémoire de l'identité, pas de la
+    // position).
+    var ORDRE_LEVELS = { count: [3, 3, 4, 4, 5] };
+
+    // "Remets les syllabes" : comme "Reforme le mot", mais avec des
+    // morceaux de syllabes au lieu de lettres isolées, pour des mots plus
+    // longs (progressivement 2 puis 3 syllabes selon le niveau).
+    var SYLLABLE_WORDS = {
+      chat2: { emoji: "🐱", syllables: ["CHA", "TON"] },
+      ballon: { emoji: "⚽", syllables: ["BAL", "LON"] },
+      bateau: { emoji: "⛵", syllables: ["BA", "TEAU"] },
+      gateau: { emoji: "🎂", syllables: ["GÂ", "TEAU"] },
+      soleil: { emoji: "☀️", syllables: ["SO", "LEIL"] },
+      lapin: { emoji: "🐰", syllables: ["LA", "PIN"] },
+      canard: { emoji: "🦆", syllables: ["CA", "NARD"] },
+      cheval: { emoji: "🐴", syllables: ["CHE", "VAL"] },
+      robot: { emoji: "🤖", syllables: ["RO", "BOT"] },
+      fusee: { emoji: "🚀", syllables: ["FU", "SÉE"] },
+      tomate: { emoji: "🍅", syllables: ["TO", "MATE"] },
+      banane: { emoji: "🍌", syllables: ["BA", "NANE"] },
+      chateau: { emoji: "🏰", syllables: ["CHÂ", "TEAU"] },
+      papillon: { emoji: "🦋", syllables: ["PA", "PIL", "LON"] },
+      crocodile: { emoji: "🐊", syllables: ["CRO", "CO", "DILE"] },
+      dinosaure: { emoji: "🦕", syllables: ["DI", "NO", "SAURE"] },
+      elephant2: { emoji: "🐘", syllables: ["É", "LÉ", "PHANT"] },
+      escargot: { emoji: "🐌", syllables: ["ES", "CAR", "GOT"] }
+    };
+    var SYLLABLE_LEVEL_POOL = [
+      ["chat2", "ballon", "bateau", "gateau"],
+      ["chat2", "ballon", "bateau", "gateau", "soleil", "lapin", "canard", "cheval"],
+      ["chat2", "ballon", "bateau", "gateau", "soleil", "lapin", "canard", "cheval", "robot", "fusee", "tomate", "banane", "chateau"],
+      ["chat2", "ballon", "bateau", "gateau", "soleil", "lapin", "canard", "cheval", "robot", "fusee", "tomate", "banane", "chateau",
+        "papillon", "crocodile"],
+      Object.keys(SYLLABLE_WORDS)
+    ];
+
+    // "Trace la lettre" : formes simplifiées (viewBox 0 0 200 200), pensées
+    // pour être suivies au doigt plutôt que reproduire une typographie
+    // exacte — progression des tracés les plus simples (lignes droites)
+    // aux plus complexes (courbes).
+    var TRACE_LETTER_PATHS = {
+      L: "M60 40 L60 160 L140 160",
+      I: "M100 40 L100 160",
+      T: "M50 50 L150 50 M100 50 L100 160",
+      O: "M45 100 A55 55 0 1 1 155 100 A55 55 0 1 1 45 100",
+      C: "M150 60 A70 70 0 1 0 150 140",
+      A: "M50 160 L100 40 L150 160 M72 112 L128 112",
+      V: "M50 40 L100 160 L150 40",
+      U: "M55 40 L55 120 A45 45 0 0 0 145 120 L145 40",
+      E: "M140 45 L60 45 L60 100 L120 100 M60 100 L60 155 L140 155",
+      S: "M138 60 Q60 50 68 95 Q76 130 132 128 Q142 165 62 150"
+    };
+    var TRACE_LEVEL_POOL = [
+      ["L", "I", "T"],
+      ["L", "I", "T", "O"],
+      ["L", "I", "T", "O", "C", "A"],
+      ["L", "I", "T", "O", "C", "A", "V", "U"],
+      ["L", "I", "T", "O", "C", "A", "V", "U", "E", "S"]
+    ];
+
     // Calcul costaud : 3 termes, 2 opérations tirées indépendamment (donc
     // potentiellement différentes) parmi +, −, ×, ÷, enchaînées de gauche à
     // droite. Chaque étape est bornée pour rester positive, entière, et sous
@@ -2935,7 +3373,18 @@
       rhythmLocked: true,
       memoryCards: [],
       memoryFlipped: [],
-      memoryLocked: false
+      memoryLocked: false,
+      suitelumSequence: [],
+      suitelumInputIndex: 0,
+      suitelumLocked: true,
+      ordreSequence: [],
+      ordreInputIndex: 0,
+      ordreLocked: true,
+      spellKey: "",
+      spellUnits: [],
+      spellFillIndex: 0,
+      spellEmoji: "",
+      traceLetter: ""
     };
 
     var PROGRESS_KEY = "calculMalinProgress";
@@ -3390,6 +3839,100 @@
       };
     }
 
+    // "La lettre manquante" (Écriture Malin) : réutilise les mêmes mots
+    // (et le même dosage par niveau) que "Mes premières lectures", mais il
+    // manque une lettre au hasard dans le mot affiché.
+    function generateLettreManProblem(levelIdx) {
+      var pool = WORD_LEVEL_POOL[levelIdx];
+      var key = pool[randInt(0, pool.length - 1)];
+      var def = WORD_DEFS[key];
+      var word = def.word.toUpperCase();
+      var letters = word.split("");
+      var blankIdx = randInt(0, letters.length - 1);
+      var correctLetter = letters[blankIdx];
+      var display = letters.slice();
+      display[blankIdx] = "_";
+      var distractorPool = ALPHABET.filter(function (l) { return l !== correctLetter; });
+      var distractors = shuffle(distractorPool).slice(0, 2);
+      var choices = shuffle(distractors.concat([correctLetter]));
+      return {
+        kind: "lettreman",
+        emoji: def.emoji,
+        displayWord: display.join(""),
+        answer: correctLetter,
+        choices: choices,
+        wordKey: key + "|" + blankIdx
+      };
+    }
+
+    // "Majuscule ou minuscule ?" (Écriture Malin) : une lettre s'affiche
+    // dans une casse (choisie au hasard), il faut retrouver sa jumelle
+    // dans l'autre casse. Les 2 mauvaises réponses sont dans la MÊME casse
+    // que la bonne réponse, pour que le jeu porte vraiment sur la lettre
+    // et pas sur la casse en elle-même.
+    function generateCaseProblem(levelIdx) {
+      var pool = CASE_LEVEL_POOL[levelIdx];
+      var letter = pool[randInt(0, pool.length - 1)];
+      var promptIsUpper = Math.random() < 0.5;
+      var promptText = promptIsUpper ? letter : letter.toLowerCase();
+      var answerText = promptIsUpper ? letter.toLowerCase() : letter;
+      var distractorLetters = shuffle(pool.filter(function (l) { return l !== letter; })).slice(0, 2);
+      var distractorTexts = distractorLetters.map(function (l) { return promptIsUpper ? l.toLowerCase() : l; });
+      var choices = shuffle(distractorTexts.concat([answerText]));
+      return {
+        kind: "casse",
+        word: promptText,
+        answer: answerText,
+        choices: choices,
+        wordKey: letter
+      };
+    }
+
+    // "Qu'est-ce qui a disparu ?" (Mémoire Malin) : une rangée de symboles
+    // s'affiche, puis l'un d'eux (choisi au hasard) devient "❓" après un
+    // court délai — géré directement dans renderProblem(), pas ici.
+    function generateDisparuProblem(levelIdx) {
+      var n = DISPARU_LEVELS.count[levelIdx];
+      var chosen = shuffle(MEMORY_SYMBOL_POOL.slice()).slice(0, n);
+      var missingIdx = randInt(0, n - 1);
+      var missingSymbol = chosen[missingIdx];
+      var outsidePool = MEMORY_SYMBOL_POOL.filter(function (s) { return chosen.indexOf(s) === -1; });
+      var distractors = shuffle(outsidePool).slice(0, 2);
+      var choices = shuffle(distractors.concat([missingSymbol]));
+      return {
+        kind: "disparu",
+        items: chosen,
+        missingIdx: missingIdx,
+        answer: missingSymbol,
+        choices: choices,
+        wordKey: chosen.join("") + "|" + missingIdx
+      };
+    }
+
+    // "Qu'est-ce qui a changé ?" (Mémoire Malin) : une rangée "avant" et la
+    // même rangée "après" où un seul symbole a été remplacé par un autre
+    // (jamais présent "avant", pour qu'il n'y ait qu'une seule bonne
+    // réponse possible) ; les réponses sont les symboles de la rangée
+    // "après" elle-même, à toucher directement dessus.
+    function generateChangeProblem(levelIdx) {
+      var n = CHANGE_LEVELS.count[levelIdx];
+      var before = shuffle(MEMORY_SYMBOL_POOL.slice()).slice(0, n);
+      var changeIdx = randInt(0, n - 1);
+      var remaining = MEMORY_SYMBOL_POOL.filter(function (s) { return before.indexOf(s) === -1; });
+      var newSymbol = remaining[randInt(0, remaining.length - 1)];
+      var after = before.slice();
+      after[changeIdx] = newSymbol;
+      return {
+        kind: "change",
+        before: before,
+        after: after,
+        changeIdx: changeIdx,
+        answer: newSymbol,
+        choices: after.slice(),
+        wordKey: before.join("") + ">" + after.join("")
+      };
+    }
+
     // "Addition/Soustraction/Multiplication/Division à 3 termes" : même
     // mécanique que le calcul costaud, mais avec la même opération enchaînée
     // deux fois de suite au lieu de deux opérations tirées indépendamment.
@@ -3463,6 +4006,18 @@
       if (p1.kind === "diet" || p2.kind === "diet") {
         return p1.kind === "diet" && p2.kind === "diet" && p1.pictureKey === p2.pictureKey;
       }
+      if (p1.kind === "lettreman" || p2.kind === "lettreman") {
+        return p1.kind === "lettreman" && p2.kind === "lettreman" && p1.wordKey === p2.wordKey;
+      }
+      if (p1.kind === "casse" || p2.kind === "casse") {
+        return p1.kind === "casse" && p2.kind === "casse" && p1.wordKey === p2.wordKey;
+      }
+      if (p1.kind === "disparu" || p2.kind === "disparu") {
+        return p1.kind === "disparu" && p2.kind === "disparu" && p1.wordKey === p2.wordKey;
+      }
+      if (p1.kind === "change" || p2.kind === "change") {
+        return p1.kind === "change" && p2.kind === "change" && p1.wordKey === p2.wordKey;
+      }
       if (p1.ops.length !== p2.ops.length || p1.terms.length !== p2.terms.length) return false;
       for (var i = 0; i < p1.ops.length; i++) {
         if (p1.ops[i] !== p2.ops[i]) return false;
@@ -3522,6 +4077,18 @@
       if (state.mode === "rhymes") {
         return generateRhymesProblem(levelIdx);
       }
+      if (state.mode === "lettreman") {
+        return generateLettreManProblem(levelIdx);
+      }
+      if (state.mode === "casse") {
+        return generateCaseProblem(levelIdx);
+      }
+      if (state.mode === "disparu") {
+        return generateDisparuProblem(levelIdx);
+      }
+      if (state.mode === "change") {
+        return generateChangeProblem(levelIdx);
+      }
       if (MIX_MODES_3[state.mode]) {
         return generateMixedOpProblem(MIX_MODES_3[state.mode], levelIdx);
       }
@@ -3566,6 +4133,7 @@
       menuMusique: document.getElementById("menuMusique"),
       menuAnimaux: document.getElementById("menuAnimaux"),
       menuMemoire: document.getElementById("menuMemoire"),
+      menuEcriture: document.getElementById("menuEcriture"),
       categoryCards: document.querySelectorAll(".category-card"),
       calcBackBtn: document.getElementById("calcBackBtn"),
       terms2BackBtn: document.getElementById("terms2BackBtn"),
@@ -3576,6 +4144,7 @@
       musiqueBackBtn: document.getElementById("musiqueBackBtn"),
       animauxBackBtn: document.getElementById("animauxBackBtn"),
       memoireBackBtn: document.getElementById("memoireBackBtn"),
+      ecritureBackBtn: document.getElementById("ecritureBackBtn"),
       colorsCard: document.getElementById("colorsCard"),
       animalsCard: document.getElementById("animalsCard"),
       bodyCard: document.getElementById("bodyCard"),
@@ -3595,6 +4164,15 @@
       habitatCard: document.getElementById("habitatCard"),
       dietCard: document.getElementById("dietCard"),
       pairesCard: document.getElementById("pairesCard"),
+      disparuCard: document.getElementById("disparuCard"),
+      ordreCard: document.getElementById("ordreCard"),
+      changeCard: document.getElementById("changeCard"),
+      suitelumCard: document.getElementById("suitelumCard"),
+      motCard: document.getElementById("motCard"),
+      lettremanCard: document.getElementById("lettremanCard"),
+      traceCard: document.getElementById("traceCard"),
+      casseCard: document.getElementById("casseCard"),
+      syllordreCard: document.getElementById("syllordreCard"),
       modeCards: document.querySelectorAll(".mode-card"),
       levelPill: document.getElementById("levelPill"),
       levelNum: document.getElementById("levelNum"),
@@ -3621,6 +4199,23 @@
       memoryScreen: document.getElementById("memoryScreen"),
       memoryBoard: document.getElementById("memoryBoard"),
       memoryFeedback: document.getElementById("memoryFeedback"),
+      suitelumScreen: document.getElementById("suitelumScreen"),
+      suitelumPads: document.getElementById("suitelumPads"),
+      suitelumFeedback: document.getElementById("suitelumFeedback"),
+      ordreScreen: document.getElementById("ordreScreen"),
+      ordreBoard: document.getElementById("ordreBoard"),
+      ordreFeedback: document.getElementById("ordreFeedback"),
+      spellScreen: document.getElementById("spellScreen"),
+      spellPic: document.getElementById("spellPic"),
+      spellSlots: document.getElementById("spellSlots"),
+      spellTiles: document.getElementById("spellTiles"),
+      traceScreen: document.getElementById("traceScreen"),
+      traceFeedback: document.getElementById("traceFeedback"),
+      traceStage: document.getElementById("traceStage"),
+      traceGuidePath: document.getElementById("traceGuidePath"),
+      traceCanvas: document.getElementById("traceCanvas"),
+      traceClearBtn: document.getElementById("traceClearBtn"),
+      traceDoneBtn: document.getElementById("traceDoneBtn"),
       levelUpOverlay: document.getElementById("levelUpOverlay"),
       levelUpNum: document.getElementById("levelUpNum"),
       levelUpConfetti: document.getElementById("levelUpConfetti"),
@@ -3800,16 +4395,92 @@
         return;
       }
 
-      if (p.kind === "reading") {
+      if (p.kind === "reading" || p.kind === "casse") {
         els.problem.removeAttribute("data-terms");
         var readingWord = document.createElement("span");
         readingWord.className = "color-word reading-word";
         var readingWordText = document.createElement("span");
-        readingWordText.className = "color-word-text";
+        readingWordText.className = p.kind === "casse" ? "color-word-text casse-word" : "color-word-text";
         readingWordText.textContent = p.word;
         readingWord.appendChild(readingWordText);
         els.problem.appendChild(readingWord);
         fitWordText(readingWord, readingWordText);
+        els.problem.classList.remove("pop");
+        void els.problem.offsetWidth;
+        els.problem.classList.add("pop");
+        return;
+      }
+
+      if (p.kind === "lettreman") {
+        els.problem.removeAttribute("data-terms");
+        var lmWrap = document.createElement("div");
+        lmWrap.className = "letterman-prompt";
+        var lmPic = document.createElement("span");
+        lmPic.className = "picture-prompt emoji letterman-pic";
+        lmPic.textContent = p.emoji;
+        var lmWord = document.createElement("span");
+        lmWord.className = "letterman-word";
+        lmWord.textContent = p.displayWord;
+        lmWrap.appendChild(lmPic);
+        lmWrap.appendChild(lmWord);
+        els.problem.appendChild(lmWrap);
+        els.problem.classList.remove("pop");
+        void els.problem.offsetWidth;
+        els.problem.classList.add("pop");
+        return;
+      }
+
+      if (p.kind === "disparu") {
+        els.problem.removeAttribute("data-terms");
+        var dpWrap = document.createElement("span");
+        dpWrap.className = "count-objects emoji";
+        p.items.forEach(function (sym) {
+          var itemEl = document.createElement("span");
+          itemEl.textContent = sym;
+          dpWrap.appendChild(itemEl);
+        });
+        els.problem.appendChild(dpWrap);
+        els.problem.classList.remove("pop");
+        void els.problem.offsetWidth;
+        els.problem.classList.add("pop");
+        window.setTimeout(function () {
+          var missingEl = dpWrap.children[p.missingIdx];
+          if (missingEl) missingEl.textContent = "❓";
+          var btns = els.answers.querySelectorAll(".answer-btn");
+          Array.prototype.forEach.call(btns, function (b) { b.disabled = false; });
+        }, 2200);
+        return;
+      }
+
+      if (p.kind === "change") {
+        els.problem.removeAttribute("data-terms");
+        var chWrap = document.createElement("div");
+        chWrap.className = "change-prompt";
+        var beforeLabel = document.createElement("span");
+        beforeLabel.className = "change-label";
+        beforeLabel.textContent = "AVANT";
+        var beforeRow = document.createElement("span");
+        beforeRow.className = "count-objects emoji change-row";
+        p.before.forEach(function (sym) {
+          var el = document.createElement("span");
+          el.textContent = sym;
+          beforeRow.appendChild(el);
+        });
+        var afterLabel = document.createElement("span");
+        afterLabel.className = "change-label";
+        afterLabel.textContent = "APRÈS";
+        var afterRow = document.createElement("span");
+        afterRow.className = "count-objects emoji change-row";
+        p.after.forEach(function (sym) {
+          var el = document.createElement("span");
+          el.textContent = sym;
+          afterRow.appendChild(el);
+        });
+        chWrap.appendChild(beforeLabel);
+        chWrap.appendChild(beforeRow);
+        chWrap.appendChild(afterLabel);
+        chWrap.appendChild(afterRow);
+        els.problem.appendChild(chWrap);
         els.problem.classList.remove("pop");
         void els.problem.offsetWidth;
         els.problem.classList.add("pop");
@@ -4180,6 +4851,22 @@
         return;
       }
 
+      if (state.problem.kind === "disparu" || state.problem.kind === "change") {
+        var symbolPalette = shuffle(CANDY_COLORS.slice());
+        state.problem.choices.forEach(function (value, idx) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "answer-btn picture-btn emoji " + symbolPalette[idx % symbolPalette.length];
+          btn.textContent = value;
+          btn.setAttribute("data-value", value);
+          btn.setAttribute("aria-label", "Répondre " + value);
+          if (state.problem.kind === "disparu") btn.disabled = true;
+          btn.addEventListener("click", function () { onAnswer(value, btn); });
+          els.answers.appendChild(btn);
+        });
+        return;
+      }
+
       var palette = shuffle(CANDY_COLORS.slice());
       state.problem.choices.forEach(function (value, idx) {
         var btn = document.createElement("button");
@@ -4268,6 +4955,10 @@
 
     function isPaintMode(mode) {
       return mode === "coloriage" || mode === "modele" || mode === "dessine";
+    }
+
+    function isSpellMode(mode) {
+      return mode === "mot" || mode === "syllordre";
     }
 
     function currentPaintTemplate() {
@@ -4796,6 +5487,107 @@
       }
     }
 
+    // "Suite lumineuse" (Mémoire Malin) : même principe que "Répète le
+    // rythme" ci-dessus (Simon), avec 4 pastilles colorées et sans son.
+    function renderSuitelumPads() {
+      els.suitelumPads.innerHTML = "";
+      SUITELUM_PADS.forEach(function (pad, idx) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "rhythm-pad";
+        btn.style.background = pad.color;
+        btn.setAttribute("aria-label", "Pastille " + (idx + 1));
+        btn.addEventListener("click", function () { onSuitelumPadTap(idx); });
+        els.suitelumPads.appendChild(btn);
+      });
+    }
+
+    function flashSuitelumPad(idx) {
+      var pad = els.suitelumPads.children[idx];
+      if (!pad) return;
+      pad.classList.add("active");
+      window.setTimeout(function () { pad.classList.remove("active"); }, 380);
+    }
+
+    function playSuitelumSequence() {
+      state.suitelumLocked = true;
+      state.suitelumInputIndex = 0;
+      els.suitelumFeedback.textContent = "";
+      var seq = state.suitelumSequence;
+      seq.forEach(function (padIdx, i) {
+        window.setTimeout(function () { flashSuitelumPad(padIdx); }, 500 + i * 650);
+      });
+      window.setTimeout(function () { state.suitelumLocked = false; }, 500 + seq.length * 650);
+    }
+
+    function startSuitelumProblem() {
+      var levelIdx = Math.min(Math.max(state.level, MIN_LEVEL), MAX_LEVEL) - 1;
+      var length = SUITELUM_LEVELS.length[levelIdx];
+      var seq = [];
+      for (var i = 0; i < length; i++) seq.push(randInt(0, SUITELUM_PADS.length - 1));
+      state.suitelumSequence = seq;
+      renderSuitelumPads();
+      playSuitelumSequence();
+      saveProgress();
+    }
+
+    function onSuitelumPadTap(idx) {
+      if (state.suitelumLocked) return;
+      flashSuitelumPad(idx);
+      var expected = state.suitelumSequence[state.suitelumInputIndex];
+      if (idx === expected) {
+        state.suitelumInputIndex++;
+        if (state.suitelumInputIndex === state.suitelumSequence.length) onSuitelumWin();
+        return;
+      }
+      // Pas de pénalité : on rejoue simplement la même séquence depuis le début.
+      state.suitelumLocked = true;
+      els.suitelumFeedback.textContent = "On regarde encore ! 👀";
+      window.setTimeout(playSuitelumSequence, 900);
+    }
+
+    function onSuitelumWin() {
+      state.suitelumLocked = true;
+      state.wrongStreak = 0;
+      state.correctStreak++;
+      var leveledUp = false;
+      var justWon = false;
+      if (state.correctStreak >= starsToLevelUp(state.mode)) {
+        if (state.level < MAX_LEVEL) {
+          state.level++;
+          leveledUp = true;
+        } else {
+          justWon = true;
+        }
+        state.correctStreak = 0;
+      }
+      if (!leveledUp && !justWon) renderLevel();
+      saveProgress();
+      els.suitelumFeedback.textContent = "Bravo ! Bien joué ! 🎉";
+      if (leveledUp) {
+        window.setTimeout(function () { showLevelUp(state.level); }, 1100);
+      } else if (justWon) {
+        window.setTimeout(showWin, 1100);
+      } else {
+        window.setTimeout(startSuitelumProblem, 1400);
+      }
+    }
+
+    // Mélange un tableau en s'assurant que le résultat diffère de l'ordre
+    // d'origine à au moins une position (sinon la manche serait triviale) —
+    // utilisé par "Retiens l'ordre" (positions à l'écran) et "Reforme le
+    // mot"/"Remets les syllabes" (ordre des tuiles).
+    function shuffleDifferent(arr) {
+      if (arr.length < 2) return arr.slice();
+      var shuffled;
+      var tries = 0;
+      do {
+        shuffled = shuffle(arr.slice());
+        tries++;
+      } while (shuffled.every(function (v, i) { return v === arr[i]; }) && tries < 20);
+      return shuffled;
+    }
+
     function renderMemoryBoard() {
       var levelIdx = Math.min(Math.max(state.level, MIN_LEVEL), MAX_LEVEL) - 1;
       els.memoryBoard.style.setProperty("--memory-columns", MEMORY_LEVELS.columns[levelIdx]);
@@ -4902,6 +5694,263 @@
       }
     }
 
+    // "Retiens l'ordre" (Mémoire Malin) : des symboles s'allument dans un
+    // ordre précis, puis sont mélangés à l'écran — il faut les toucher
+    // dans le même ordre que celui vu au départ (mémoire de l'identité,
+    // pas de la position à l'écran).
+    function renderOrdreBoard(order) {
+      els.ordreBoard.innerHTML = "";
+      order.forEach(function (sym, idx) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "ordre-pad " + CANDY_COLORS[idx % CANDY_COLORS.length];
+        btn.textContent = sym;
+        btn.setAttribute("data-symbol", sym);
+        btn.setAttribute("aria-label", "Image " + (idx + 1));
+        btn.addEventListener("click", function () { onOrdrePadTap(sym, btn); });
+        els.ordreBoard.appendChild(btn);
+      });
+    }
+
+    function flashOrdrePad(idx) {
+      var pad = els.ordreBoard.children[idx];
+      if (!pad) return;
+      pad.classList.add("active");
+      window.setTimeout(function () { pad.classList.remove("active"); }, 380);
+    }
+
+    function playOrdreFlash() {
+      state.ordreLocked = true;
+      state.ordreInputIndex = 0;
+      els.ordreFeedback.textContent = "";
+      renderOrdreBoard(state.ordreSequence);
+      var seq = state.ordreSequence;
+      seq.forEach(function (sym, i) {
+        window.setTimeout(function () { flashOrdrePad(i); }, 500 + i * 700);
+      });
+      window.setTimeout(function () {
+        renderOrdreBoard(shuffleDifferent(state.ordreSequence));
+        state.ordreLocked = false;
+      }, 500 + seq.length * 700 + 400);
+    }
+
+    function startOrdreProblem() {
+      var levelIdx = Math.min(Math.max(state.level, MIN_LEVEL), MAX_LEVEL) - 1;
+      var n = ORDRE_LEVELS.count[levelIdx];
+      state.ordreSequence = shuffle(MEMORY_SYMBOL_POOL.slice()).slice(0, n);
+      playOrdreFlash();
+      saveProgress();
+    }
+
+    function onOrdrePadTap(sym, btn) {
+      if (state.ordreLocked || btn.disabled) return;
+      var expected = state.ordreSequence[state.ordreInputIndex];
+      if (sym === expected) {
+        btn.disabled = true;
+        btn.classList.add("matched");
+        state.ordreInputIndex++;
+        if (state.ordreInputIndex === state.ordreSequence.length) onOrdreWin();
+        return;
+      }
+      // Pas de pénalité : on rejoue simplement la même séquence depuis le début.
+      state.ordreLocked = true;
+      btn.classList.add("shake");
+      els.ordreFeedback.textContent = "On regarde encore ! 👀";
+      window.setTimeout(playOrdreFlash, 900);
+    }
+
+    function onOrdreWin() {
+      state.ordreLocked = true;
+      state.wrongStreak = 0;
+      state.correctStreak++;
+      var leveledUp = false;
+      var justWon = false;
+      if (state.correctStreak >= starsToLevelUp(state.mode)) {
+        if (state.level < MAX_LEVEL) {
+          state.level++;
+          leveledUp = true;
+        } else {
+          justWon = true;
+        }
+        state.correctStreak = 0;
+      }
+      if (!leveledUp && !justWon) renderLevel();
+      saveProgress();
+      els.ordreFeedback.textContent = "Bravo ! Bien joué ! 🎉";
+      if (leveledUp) {
+        window.setTimeout(function () { showLevelUp(state.level); }, 1100);
+      } else if (justWon) {
+        window.setTimeout(showWin, 1100);
+      } else {
+        window.setTimeout(startOrdreProblem, 1400);
+      }
+    }
+
+    // "Reforme le mot" / "Remets les syllabes" (Écriture Malin) : une image
+    // s'affiche avec des cases vides, et des tuiles mélangées (lettres ou
+    // syllabes selon le mode) qu'il faut toucher dans le bon ordre pour
+    // reconstituer le mot.
+    function currentSpellPool(levelIdx) {
+      return state.mode === "syllordre" ? SYLLABLE_LEVEL_POOL[levelIdx] : WORD_LEVEL_POOL[levelIdx];
+    }
+
+    function renderSpellScreen() {
+      els.spellPic.textContent = state.spellEmoji;
+      els.spellSlots.innerHTML = "";
+      state.spellUnits.forEach(function () {
+        var slot = document.createElement("span");
+        slot.className = "spell-slot";
+        els.spellSlots.appendChild(slot);
+      });
+      var shuffledUnits = shuffleDifferent(state.spellUnits);
+      els.spellTiles.innerHTML = "";
+      shuffledUnits.forEach(function (unit, idx) {
+        var tile = document.createElement("button");
+        tile.type = "button";
+        tile.className = "spell-tile " + CANDY_COLORS[idx % CANDY_COLORS.length];
+        tile.textContent = unit;
+        tile.addEventListener("click", function () { onSpellTileTap(unit, tile); });
+        els.spellTiles.appendChild(tile);
+      });
+    }
+
+    function startSpellProblem() {
+      var levelIdx = Math.min(Math.max(state.level, MIN_LEVEL), MAX_LEVEL) - 1;
+      var pool = currentSpellPool(levelIdx);
+      var key = pool[randInt(0, pool.length - 1)];
+      var isSyll = state.mode === "syllordre";
+      var def = isSyll ? SYLLABLE_WORDS[key] : WORD_DEFS[key];
+      state.spellKey = key;
+      state.spellUnits = isSyll ? def.syllables.slice() : def.word.toUpperCase().split("");
+      state.spellFillIndex = 0;
+      state.spellEmoji = def.emoji;
+      renderSpellScreen();
+      saveProgress();
+    }
+
+    function onSpellTileTap(unit, btn) {
+      if (btn.disabled) return;
+      var expected = state.spellUnits[state.spellFillIndex];
+      if (unit === expected) {
+        btn.disabled = true;
+        var slot = els.spellSlots.children[state.spellFillIndex];
+        if (slot) slot.textContent = unit;
+        state.spellFillIndex++;
+        if (state.spellFillIndex === state.spellUnits.length) onSpellWin();
+        return;
+      }
+      // Pas de pénalité : une mauvaise tuile secoue juste, les cases déjà
+      // remplies restent acquises.
+      btn.classList.add("shake");
+      window.setTimeout(function () { btn.classList.remove("shake"); }, 400);
+    }
+
+    function onSpellWin() {
+      state.wrongStreak = 0;
+      state.correctStreak++;
+      var leveledUp = false;
+      var justWon = false;
+      if (state.correctStreak >= starsToLevelUp(state.mode)) {
+        if (state.level < MAX_LEVEL) {
+          state.level++;
+          leveledUp = true;
+        } else {
+          justWon = true;
+        }
+        state.correctStreak = 0;
+      }
+      if (!leveledUp && !justWon) renderLevel();
+      saveProgress();
+      if (leveledUp) {
+        window.setTimeout(function () { showLevelUp(state.level); }, 900);
+      } else if (justWon) {
+        window.setTimeout(showWin, 900);
+      } else {
+        window.setTimeout(startSpellProblem, 1200);
+      }
+    }
+
+    // "Trace la lettre" (Écriture Malin) : une grande lettre en pointillés
+    // sert de guide, et l'enfant la suit du doigt sur un canevas superposé
+    // — reprend le geste de dessin libre de Peinture Malin, sans validation
+    // stricte du tracé (l'objectif est le geste, pas la précision).
+    var traceCtx = null;
+    var TRACE_CANVAS_SIZE = 600;
+
+    function clearTraceCanvas() {
+      if (!traceCtx) return;
+      traceCtx.clearRect(0, 0, TRACE_CANVAS_SIZE, TRACE_CANVAS_SIZE);
+    }
+
+    function attachTraceDrawHandlers(canvas) {
+      function getPos(e) {
+        var rect = canvas.getBoundingClientRect();
+        var scaleX = TRACE_CANVAS_SIZE / rect.width;
+        var scaleY = TRACE_CANVAS_SIZE / rect.height;
+        return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
+      }
+      function startStroke(e) {
+        state.drawing = true;
+        if (canvas.setPointerCapture) canvas.setPointerCapture(e.pointerId);
+        var pos = getPos(e);
+        traceCtx.lineCap = "round";
+        traceCtx.lineJoin = "round";
+        traceCtx.lineWidth = 16;
+        traceCtx.strokeStyle = "#598ce6";
+        traceCtx.beginPath();
+        traceCtx.moveTo(pos.x, pos.y);
+        traceCtx.lineTo(pos.x, pos.y);
+        traceCtx.stroke();
+      }
+      function draw(e) {
+        if (!state.drawing) return;
+        var pos = getPos(e);
+        traceCtx.lineTo(pos.x, pos.y);
+        traceCtx.stroke();
+      }
+      function endStroke() { state.drawing = false; }
+      canvas.addEventListener("pointerdown", startStroke);
+      canvas.addEventListener("pointermove", draw);
+      canvas.addEventListener("pointerup", endStroke);
+      canvas.addEventListener("pointercancel", endStroke);
+    }
+
+    function startTraceProblem() {
+      var levelIdx = Math.min(Math.max(state.level, MIN_LEVEL), MAX_LEVEL) - 1;
+      var pool = TRACE_LEVEL_POOL[levelIdx];
+      state.traceLetter = pool[randInt(0, pool.length - 1)];
+      els.traceGuidePath.setAttribute("d", TRACE_LETTER_PATHS[state.traceLetter]);
+      els.traceFeedback.textContent = "";
+      clearTraceCanvas();
+      saveProgress();
+    }
+
+    function onTraceDone() {
+      state.wrongStreak = 0;
+      state.correctStreak++;
+      var leveledUp = false;
+      var justWon = false;
+      if (state.correctStreak >= starsToLevelUp(state.mode)) {
+        if (state.level < MAX_LEVEL) {
+          state.level++;
+          leveledUp = true;
+        } else {
+          justWon = true;
+        }
+        state.correctStreak = 0;
+      }
+      if (!leveledUp && !justWon) renderLevel();
+      saveProgress();
+      els.traceFeedback.textContent = "Bravo ! Bien tracé ! 🎉";
+      if (leveledUp) {
+        window.setTimeout(function () { showLevelUp(state.level); }, 900);
+      } else if (justWon) {
+        window.setTimeout(showWin, 900);
+      } else {
+        window.setTimeout(startTraceProblem, 1100);
+      }
+    }
+
     var CONFETTI_COLORS = ["var(--green-add)", "var(--orange-sub)", "var(--candy-blue)", "var(--candy-pink)", "var(--gold)"];
 
     function spawnConfetti(container, count) {
@@ -4949,7 +5998,8 @@
       if (isPaintMode(mode)) return "peinture";
       if (mode === "musiquelibre" || mode === "instruments" || mode === "pitch" || mode === "rythme") return "musique";
       if (mode === "animalname" || mode === "babies" || mode === "habitat" || mode === "diet") return "animaux";
-      if (mode === "paires") return "memoire";
+      if (mode === "paires" || mode === "disparu" || mode === "ordre" || mode === "change" || mode === "suitelum") return "memoire";
+      if (mode === "mot" || mode === "lettreman" || mode === "trace" || mode === "casse" || mode === "syllordre") return "ecriture";
       return null;
     }
 
@@ -4964,6 +6014,7 @@
       els.menuMusique.hidden = screen !== "musique";
       els.menuAnimaux.hidden = screen !== "animaux";
       els.menuMemoire.hidden = screen !== "memoire";
+      els.menuEcriture.hidden = screen !== "ecriture";
     }
 
     // Vers quel écran de menu revenir avec le bouton retour Android, pour
@@ -4977,7 +6028,8 @@
       peinture: "home",
       musique: "home",
       animaux: "home",
-      memoire: "home"
+      memoire: "home",
+      ecriture: "home"
     };
 
     function currentMenuScreen() {
@@ -4990,6 +6042,7 @@
       if (!els.menuMusique.hidden) return "musique";
       if (!els.menuAnimaux.hidden) return "animaux";
       if (!els.menuMemoire.hidden) return "memoire";
+      if (!els.menuEcriture.hidden) return "ecriture";
       return "home";
     }
 
@@ -5021,12 +6074,20 @@
       var music = mode === "musiquelibre";
       var rhythm = mode === "rythme";
       var memory = mode === "paires";
-      els.problemZone.hidden = paint || music || rhythm || memory;
-      els.answers.hidden = paint || music || rhythm || memory;
+      var suitelum = mode === "suitelum";
+      var ordre = mode === "ordre";
+      var spell = isSpellMode(mode);
+      var trace = mode === "trace";
+      els.problemZone.hidden = paint || music || rhythm || memory || suitelum || ordre || spell || trace;
+      els.answers.hidden = paint || music || rhythm || memory || suitelum || ordre || spell || trace;
       els.paintScreen.hidden = !paint;
       els.musicScreen.hidden = !music;
       els.rhythmScreen.hidden = !rhythm;
       els.memoryScreen.hidden = !memory;
+      els.suitelumScreen.hidden = !suitelum;
+      els.ordreScreen.hidden = !ordre;
+      els.spellScreen.hidden = !spell;
+      els.traceScreen.hidden = !trace;
       els.levelPill.hidden = mode === "dessine" || music;
       if (paint) {
         state.problem = null;
@@ -5047,6 +6108,26 @@
       if (memory) {
         state.problem = null;
         startMemoryProblem();
+        return;
+      }
+      if (suitelum) {
+        state.problem = null;
+        startSuitelumProblem();
+        return;
+      }
+      if (ordre) {
+        state.problem = null;
+        startOrdreProblem();
+        return;
+      }
+      if (spell) {
+        state.problem = null;
+        startSpellProblem();
+        return;
+      }
+      if (trace) {
+        state.problem = null;
+        startTraceProblem();
         return;
       }
 
@@ -5089,6 +6170,19 @@
     els.habitatCard.addEventListener("click", function () { selectMode("habitat"); });
     els.dietCard.addEventListener("click", function () { selectMode("diet"); });
     els.pairesCard.addEventListener("click", function () { selectMode("paires"); });
+    els.disparuCard.addEventListener("click", function () { selectMode("disparu"); });
+    els.ordreCard.addEventListener("click", function () { selectMode("ordre"); });
+    els.changeCard.addEventListener("click", function () { selectMode("change"); });
+    els.suitelumCard.addEventListener("click", function () { selectMode("suitelum"); });
+    els.motCard.addEventListener("click", function () { selectMode("mot"); });
+    els.lettremanCard.addEventListener("click", function () { selectMode("lettreman"); });
+    els.traceCard.addEventListener("click", function () { selectMode("trace"); });
+    els.casseCard.addEventListener("click", function () { selectMode("casse"); });
+    els.syllordreCard.addEventListener("click", function () { selectMode("syllordre"); });
+    els.traceClearBtn.addEventListener("click", function () { clearTraceCanvas(); });
+    els.traceDoneBtn.addEventListener("click", onTraceDone);
+    traceCtx = els.traceCanvas.getContext && els.traceCanvas.getContext("2d");
+    attachTraceDrawHandlers(els.traceCanvas);
     els.calcBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
     els.terms2BackBtn.addEventListener("click", function () { showMenuScreen("calc"); });
     els.terms3BackBtn.addEventListener("click", function () { showMenuScreen("calc"); });
@@ -5098,6 +6192,7 @@
     els.musiqueBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
     els.animauxBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
     els.memoireBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
+    els.ecritureBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
 
     els.levelNum.addEventListener("click", function () {
       if (!state.mode) return;
@@ -5116,14 +6211,14 @@
       state.locked = false;
       renderLevel();
       saveProgress();
-      if (isPaintMode(state.mode)) { startPaintProblem(); } else if (state.mode === "rythme") { startRhythmProblem(); } else if (state.mode === "paires") { startMemoryProblem(); } else { nextProblem(); }
+      if (isPaintMode(state.mode)) { startPaintProblem(); } else if (state.mode === "rythme") { startRhythmProblem(); } else if (state.mode === "paires") { startMemoryProblem(); } else if (state.mode === "suitelum") { startSuitelumProblem(); } else if (state.mode === "ordre") { startOrdreProblem(); } else if (isSpellMode(state.mode)) { startSpellProblem(); } else if (state.mode === "trace") { startTraceProblem(); } else { nextProblem(); }
     });
 
     els.levelUpContinueBtn.addEventListener("click", function () {
       els.levelUpOverlay.hidden = true;
       setThemeColor(THEME_COLOR_BAR);
       renderLevel();
-      if (isPaintMode(state.mode)) { startPaintProblem(); } else if (state.mode === "rythme") { startRhythmProblem(); } else if (state.mode === "paires") { startMemoryProblem(); } else { nextProblem(); }
+      if (isPaintMode(state.mode)) { startPaintProblem(); } else if (state.mode === "rythme") { startRhythmProblem(); } else if (state.mode === "paires") { startMemoryProblem(); } else if (state.mode === "suitelum") { startSuitelumProblem(); } else if (state.mode === "ordre") { startOrdreProblem(); } else if (isSpellMode(state.mode)) { startSpellProblem(); } else if (state.mode === "trace") { startTraceProblem(); } else { nextProblem(); }
     });
 
     els.winReplayBtn.addEventListener("click", function () {
@@ -5134,7 +6229,7 @@
       state.wrongStreak = 0;
       renderLevel();
       saveProgress();
-      if (isPaintMode(state.mode)) { startPaintProblem(); } else if (state.mode === "rythme") { startRhythmProblem(); } else if (state.mode === "paires") { startMemoryProblem(); } else { nextProblem(); }
+      if (isPaintMode(state.mode)) { startPaintProblem(); } else if (state.mode === "rythme") { startRhythmProblem(); } else if (state.mode === "paires") { startMemoryProblem(); } else if (state.mode === "suitelum") { startSuitelumProblem(); } else if (state.mode === "ordre") { startOrdreProblem(); } else if (isSpellMode(state.mode)) { startSpellProblem(); } else if (state.mode === "trace") { startTraceProblem(); } else { nextProblem(); }
     });
 
     els.winMenuBtn.addEventListener("click", function () {
