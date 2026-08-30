@@ -1821,6 +1821,7 @@
   .category-card-numbers { background: linear-gradient(135deg, #4fb3e8, #3d7fe0); }
   .category-card-body { background: linear-gradient(135deg, #8e5ce6, #6a4c93); }
   .category-card-paires { background: linear-gradient(135deg, #33c2c2, #598ce6); }
+  .category-card-pairesdrapeaux { background: linear-gradient(135deg, #3d7fe0, #e63946); }
   .category-card-disparu { background: linear-gradient(135deg, #ffc93c, #f2994a); }
   .category-card-ordre { background: linear-gradient(135deg, #ef5da8, #d9418c); }
   .category-card-change { background: linear-gradient(135deg, #43b98a, #2a9d6f); }
@@ -2585,6 +2586,11 @@
         <button class="category-card category-card-paires" type="button" id="pairesCard">
           <span class="icon emoji">🃏</span>
           <span>Paires cachées</span>
+          <span class="level-badge">PS-GS</span>
+        </button>
+        <button class="category-card category-card-pairesdrapeaux" type="button" id="pairesDrapeauxCard">
+          <span class="icon emoji">🌍</span>
+          <span>Paires cachées (drapeaux)</span>
           <span class="level-badge">PS-GS</span>
         </button>
         <button class="category-card category-card-disparu" type="button" id="disparuCard">
@@ -3467,6 +3473,11 @@
     // plateau reste un joli rectangle plutôt qu'une dernière ligne à moitié
     // vide.
     var MEMORY_SYMBOL_POOL = ["🐱", "🐶", "⚽", "☀️", "🐰", "🦆", "🐟", "🤖", "🚀", "🍌"];
+    // "Paires cachées (drapeaux)" : même jeu que "Paires cachées", avec des
+    // drapeaux de pays à la place des symboles — variante indépendante
+    // (progression et pile mélangée propres), choisis pour rester
+    // visuellement bien distincts les uns des autres.
+    var FLAG_SYMBOL_POOL = ["🇫🇷", "🇮🇹", "🇪🇸", "🇩🇪", "🇬🇧", "🇺🇸", "🇯🇵", "🇧🇷", "🇨🇦", "🇧🇪"];
     var MEMORY_LEVELS = {
       pairs: [3, 4, 6, 8, 10],
       columns: [3, 4, 4, 4, 4]
@@ -4592,6 +4603,7 @@
       habitatCard: document.getElementById("habitatCard"),
       dietCard: document.getElementById("dietCard"),
       pairesCard: document.getElementById("pairesCard"),
+      pairesDrapeauxCard: document.getElementById("pairesDrapeauxCard"),
       disparuCard: document.getElementById("disparuCard"),
       ordreCard: document.getElementById("ordreCard"),
       changeCard: document.getElementById("changeCard"),
@@ -5540,6 +5552,12 @@
       return mode === "trace" || mode === "traceforme";
     }
 
+    // "Paires cachées" et "Paires cachées (drapeaux)" partagent le même
+    // plateau : seul le pool de symboles pioché change.
+    function isMemoryMode(mode) {
+      return mode === "paires" || mode === "pairesdrapeaux";
+    }
+
     function currentPaintTemplate() {
       var levelIdx = Math.min(Math.max(state.level, MIN_LEVEL), MAX_LEVEL) - 1;
       var variants = PAINT_TEMPLATES[levelIdx];
@@ -6044,7 +6062,8 @@
     function startMemoryProblem() {
       var levelIdx = Math.min(Math.max(state.level, MIN_LEVEL), MAX_LEVEL) - 1;
       var pairsCount = MEMORY_LEVELS.pairs[levelIdx];
-      var chosenSymbols = shuffle(MEMORY_SYMBOL_POOL.slice()).slice(0, pairsCount);
+      var pool = state.mode === "pairesdrapeaux" ? FLAG_SYMBOL_POOL : MEMORY_SYMBOL_POOL;
+      var chosenSymbols = shuffle(pool.slice()).slice(0, pairsCount);
       var cards = shuffle(chosenSymbols.concat(chosenSymbols)).map(function (symbol) {
         return { symbol: symbol, matched: false };
       });
@@ -6576,7 +6595,7 @@
       if (isPaintMode(mode)) return "peinture";
       if (mode === "musiquelibre" || mode === "instruments" || mode === "pitch" || mode === "rythme") return "musique";
       if (mode === "animalname" || mode === "babies" || mode === "habitat" || mode === "diet") return "animaux";
-      if (mode === "paires" || mode === "disparu" || mode === "ordre" || mode === "change" || mode === "suitelum") return "memoire";
+      if (isMemoryMode(mode) || mode === "disparu" || mode === "ordre" || mode === "change" || mode === "suitelum") return "memoire";
       if (mode === "mot" || mode === "lettreman" || mode === "trace" || mode === "casse" || mode === "syllordre") return "ecriture";
       if (mode === "traceforme" || mode === "shapes" || mode === "fillforme" || mode === "intrus" || mode === "puzzle") return "formes";
       return null;
@@ -6656,7 +6675,7 @@
       var paint = isPaintMode(mode);
       var music = mode === "musiquelibre";
       var rhythm = mode === "rythme";
-      var memory = mode === "paires";
+      var memory = isMemoryMode(mode);
       var suitelum = mode === "suitelum";
       var ordre = mode === "ordre";
       var spell = isSpellMode(mode);
@@ -6760,6 +6779,7 @@
     els.habitatCard.addEventListener("click", function () { selectMode("habitat"); });
     els.dietCard.addEventListener("click", function () { selectMode("diet"); });
     els.pairesCard.addEventListener("click", function () { selectMode("paires"); });
+    els.pairesDrapeauxCard.addEventListener("click", function () { selectMode("pairesdrapeaux"); });
     els.disparuCard.addEventListener("click", function () { selectMode("disparu"); });
     els.ordreCard.addEventListener("click", function () { selectMode("ordre"); });
     els.changeCard.addEventListener("click", function () { selectMode("change"); });
@@ -6808,14 +6828,14 @@
       state.locked = false;
       renderLevel();
       saveProgress();
-      if (isPaintMode(state.mode)) { startPaintProblem(); } else if (state.mode === "rythme") { startRhythmProblem(); } else if (state.mode === "paires") { startMemoryProblem(); } else if (state.mode === "suitelum") { startSuitelumProblem(); } else if (state.mode === "ordre") { startOrdreProblem(); } else if (isSpellMode(state.mode)) { startSpellProblem(); } else if (isTraceMode(state.mode)) { startTraceProblem(); } else if (state.mode === "fillforme") { startFillFormeProblem(); } else { nextProblem(); }
+      if (isPaintMode(state.mode)) { startPaintProblem(); } else if (state.mode === "rythme") { startRhythmProblem(); } else if (isMemoryMode(state.mode)) { startMemoryProblem(); } else if (state.mode === "suitelum") { startSuitelumProblem(); } else if (state.mode === "ordre") { startOrdreProblem(); } else if (isSpellMode(state.mode)) { startSpellProblem(); } else if (isTraceMode(state.mode)) { startTraceProblem(); } else if (state.mode === "fillforme") { startFillFormeProblem(); } else { nextProblem(); }
     });
 
     els.levelUpContinueBtn.addEventListener("click", function () {
       els.levelUpOverlay.hidden = true;
       setThemeColor(THEME_COLOR_BAR);
       renderLevel();
-      if (isPaintMode(state.mode)) { startPaintProblem(); } else if (state.mode === "rythme") { startRhythmProblem(); } else if (state.mode === "paires") { startMemoryProblem(); } else if (state.mode === "suitelum") { startSuitelumProblem(); } else if (state.mode === "ordre") { startOrdreProblem(); } else if (isSpellMode(state.mode)) { startSpellProblem(); } else if (isTraceMode(state.mode)) { startTraceProblem(); } else if (state.mode === "fillforme") { startFillFormeProblem(); } else { nextProblem(); }
+      if (isPaintMode(state.mode)) { startPaintProblem(); } else if (state.mode === "rythme") { startRhythmProblem(); } else if (isMemoryMode(state.mode)) { startMemoryProblem(); } else if (state.mode === "suitelum") { startSuitelumProblem(); } else if (state.mode === "ordre") { startOrdreProblem(); } else if (isSpellMode(state.mode)) { startSpellProblem(); } else if (isTraceMode(state.mode)) { startTraceProblem(); } else if (state.mode === "fillforme") { startFillFormeProblem(); } else { nextProblem(); }
     });
 
     els.winReplayBtn.addEventListener("click", function () {
@@ -6826,7 +6846,7 @@
       state.wrongStreak = 0;
       renderLevel();
       saveProgress();
-      if (isPaintMode(state.mode)) { startPaintProblem(); } else if (state.mode === "rythme") { startRhythmProblem(); } else if (state.mode === "paires") { startMemoryProblem(); } else if (state.mode === "suitelum") { startSuitelumProblem(); } else if (state.mode === "ordre") { startOrdreProblem(); } else if (isSpellMode(state.mode)) { startSpellProblem(); } else if (isTraceMode(state.mode)) { startTraceProblem(); } else if (state.mode === "fillforme") { startFillFormeProblem(); } else { nextProblem(); }
+      if (isPaintMode(state.mode)) { startPaintProblem(); } else if (state.mode === "rythme") { startRhythmProblem(); } else if (isMemoryMode(state.mode)) { startMemoryProblem(); } else if (state.mode === "suitelum") { startSuitelumProblem(); } else if (state.mode === "ordre") { startOrdreProblem(); } else if (isSpellMode(state.mode)) { startSpellProblem(); } else if (isTraceMode(state.mode)) { startTraceProblem(); } else if (state.mode === "fillforme") { startFillFormeProblem(); } else { nextProblem(); }
     });
 
     els.winMenuBtn.addEventListener("click", function () {
