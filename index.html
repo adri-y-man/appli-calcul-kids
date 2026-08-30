@@ -5927,6 +5927,15 @@
       var audio = freePlayAudioCache[state.musicInstrument];
       if (!audio) {
         audio = new Audio(src);
+        // Par défaut, les navigateurs corrigent automatiquement la
+        // hauteur du son quand on change playbackRate (pour accélérer une
+        // vidéo sans effet "petit robot") — l'effet exactement inverse de
+        // ce qu'on veut ici (le tourne-disque doit changer de hauteur en
+        // changeant de vitesse). Il faut explicitement désactiver cette
+        // correction, sinon les 7 touches jouent toutes la même note.
+        audio.preservesPitch = false;
+        audio.mozPreservesPitch = false;
+        audio.webkitPreservesPitch = false;
         freePlayAudioCache[state.musicInstrument] = audio;
       }
       try {
