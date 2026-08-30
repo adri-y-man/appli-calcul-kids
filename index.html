@@ -383,17 +383,6 @@
     line-height: 1;
   }
 
-  /* ---------- "Quel instrument ?" : icône dessinée pour la harpe, qui n'a
-     pas d'emoji Unicode (voir INSTRUMENT_DEFS.harpe) — dimensionnée en
-     "em" pour suivre la même taille que les emoji des autres boutons ---------- */
-
-  .instrument-svg-icon {
-    display: block;
-    width: 1em;
-    height: 1em;
-    margin: 0 auto;
-  }
-
   /* ---------- jeu "Animaux" (Anglais Malin) : vraie photo au lieu de
      l'emoji dans les boutons de réponse ---------- */
 
@@ -1604,7 +1593,7 @@
 
   .fox-walker {
     position: absolute;
-    bottom: env(safe-area-inset-bottom);
+    bottom: calc(env(safe-area-inset-bottom) + 0.6rem);
     left: -110px;
     width: clamp(70px, 12vw, 100px);
     height: auto;
@@ -3458,22 +3447,7 @@
       saxophone: { fr: "Saxophone", emoji: "🎷" },
       accordeon: { fr: "Accordéon", emoji: "🪗" },
       banjo: { fr: "Banjo", emoji: "🪕" },
-      // Aucun emoji "harpe" n'existe dans Unicode (déjà vérifié en cherchant
-      // le logo de Formes Malin) : icône dessinée à la main plutôt qu'un
-      // emoji trompeur, rendue via "svg" au lieu de "emoji" dans les
-      // boutons de réponse (voir renderAnswers, cas "instruments").
-      harpe: {
-        fr: "Harpe",
-        svg: '<svg viewBox="0 0 100 100" class="instrument-svg-icon" aria-hidden="true">' +
-          '<path d="M48 4 L34 92 L86 92 Q94 50 74 25 Q64 12 48 4 Z" fill="#d99a4e" stroke="#6b4423" stroke-width="4" stroke-linejoin="round"/>' +
-          '<g stroke="#fff8ee" stroke-width="4" stroke-linecap="round">' +
-          '<line x1="46" y1="18" x2="80" y2="34"/>' +
-          '<line x1="43" y1="34" x2="85" y2="48"/>' +
-          '<line x1="40" y1="50" x2="87" y2="62"/>' +
-          '<line x1="37" y1="66" x2="86" y2="76"/>' +
-          '<line x1="35" y1="82" x2="82" y2="88"/>' +
-          "</g></svg>"
-      }
+      harpe: { fr: "Harpe", emoji: "🪉" }
     };
     var INSTRUMENT_LEVEL_POOL = [
       ["tambour", "piano", "trompette"],
@@ -5328,15 +5302,8 @@
           var def = INSTRUMENT_DEFS[key];
           var btn = document.createElement("button");
           btn.type = "button";
-          // "harpe" n'a pas d'emoji Unicode : une icône dessinée à la main
-          // (def.svg) remplace le glyphe emoji dans ce seul cas.
-          if (def.svg) {
-            btn.className = "answer-btn picture-btn " + instrumentPalette[idx % instrumentPalette.length];
-            btn.innerHTML = def.svg;
-          } else {
-            btn.className = "answer-btn picture-btn emoji " + instrumentPalette[idx % instrumentPalette.length];
-            btn.textContent = def.emoji;
-          }
+          btn.className = "answer-btn picture-btn emoji " + instrumentPalette[idx % instrumentPalette.length];
+          btn.textContent = def.emoji;
           btn.setAttribute("data-value", key);
           btn.setAttribute("aria-label", "Répondre " + def.fr);
           btn.addEventListener("click", function () { onAnswer(key, btn); });
