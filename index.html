@@ -1520,15 +1520,22 @@
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    padding: clamp(4rem, 14vh, 6.5rem) clamp(1rem, 4vw, 2rem) clamp(5rem, 16vh, 8rem);
+    padding: clamp(4rem, 14vh, 6.5rem) clamp(1rem, 4vw, 2rem) clamp(1.5rem, 5vh, 2.5rem);
     overflow-y: auto;
     background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 100%);
   }
 
   /* l'écran d'accueil (choix de la section) reste centré verticalement,
      contrairement aux sous-menus qui se calent tous au même niveau,
-     un peu sous le titre de l'appli, pour être uniformes entre eux. */
-  #menuHome { align-self: center; }
+     un peu sous le titre de l'appli, pour être uniformes entre eux. Lui
+     seul a besoin d'un grand espace sous son contenu, pour laisser le
+     renard se promener sans passer par-dessus les dernières cartes —
+     les sous-menus n'ont pas ce renard, donc gardent le padding réduit
+     de .menu-overlay au lieu d'un grand vide sous leur dernier bouton. */
+  #menuHome {
+    align-self: center;
+    padding-bottom: clamp(4.5rem, 16vh, 7rem);
+  }
 
   .menu-overlay[hidden] { display: none; }
 
