@@ -1533,14 +1533,23 @@
   .menu-overlay[hidden] { display: none; }
 
 
+  /* Fond plein (et pas juste derrière le logo) : sinon, en faisant défiler
+     un long sous-menu, les cartes de jeu remontent visuellement "à travers"
+     l'en-tête fixe et donnent une impression de collision avec le texte du
+     logo. Couleur alignée sur le haut du dégradé du fond (var(--sky-top)),
+     qui correspond déjà à la couleur affichée à cet endroit précis de
+     l'écran, pour une transition invisible entre le fond et l'en-tête. */
   .menu-brand {
     position: fixed;
-    top: max(0.8rem, env(safe-area-inset-top));
-    left: max(0.9rem, env(safe-area-inset-left));
-    z-index: 1;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 15;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    padding: max(0.8rem, env(safe-area-inset-top)) 1rem 0.8rem max(0.9rem, env(safe-area-inset-left));
+    background: var(--sky-top);
   }
 
   .menu-brand-text {
