@@ -1906,7 +1906,7 @@
 
   #menuHome .category-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
     align-items: start;
     gap: clamp(0.7rem, 3.5vw, 1.4rem) clamp(0.4rem, 2vw, 1rem);
   }
@@ -2010,9 +2010,6 @@
     /* trop peu de hauteur pour laisser le renard se promener sans gêner
        le contenu du menu, qui défile déjà dans cet espace réduit. */
     .fox-walk-lane { display: none; }
-
-    .menu-brand-text { font-size: clamp(1rem, 5vh, 1.3rem); }
-    .menu-logo { width: clamp(1.8rem, 7vh, 2.2rem); height: clamp(1.8rem, 7vh, 2.2rem); }
 
     .menu-panel { gap: clamp(0.4rem, 2vh, 0.65rem); }
     .menu-title { font-size: clamp(1.1rem, 6vh, 1.5rem); }
