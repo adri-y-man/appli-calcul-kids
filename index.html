@@ -687,7 +687,12 @@
   }
 
   @media (min-width: 640px) {
-    .answers { flex-direction: row; }
+    /* sans "align-items: center", les réponses s'étirent pour remplir
+       toute la hauteur disponible de .answers (qui grandit librement dans
+       .scene) : sur tablette/ordinateur, où cette hauteur est grande, les
+       boutons devenaient des colonnes démesurées au lieu de rester des
+       boutons de taille raisonnable. */
+    .answers { flex-direction: row; align-items: center; }
     /* Chaque réponse d'Animaux Malin devient une colonne haute et étroite
        ici (comme .answer-btn seul auparavant) : le bouton "écouter" doit
        passer sous le mot plutôt qu'à côté, sinon la colonne se retrouve
@@ -947,7 +952,7 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: clamp(0.6rem, 3vw, 1rem);
-    width: min(82vw, 28rem);
+    width: min(82vw, 40rem);
     aspect-ratio: 1;
     max-height: 100%;
   }
@@ -991,7 +996,7 @@
     display: grid;
     grid-template-columns: repeat(var(--memory-columns), 1fr);
     gap: clamp(0.4rem, 2vw, 0.8rem);
-    width: min(92vw, 30rem);
+    width: min(92vw, 44rem);
     max-height: 100%;
     overflow-y: auto;
   }
@@ -1061,7 +1066,7 @@
     flex-wrap: wrap;
     gap: clamp(0.5rem, 2.5vw, 0.9rem);
     justify-content: center;
-    width: min(88vw, 28rem);
+    width: min(88vw, 40rem);
   }
 
   .ordre-pad {
@@ -1069,9 +1074,9 @@
     border: none;
     cursor: pointer;
     font-family: inherit;
-    width: clamp(4.8rem, 20vw, 6.8rem);
-    height: clamp(4.8rem, 20vw, 6.8rem);
-    font-size: clamp(2.4rem, 11vw, 3.6rem);
+    width: clamp(4.8rem, 20vw, 9rem);
+    height: clamp(4.8rem, 20vw, 9rem);
+    font-size: clamp(2.4rem, 11vw, 4.6rem);
     border-radius: clamp(1rem, 3.5vw, 1.5rem);
     background: var(--candy-blue);
     box-shadow: 0 10px 20px -10px rgba(31, 42, 60, 0.5);
