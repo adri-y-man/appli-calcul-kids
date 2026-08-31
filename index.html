@@ -673,6 +673,8 @@
     display: flex;
   }
 
+  .answer-btn.shape-icon-btn { background: var(--white); }
+
   .shape-icon-btn svg { display: block; width: 100%; height: 100%; }
 
   .shape-icon-btn-small {
@@ -3808,20 +3810,18 @@
     var SHAPE_QUIZ_COLORS = ["#e63946", "#3d7fe0", "#43b98a", "#f2994a", "#8e5ce6", "#ef5da8", "#33c2c2", "#ffd400"];
 
     // "Trouve l'intrus" et "Complète le puzzle" affichent leurs formes sans
-    // fond, à même les boutons-réponse turquoise (--candy-teal) : on exclut
-    // ce turquoise de leur tirage de couleur pour que la forme ne se fonde
-    // jamais dans le bouton.
-    var SHAPE_ICON_BTN_COLORS = SHAPE_QUIZ_COLORS.filter(function (c) { return c !== "#33c2c2"; });
+    // fond, à même les boutons-réponse blancs : on exclut le jaune de leur
+    // tirage de couleur, sinon la forme se voit à peine sur ce fond clair.
+    var SHAPE_ICON_BTN_COLORS = SHAPE_QUIZ_COLORS.filter(function (c) { return c !== "#ffd400"; });
 
     // "Trouve l'intrus" : nombre de cases dans la grille pour chaque niveau.
     var INTRUS_GRID_SIZE = [4, 6, 6, 8, 9];
 
     // "Remplis la forme" : l'enfant colorie au doigt (glisser = peindre),
     // le trait est automatiquement retenu à l'intérieur du contour. Part de
-    // couverture (0 à 1) de la forme nécessaire pour valider, croissant
-    // avec le niveau (un tout petit n'a pas besoin de tout colorier au
-    // pixel près pour que ce soit reconnu comme "réussi").
-    var FILLFORME_COVERAGE_FOR_LEVEL = [0.45, 0.55, 0.62, 0.7, 0.78];
+    // couverture (0 à 1) de la forme nécessaire pour valider : la même
+    // exigence à tous les niveaux, il faut vraiment colorier toute la forme.
+    var FILLFORME_COVERAGE_NEEDED = 0.95;
     var FILLFORME_FILL_COLORS = ["#e63946", "#3d7fe0", "#43b98a", "#f2994a", "#8e5ce6", "#ef5da8"];
     var FILLFORME_CANVAS_SIZE = 600;
     var FILLFORME_COORD_SIZE = 200;
@@ -6778,7 +6778,7 @@
       state.fillFormeKey = drawFromBag(pool, "fillFormeBag", "fillFormeBagPool", "lastFillFormeKey");
       state.lastFillFormeKey = state.fillFormeKey;
       state.fillFormeColor = FILLFORME_FILL_COLORS[randInt(0, FILLFORME_FILL_COLORS.length - 1)];
-      state.fillFormeCoverageNeeded = FILLFORME_COVERAGE_FOR_LEVEL[levelIdx];
+      state.fillFormeCoverageNeeded = FILLFORME_COVERAGE_NEEDED;
       state.fillFormeDone = false;
       els.fillFormeOutline.innerHTML = shapeOutlineSvgInner(state.fillFormeKey, "#1f2a3c", false);
       fillFormeShapePath = typeof Path2D !== "undefined" ? new Path2D(shapeTracePath(state.fillFormeKey)) : null;
