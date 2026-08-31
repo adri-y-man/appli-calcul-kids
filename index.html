@@ -3704,17 +3704,13 @@
       coeur: { fr: "Cœur", type: "path", d: "M100 164 C40 120 16 80 16 52 C16 24 40 8 64 8 C84 8 100 24 100 44 C100 24 116 8 136 8 C160 8 184 24 184 52 C184 80 160 120 100 164 Z" }
     };
 
-    // "stroke" est optionnel : un contour ajouté à la forme elle-même (pas
-    // un fond) pour rester lisible sur n'importe quel fond, sans faire
-    // croire que la forme a un bord rond (voir "Quelle forme ?" ci-dessous).
-    function shapeFillSvgInner(key, fill, stroke) {
+    function shapeFillSvgInner(key, fill) {
       var d = SHAPE_DEFS[key];
-      var strokeAttr = stroke ? ' stroke="' + stroke + '" stroke-width="5" stroke-linejoin="round"' : "";
-      if (d.type === "circle") return '<circle cx="' + d.cx + '" cy="' + d.cy + '" r="' + d.r + '" fill="' + fill + '"' + strokeAttr + '/>';
-      if (d.type === "ellipse") return '<ellipse cx="' + d.cx + '" cy="' + d.cy + '" rx="' + d.rx + '" ry="' + d.ry + '" fill="' + fill + '"' + strokeAttr + '/>';
-      if (d.type === "rect") return '<rect x="' + d.x + '" y="' + d.y + '" width="' + d.w + '" height="' + d.h + '" rx="20" fill="' + fill + '"' + strokeAttr + '/>';
-      if (d.type === "polygon") return '<polygon points="' + d.points + '" fill="' + fill + '"' + strokeAttr + '/>';
-      return '<path d="' + d.d + '" fill="' + fill + '"' + strokeAttr + '/>';
+      if (d.type === "circle") return '<circle cx="' + d.cx + '" cy="' + d.cy + '" r="' + d.r + '" fill="' + fill + '"/>';
+      if (d.type === "ellipse") return '<ellipse cx="' + d.cx + '" cy="' + d.cy + '" rx="' + d.rx + '" ry="' + d.ry + '" fill="' + fill + '"/>';
+      if (d.type === "rect") return '<rect x="' + d.x + '" y="' + d.y + '" width="' + d.w + '" height="' + d.h + '" fill="' + fill + '"/>';
+      if (d.type === "polygon") return '<polygon points="' + d.points + '" fill="' + fill + '"/>';
+      return '<path d="' + d.d + '" fill="' + fill + '"/>';
     }
 
     function shapeOutlineSvgInner(key, stroke, dashed) {
@@ -3722,7 +3718,7 @@
       var extra = ' fill="none" stroke="' + stroke + '" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"' + (dashed ? ' stroke-dasharray="6 9"' : '');
       if (d.type === "circle") return '<circle cx="' + d.cx + '" cy="' + d.cy + '" r="' + d.r + '"' + extra + '/>';
       if (d.type === "ellipse") return '<ellipse cx="' + d.cx + '" cy="' + d.cy + '" rx="' + d.rx + '" ry="' + d.ry + '"' + extra + '/>';
-      if (d.type === "rect") return '<rect x="' + d.x + '" y="' + d.y + '" width="' + d.w + '" height="' + d.h + '" rx="20"' + extra + '/>';
+      if (d.type === "rect") return '<rect x="' + d.x + '" y="' + d.y + '" width="' + d.w + '" height="' + d.h + '"' + extra + '/>';
       if (d.type === "polygon") return '<polygon points="' + d.points + '"' + extra + '/>';
       return '<path d="' + d.d + '"' + extra + '/>';
     }
@@ -4957,7 +4953,7 @@
         els.problem.removeAttribute("data-terms");
         var shapeWrap = document.createElement("span");
         shapeWrap.className = "shape-prompt";
-        shapeWrap.innerHTML = '<svg viewBox="0 0 200 200" aria-hidden="true">' + shapeFillSvgInner(p.shapeKey, p.shapeColor, "#1f2a3c") + "</svg>";
+        shapeWrap.innerHTML = '<svg viewBox="0 0 200 200" aria-hidden="true">' + shapeFillSvgInner(p.shapeKey, p.shapeColor) + "</svg>";
         els.problem.appendChild(shapeWrap);
         els.problem.classList.remove("pop");
         void els.problem.offsetWidth;
