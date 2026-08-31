@@ -2008,7 +2008,12 @@
 
     .menu-overlay {
       align-items: flex-start;
-      padding: clamp(2.6rem, 13vh, 3.4rem) clamp(0.6rem, 3vw, 1rem) clamp(0.6rem, 3vh, 1rem);
+      /* le bandeau .menu-brand est fixed et opaque par-dessus le menu : sa
+         hauteur réelle (même calcul que ses propres padding/logo) doit être
+         entièrement dégagée ici, sinon le titre du sous-menu (et son bouton
+         retour) démarre caché dessous. */
+      padding: calc(max(0.8rem, env(safe-area-inset-top)) + 0.8rem + clamp(2.6rem, 8.4vw, 3.3rem) + 0.6rem)
+        clamp(0.6rem, 3vw, 1rem) clamp(0.6rem, 3vh, 1rem);
       overflow-y: auto;
     }
 
@@ -2041,8 +2046,16 @@
     }
     .mode-flat .icon { font-size: clamp(1.3rem, 5vh, 1.6rem); }
 
-    .category-grid { gap: clamp(0.35rem, 1.6vh, 0.5rem); }
+    /* 2 colonnes plutôt qu'une pile d'une seule carte par ligne : profite
+       de la largeur disponible en paysage, et surtout évite d'avoir à
+       faire défiler tout le sous-menu pour voir tous les jeux. */
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: clamp(0.35rem, 1.6vh, 0.5rem) clamp(0.4rem, 2vw, 0.7rem);
+    }
     .category-card {
+      width: auto;
       padding: clamp(0.45rem, 2vh, 0.7rem) 0.8rem;
       font-size: clamp(0.85rem, 3.4vh, 1.05rem);
     }
