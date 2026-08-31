@@ -448,6 +448,9 @@
     display: block;
     width: clamp(9rem, 40vw, 13.5rem);
     height: clamp(9rem, 40vw, 13.5rem);
+    padding: clamp(0.5rem, 2.5vw, 0.9rem);
+    background: var(--white);
+    border-radius: clamp(1rem, 4vw, 1.6rem);
     filter: drop-shadow(0 10px 16px rgba(31, 42, 60, 0.3));
   }
 
@@ -4311,12 +4314,10 @@
       state.lastShapeKey = targetKey;
       var distractors = shuffle(pool.filter(function (k) { return k !== targetKey; })).slice(0, 2);
       var choices = shuffle(distractors.concat([targetKey]));
-      var color = SHAPE_QUIZ_COLORS[randInt(0, SHAPE_QUIZ_COLORS.length - 1)];
       var orientation = Math.random() < 0.5 ? "h" : "v";
       return {
         kind: "shapes",
         shapeKey: targetKey,
-        shapeColor: color,
         shapeOrientation: orientation,
         answer: targetKey,
         choices: choices
@@ -5033,7 +5034,7 @@
         els.problem.removeAttribute("data-terms");
         var shapeWrap = document.createElement("span");
         shapeWrap.className = "shape-prompt";
-        shapeWrap.innerHTML = '<svg viewBox="0 0 200 200" aria-hidden="true">' + shapeFillSvgInner(p.shapeKey, p.shapeColor, p.shapeOrientation) + "</svg>";
+        shapeWrap.innerHTML = '<svg viewBox="0 0 200 200" aria-hidden="true">' + shapeFillSvgInner(p.shapeKey, "#1f2a3c", p.shapeOrientation) + "</svg>";
         els.problem.appendChild(shapeWrap);
         els.problem.classList.remove("pop");
         void els.problem.offsetWidth;
