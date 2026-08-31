@@ -3694,7 +3694,7 @@
       carre: { fr: "Carré", type: "rect", x: 24, y: 24, w: 152, h: 152 },
       triangle: { fr: "Triangle", type: "polygon", points: "100,20 180,164 20,164" },
       rectangle: { fr: "Rectangle", type: "rect", x: 16, y: 48, w: 168, h: 104 },
-      losange: { fr: "Losange", type: "polygon", points: "100,16 184,100 100,184 16,100" },
+      losange: { fr: "Losange", type: "diamond", cx: 100, cy: 100, hw: 80, hh: 52 },
       ovale: { fr: "Ovale", type: "ellipse", cx: 100, cy: 100, rx: 84, ry: 56 },
       etoile: { fr: "Étoile", type: "polygon", points: "100,20 117.6,75.8 176,75.2 128.6,109.2 147,164.8 100,130 53,164.8 71.4,109.2 24,75.2 82.4,75.8" },
       hexagone: { fr: "Hexagone", type: "polygon", points: "100,20 169.2,60 169.2,140 100,180 30.8,140 30.8,60" },
@@ -3702,32 +3702,52 @@
       coeur: { fr: "Cœur", type: "path", d: "M100 164 C40 120 16 80 16 52 C16 24 40 8 64 8 C84 8 100 24 100 44 C100 24 116 8 136 8 C160 8 184 24 184 52 C184 80 160 120 100 164 Z" }
     };
 
-    function shapeFillSvgInner(key, fill) {
+    // Rectangle, ovale et losange ont un sens "large" par défaut dans
+    // SHAPE_DEFS ; orientation "v" échange largeur et hauteur (autour du
+    // centre commun 100,100 à tous les SHAPE_DEFS) pour obtenir le même
+    // contour tourné d'un quart de tour, histoire qu'un rectangle ou un
+    // losange ne soit pas identifié à sa seule orientation "couchée". Les
+    // formes symétriques (rond, carré...) ignorent ce paramètre.
+    function orientedShapeGeom(key, orientation) {
       var d = SHAPE_DEFS[key];
+      if (orientation !== "v") return d;
+      if (d.type === "rect") return { type: "rect", x: 100 - d.h / 2, y: 100 - d.w / 2, w: d.h, h: d.w };
+      if (d.type === "ellipse") return { type: "ellipse", cx: d.cx, cy: d.cy, rx: d.ry, ry: d.rx };
+      if (d.type === "diamond") return { type: "diamond", cx: d.cx, cy: d.cy, hw: d.hh, hh: d.hw };
+      return d;
+    }
+
+    function diamondPoints(d) {
+      return (d.cx) + "," + (d.cy - d.hh) + " " + (d.cx + d.hw) + "," + d.cy + " " + d.cx + "," + (d.cy + d.hh) + " " + (d.cx - d.hw) + "," + d.cy;
+    }
+
+    function shapeFillSvgInner(key, fill, orientation) {
+      var d = orientedShapeGeom(key, orientation);
       if (d.type === "circle") return '<circle cx="' + d.cx + '" cy="' + d.cy + '" r="' + d.r + '" fill="' + fill + '"/>';
       if (d.type === "ellipse") return '<ellipse cx="' + d.cx + '" cy="' + d.cy + '" rx="' + d.rx + '" ry="' + d.ry + '" fill="' + fill + '"/>';
       if (d.type === "rect") return '<rect x="' + d.x + '" y="' + d.y + '" width="' + d.w + '" height="' + d.h + '" fill="' + fill + '"/>';
+      if (d.type === "diamond") return '<polygon points="' + diamondPoints(d) + '" fill="' + fill + '"/>';
       if (d.type === "polygon") return '<polygon points="' + d.points + '" fill="' + fill + '"/>';
       return '<path d="' + d.d + '" fill="' + fill + '"/>';
     }
 
-    function shapeOutlineSvgInner(key, stroke, dashed) {
-      var d = SHAPE_DEFS[key];
+    function shapeOutlineSvgInner(key, stroke, dashed, orientation) {
+      var d = orientedShapeGeom(key, orientation);
       var extra = ' fill="none" stroke="' + stroke + '" stroke-width="7" stroke-linejoin="round" stroke-linecap="round"' + (dashed ? ' stroke-dasharray="6 9"' : '');
       if (d.type === "circle") return '<circle cx="' + d.cx + '" cy="' + d.cy + '" r="' + d.r + '"' + extra + '/>';
       if (d.type === "ellipse") return '<ellipse cx="' + d.cx + '" cy="' + d.cy + '" rx="' + d.rx + '" ry="' + d.ry + '"' + extra + '/>';
       if (d.type === "rect") return '<rect x="' + d.x + '" y="' + d.y + '" width="' + d.w + '" height="' + d.h + '"' + extra + '/>';
+      if (d.type === "diamond") return '<polygon points="' + diamondPoints(d) + '"' + extra + '/>';
       if (d.type === "polygon") return '<polygon points="' + d.points + '"' + extra + '/>';
       return '<path d="' + d.d + '"' + extra + '/>';
     }
-
 
     // Chemin unique (commandes M/L/A) utilisable comme "d" d'un <path> :
     // c'est ce que veut le guide pointillé de "Trace la forme" (même
     // élément <path> que "Trace la lettre"), donc les cercles/ellipses
     // doivent être convertis en deux arcs plutôt que rester des <circle>.
-    function shapeTracePath(key) {
-      var d = SHAPE_DEFS[key];
+    function shapeTracePath(key, orientation) {
+      var d = orientedShapeGeom(key, orientation);
       if (d.type === "circle") {
         return "M" + (d.cx + d.r) + "," + d.cy + " A" + d.r + "," + d.r + " 0 1,0 " + (d.cx - d.r) + "," + d.cy + " A" + d.r + "," + d.r + " 0 1,0 " + (d.cx + d.r) + "," + d.cy + " Z";
       }
@@ -3737,9 +3757,13 @@
       if (d.type === "rect") {
         return "M" + d.x + "," + d.y + " L" + (d.x + d.w) + "," + d.y + " L" + (d.x + d.w) + "," + (d.y + d.h) + " L" + d.x + "," + (d.y + d.h) + " Z";
       }
-      if (d.type === "polygon") {
-        var pts = d.points.split(" ");
+      if (d.type === "diamond") {
+        var pts = diamondPoints(d).split(" ");
         return "M" + pts[0] + " L" + pts.slice(1).join(" L") + " Z";
+      }
+      if (d.type === "polygon") {
+        var pts2 = d.points.split(" ");
+        return "M" + pts2[0] + " L" + pts2.slice(1).join(" L") + " Z";
       }
       return d.d;
     }
@@ -4240,10 +4264,12 @@
       var distractors = shuffle(pool.filter(function (k) { return k !== targetKey; })).slice(0, 2);
       var choices = shuffle(distractors.concat([targetKey]));
       var color = SHAPE_QUIZ_COLORS[randInt(0, SHAPE_QUIZ_COLORS.length - 1)];
+      var orientation = Math.random() < 0.5 ? "h" : "v";
       return {
         kind: "shapes",
         shapeKey: targetKey,
         shapeColor: color,
+        shapeOrientation: orientation,
         answer: targetKey,
         choices: choices
       };
@@ -4952,7 +4978,7 @@
         els.problem.removeAttribute("data-terms");
         var shapeWrap = document.createElement("span");
         shapeWrap.className = "shape-prompt";
-        shapeWrap.innerHTML = '<svg viewBox="0 0 200 200" aria-hidden="true">' + shapeFillSvgInner(p.shapeKey, p.shapeColor) + "</svg>";
+        shapeWrap.innerHTML = '<svg viewBox="0 0 200 200" aria-hidden="true">' + shapeFillSvgInner(p.shapeKey, p.shapeColor, p.shapeOrientation) + "</svg>";
         els.problem.appendChild(shapeWrap);
         els.problem.classList.remove("pop");
         void els.problem.offsetWidth;
