@@ -653,7 +653,8 @@
   }
 
   /* ---------- Formes Malin : "Trouve l'intrus" — grille de 4 à 9 formes
-     tactiles, 3 colonnes fixes quel que soit le nombre de cases ---------- */
+     tactiles, 3 colonnes (2 au niveau 1, qui n'a que 4 cases : .answers-grid-2
+     ci-dessus donne alors une grille 2x2 bien carrée) ---------- */
 
   .answers.answers-grid-3 {
     display: grid;
@@ -1238,24 +1239,26 @@
   .fillforme-screen[hidden] { display: none; }
 
   .fillforme-stage {
-    appearance: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
+    position: relative;
     width: min(72vw, 60vh, 20rem);
     aspect-ratio: 1;
     background: var(--white);
     border-radius: clamp(1rem, 4vw, 1.6rem);
     box-shadow: 0 12px 24px -14px rgba(31, 42, 60, 0.45);
-    transition: transform 0.1s ease;
+    overflow: hidden;
+    touch-action: none;
   }
 
-  .fillforme-stage:active { transform: scale(0.97); }
-  .fillforme-stage:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
+  .fillforme-stage canvas,
+  .fillforme-stage svg {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
 
-  .fillforme-stage svg { display: block; width: 100%; height: 100%; }
-
-  .fillforme-fill-rect { transition: transform 0.25s ease; }
+  .fillforme-stage svg { pointer-events: none; }
 
   .fillforme-tap-hint {
     margin: 0;
@@ -2222,16 +2225,11 @@
   </section>
 
   <section class="fillforme-screen" id="fillFormeScreen" hidden>
-    <button type="button" class="fillforme-stage" id="fillFormeStage" aria-label="Touche pour colorier la forme">
-      <svg viewBox="0 0 200 200" aria-hidden="true">
-        <defs><clipPath id="fillFormeClip"></clipPath></defs>
-        <g clip-path="url(#fillFormeClip)">
-          <rect id="fillFormeFillRect" class="fillforme-fill-rect" x="0" y="0" width="200" height="200" />
-        </g>
-        <g id="fillFormeOutline"></g>
-      </svg>
-    </button>
-    <p class="fillforme-tap-hint" id="fillFormeHint">Touche pour colorier !</p>
+    <div class="fillforme-stage" id="fillFormeStage" aria-label="Touche et glisse le doigt pour colorier la forme">
+      <canvas id="fillFormeCanvas" width="600" height="600"></canvas>
+      <svg viewBox="0 0 200 200" aria-hidden="true"><g id="fillFormeOutline"></g></svg>
+    </div>
+    <p class="fillforme-tap-hint" id="fillFormeHint">Touche et glisse pour colorier !</p>
   </section>
 
   <div class="menu-overlay" id="menuOverlay">
@@ -3723,16 +3721,6 @@
       return '<path d="' + d.d + '"' + extra + '/>';
     }
 
-    // Fond neutre derrière une forme pleine affichée en icône (quiz, grille
-    // "trouve l'intrus", pièces de puzzle) : sans lui, une forme tirée dans
-    // une des couleurs de SHAPE_QUIZ_COLORS peut tomber exactement sur la
-    // même couleur que le fond du bouton-réponse (le turquoise des deux
-    // palettes se recoupe) et devenir invisible. N'est volontairement pas
-    // utilisé pour la pièce de clip de "Remplis la forme" (jamais peinte,
-    // seulement sa géométrie compte) ni pour le tracé au clavier.
-    function shapeIconMarkup(key, fill) {
-      return '<circle cx="100" cy="100" r="94" fill="#fff8ee"/>' + shapeFillSvgInner(key, fill);
-    }
 
     // Chemin unique (commandes M/L/A) utilisable comme "d" d'un <path> :
     // c'est ce que veut le guide pointillé de "Trace la forme" (même
@@ -3769,13 +3757,25 @@
 
     var SHAPE_QUIZ_COLORS = ["#e63946", "#3d7fe0", "#43b98a", "#f2994a", "#8e5ce6", "#ef5da8", "#33c2c2", "#ffd400"];
 
+    // "Trouve l'intrus" et "Complète le puzzle" affichent leurs formes sans
+    // fond, à même les boutons-réponse turquoise (--candy-teal) : on exclut
+    // ce turquoise de leur tirage de couleur pour que la forme ne se fonde
+    // jamais dans le bouton.
+    var SHAPE_ICON_BTN_COLORS = SHAPE_QUIZ_COLORS.filter(function (c) { return c !== "#33c2c2"; });
+
     // "Trouve l'intrus" : nombre de cases dans la grille pour chaque niveau.
     var INTRUS_GRID_SIZE = [4, 6, 6, 8, 9];
 
-    // "Remplis la forme" : nombre de touches nécessaires pour remplir
-    // entièrement la forme, croissant avec le niveau.
-    var FILLFORME_TAPS_FOR_LEVEL = [3, 4, 5, 6, 8];
+    // "Remplis la forme" : l'enfant colorie au doigt (glisser = peindre),
+    // le trait est automatiquement retenu à l'intérieur du contour. Part de
+    // couverture (0 à 1) de la forme nécessaire pour valider, croissant
+    // avec le niveau (un tout petit n'a pas besoin de tout colorier au
+    // pixel près pour que ce soit reconnu comme "réussi").
+    var FILLFORME_COVERAGE_FOR_LEVEL = [0.45, 0.55, 0.62, 0.7, 0.78];
     var FILLFORME_FILL_COLORS = ["#e63946", "#3d7fe0", "#43b98a", "#f2994a", "#8e5ce6", "#ef5da8"];
+    var FILLFORME_CANVAS_SIZE = 600;
+    var FILLFORME_COORD_SIZE = 200;
+    var FILLFORME_BRUSH_WIDTH = 26;
 
     // Calcul costaud : 3 termes, 2 opérations tirées indépendamment (donc
     // potentiellement différentes) parmi +, −, ×, ÷, enchaînées de gauche à
@@ -3840,8 +3840,8 @@
       puzzleBagPool: null,
       fillFormeKey: "",
       fillFormeColor: "",
-      fillFormeTaps: 0,
-      fillFormeTapsNeeded: 0,
+      fillFormeCoverageNeeded: 0,
+      fillFormeDone: false,
       lastFillFormeKey: "",
       fillFormeBag: [],
       fillFormeBagPool: null,
@@ -4258,7 +4258,7 @@
     function generateIntrusProblem(levelIdx) {
       var pool = SHAPE_LEVEL_POOL[levelIdx];
       var gridSize = INTRUS_GRID_SIZE[levelIdx];
-      var color = SHAPE_QUIZ_COLORS[randInt(0, SHAPE_QUIZ_COLORS.length - 1)];
+      var color = SHAPE_ICON_BTN_COLORS[randInt(0, SHAPE_ICON_BTN_COLORS.length - 1)];
       var mainKey = pool[randInt(0, pool.length - 1)];
       var others = pool.filter(function (k) { return k !== mainKey; });
       var oddKey = others[randInt(0, others.length - 1)];
@@ -4283,7 +4283,7 @@
       var pool = SHAPE_LEVEL_POOL[levelIdx];
       var targetKey = drawFromBag(pool, "puzzleBag", "puzzleBagPool", "lastPuzzleKey");
       state.lastPuzzleKey = targetKey;
-      var color = SHAPE_QUIZ_COLORS[randInt(0, SHAPE_QUIZ_COLORS.length - 1)];
+      var color = SHAPE_ICON_BTN_COLORS[randInt(0, SHAPE_ICON_BTN_COLORS.length - 1)];
       var distractors = shuffle(pool.filter(function (k) { return k !== targetKey; })).slice(0, 2);
       var choices = shuffle(distractors.concat([targetKey]));
       return {
@@ -4766,9 +4766,8 @@
       traceDoneBtn: document.getElementById("traceDoneBtn"),
       fillFormeScreen: document.getElementById("fillFormeScreen"),
       fillFormeStage: document.getElementById("fillFormeStage"),
+      fillFormeCanvas: document.getElementById("fillFormeCanvas"),
       fillFormeOutline: document.getElementById("fillFormeOutline"),
-      fillFormeClipShape: document.getElementById("fillFormeClip"),
-      fillFormeFillRect: document.getElementById("fillFormeFillRect"),
       fillFormeHint: document.getElementById("fillFormeHint"),
       levelUpOverlay: document.getElementById("levelUpOverlay"),
       levelUpNum: document.getElementById("levelUpNum"),
@@ -4979,7 +4978,7 @@
         puzzleWrap.className = "puzzle-prompt";
         var puzzleKnown = document.createElement("span");
         puzzleKnown.className = "puzzle-slot";
-        puzzleKnown.innerHTML = '<svg viewBox="0 0 200 200" aria-hidden="true">' + shapeIconMarkup(p.shapeKey, p.shapeColor) + "</svg>";
+        puzzleKnown.innerHTML = '<svg viewBox="0 0 200 200" aria-hidden="true">' + shapeFillSvgInner(p.shapeKey, p.shapeColor) + "</svg>";
         var puzzleMissing = document.createElement("span");
         puzzleMissing.className = "puzzle-slot puzzle-slot-missing";
         puzzleMissing.innerHTML = '<svg viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="94" fill="#fff8ee"/>' + shapeOutlineSvgInner(p.shapeKey, "#c7c2b8", true) + "</svg>";
@@ -5438,12 +5437,12 @@
       }
 
       if (state.problem.kind === "intrus") {
-        els.answers.classList.add("answers-grid-3");
+        els.answers.classList.add(state.problem.cells.length === 4 ? "answers-grid-2" : "answers-grid-3");
         state.problem.cells.forEach(function (key, idx) {
           var btn = document.createElement("button");
           btn.type = "button";
           btn.className = "answer-btn shape-icon-btn shape-icon-btn-small";
-          btn.innerHTML = '<svg viewBox="0 0 200 200" aria-hidden="true">' + shapeIconMarkup(key, state.problem.color) + "</svg>";
+          btn.innerHTML = '<svg viewBox="0 0 200 200" aria-hidden="true">' + shapeFillSvgInner(key, state.problem.color) + "</svg>";
           btn.setAttribute("data-value", idx);
           btn.setAttribute("aria-label", "Case " + (idx + 1));
           btn.addEventListener("click", function () { onAnswer(idx, btn); });
@@ -5458,7 +5457,7 @@
           var btn = document.createElement("button");
           btn.type = "button";
           btn.className = "answer-btn shape-icon-btn";
-          btn.innerHTML = '<svg viewBox="0 0 200 200" aria-hidden="true">' + shapeIconMarkup(key, state.problem.shapeColor) + "</svg>";
+          btn.innerHTML = '<svg viewBox="0 0 200 200" aria-hidden="true">' + shapeFillSvgInner(key, state.problem.shapeColor) + "</svg>";
           btn.setAttribute("data-value", key);
           btn.setAttribute("aria-label", "Répondre " + SHAPE_DEFS[key].fr);
           btn.addEventListener("click", function () { onAnswer(key, btn); });
@@ -6653,38 +6652,116 @@
       }
     }
 
-    // "Remplis la forme" : l'enfant touche l'écran plusieurs fois de suite
-    // (nombre croissant avec le niveau) pour faire "monter" la couleur dans
-    // le contour de la forme, comme un thermomètre qui se remplit — pas
-    // besoin de viser précisément l'intérieur de la forme, toute la scène
-    // est tactile, ce qui reste adapté à un tout petit.
+    // "Remplis la forme" : l'enfant colorie directement au doigt, comme dans
+    // un vrai cahier de coloriage — le trait qu'il glisse sur l'écran est
+    // peint sur un canevas dont la zone peinte est retenue (clip) à
+    // l'intérieur du contour de la forme, donc pas besoin d'être précis :
+    // déborder ne colorie jamais en dehors. On mesure ensuite la part de la
+    // forme couverte (comptage de pixels) pour savoir quand valider.
+    var fillFormeCtx = null;
+    var fillFormeShapePath = null;
+    var fillFormeMaskTotal = 0;
+    var fillFormeLastPos = null;
+
+    function countOpaquePixels(ctx) {
+      var data = ctx.getImageData(0, 0, FILLFORME_CANVAS_SIZE, FILLFORME_CANVAS_SIZE).data;
+      var count = 0;
+      for (var i = 3; i < data.length; i += 4) {
+        if (data[i] > 10) count++;
+      }
+      return count;
+    }
+
+    function countShapeMaskPixels(path2d) {
+      var maskCanvas = document.createElement("canvas");
+      maskCanvas.width = FILLFORME_CANVAS_SIZE;
+      maskCanvas.height = FILLFORME_CANVAS_SIZE;
+      var maskCtx = maskCanvas.getContext && maskCanvas.getContext("2d");
+      if (!maskCtx) return 0;
+      maskCtx.setTransform(FILLFORME_CANVAS_SIZE / FILLFORME_COORD_SIZE, 0, 0, FILLFORME_CANVAS_SIZE / FILLFORME_COORD_SIZE, 0, 0);
+      maskCtx.fillStyle = "#000";
+      maskCtx.fill(path2d);
+      return countOpaquePixels(maskCtx);
+    }
+
     function startFillFormeProblem() {
       var levelIdx = Math.min(Math.max(state.level, MIN_LEVEL), MAX_LEVEL) - 1;
       var pool = SHAPE_LEVEL_POOL[levelIdx];
       state.fillFormeKey = drawFromBag(pool, "fillFormeBag", "fillFormeBagPool", "lastFillFormeKey");
       state.lastFillFormeKey = state.fillFormeKey;
       state.fillFormeColor = FILLFORME_FILL_COLORS[randInt(0, FILLFORME_FILL_COLORS.length - 1)];
-      state.fillFormeTaps = 0;
-      state.fillFormeTapsNeeded = FILLFORME_TAPS_FOR_LEVEL[levelIdx];
+      state.fillFormeCoverageNeeded = FILLFORME_COVERAGE_FOR_LEVEL[levelIdx];
+      state.fillFormeDone = false;
       els.fillFormeOutline.innerHTML = shapeOutlineSvgInner(state.fillFormeKey, "#1f2a3c", false);
-      els.fillFormeClipShape.innerHTML = shapeFillSvgInner(state.fillFormeKey, "#000");
-      els.fillFormeFillRect.setAttribute("fill", state.fillFormeColor);
-      els.fillFormeFillRect.setAttribute("transform", "translate(0,200)");
+      fillFormeShapePath = typeof Path2D !== "undefined" ? new Path2D(shapeTracePath(state.fillFormeKey)) : null;
+      fillFormeCtx = els.fillFormeCanvas && els.fillFormeCanvas.getContext && els.fillFormeCanvas.getContext("2d");
+      if (fillFormeCtx && fillFormeShapePath) {
+        fillFormeCtx.setTransform(FILLFORME_CANVAS_SIZE / FILLFORME_COORD_SIZE, 0, 0, FILLFORME_CANVAS_SIZE / FILLFORME_COORD_SIZE, 0, 0);
+        fillFormeCtx.clearRect(0, 0, FILLFORME_COORD_SIZE, FILLFORME_COORD_SIZE);
+        fillFormeMaskTotal = countShapeMaskPixels(fillFormeShapePath);
+      } else {
+        fillFormeMaskTotal = 0;
+      }
       els.fillFormeHint.hidden = false;
-      els.fillFormeHint.textContent = "Touche pour colorier !";
+      els.fillFormeHint.textContent = "Touche et glisse pour colorier !";
       setGameFeedback("");
       saveProgress();
     }
 
-    function onFillFormeTap() {
-      if (state.mode !== "fillforme" || state.fillFormeTaps >= state.fillFormeTapsNeeded) return;
-      state.fillFormeTaps++;
-      var pct = state.fillFormeTaps / state.fillFormeTapsNeeded;
-      els.fillFormeFillRect.setAttribute("transform", "translate(0," + (200 - 200 * pct) + ")");
-      if (state.fillFormeTaps >= state.fillFormeTapsNeeded) {
+    function fillFormePaintTo(pos) {
+      if (!fillFormeCtx || !fillFormeShapePath || !fillFormeLastPos) return;
+      fillFormeCtx.save();
+      fillFormeCtx.clip(fillFormeShapePath);
+      fillFormeCtx.lineCap = "round";
+      fillFormeCtx.lineJoin = "round";
+      fillFormeCtx.lineWidth = FILLFORME_BRUSH_WIDTH;
+      fillFormeCtx.strokeStyle = state.fillFormeColor;
+      fillFormeCtx.beginPath();
+      fillFormeCtx.moveTo(fillFormeLastPos.x, fillFormeLastPos.y);
+      fillFormeCtx.lineTo(pos.x, pos.y);
+      fillFormeCtx.stroke();
+      fillFormeCtx.restore();
+      fillFormeLastPos = pos;
+    }
+
+    function checkFillFormeCoverage() {
+      if (state.mode !== "fillforme" || state.fillFormeDone || !fillFormeCtx || fillFormeMaskTotal <= 0) return;
+      var painted = countOpaquePixels(fillFormeCtx);
+      if (painted / fillFormeMaskTotal >= state.fillFormeCoverageNeeded) {
+        state.fillFormeDone = true;
         els.fillFormeHint.hidden = true;
         onFillFormeComplete();
       }
+    }
+
+    function fillFormeCanvasPos(e) {
+      var rect = els.fillFormeCanvas.getBoundingClientRect();
+      return {
+        x: (e.clientX - rect.left) * (FILLFORME_COORD_SIZE / rect.width),
+        y: (e.clientY - rect.top) * (FILLFORME_COORD_SIZE / rect.height)
+      };
+    }
+
+    function onFillFormeStrokeStart(e) {
+      if (state.mode !== "fillforme" || state.fillFormeDone) return;
+      state.drawing = true;
+      if (els.fillFormeCanvas.setPointerCapture) {
+        try { els.fillFormeCanvas.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+      }
+      fillFormeLastPos = fillFormeCanvasPos(e);
+      fillFormePaintTo(fillFormeLastPos);
+    }
+
+    function onFillFormeStrokeMove(e) {
+      if (!state.drawing || state.mode !== "fillforme" || state.fillFormeDone) return;
+      fillFormePaintTo(fillFormeCanvasPos(e));
+    }
+
+    function onFillFormeStrokeEnd() {
+      if (!state.drawing) return;
+      state.drawing = false;
+      fillFormeLastPos = null;
+      checkFillFormeCoverage();
     }
 
     function onFillFormeComplete() {
@@ -6959,7 +7036,10 @@
     els.fillFormeCard.addEventListener("click", function () { selectMode("fillforme"); });
     els.intrusCard.addEventListener("click", function () { selectMode("intrus"); });
     els.puzzleCard.addEventListener("click", function () { selectMode("puzzle"); });
-    els.fillFormeStage.addEventListener("click", onFillFormeTap);
+    els.fillFormeCanvas.addEventListener("pointerdown", onFillFormeStrokeStart);
+    els.fillFormeCanvas.addEventListener("pointermove", onFillFormeStrokeMove);
+    els.fillFormeCanvas.addEventListener("pointerup", onFillFormeStrokeEnd);
+    els.fillFormeCanvas.addEventListener("pointercancel", onFillFormeStrokeEnd);
     els.traceClearBtn.addEventListener("click", function () { clearTraceCanvas(); });
     els.traceDoneBtn.addEventListener("click", onTraceDone);
     traceCtx = els.traceCanvas.getContext && els.traceCanvas.getContext("2d");
