@@ -1890,6 +1890,7 @@
   .category-card-animals { background: linear-gradient(135deg, #f2994a, #d9724c); }
   .category-card-numbers { background: linear-gradient(135deg, #4fb3e8, #3d7fe0); }
   .category-card-body { background: linear-gradient(135deg, #8e5ce6, #6a4c93); }
+  .category-card-numbers { background: linear-gradient(135deg, #3d7fe0, #33c2c2); }
   .category-card-paires { background: linear-gradient(135deg, #33c2c2, #598ce6); }
   .category-card-pairesdrapeaux { background: linear-gradient(135deg, #3d7fe0, #e63946); }
   .category-card-disparu { background: linear-gradient(135deg, #ffc93c, #f2994a); }
@@ -2498,6 +2499,11 @@
         <button class="category-card category-card-body" type="button" id="bodyCard">
           <span class="icon emoji">✋</span>
           <span>Le corps humain</span>
+          <span class="level-badge">MS-CP</span>
+        </button>
+        <button class="category-card category-card-numbers" type="button" id="numbersCard">
+          <span class="icon emoji">🔢</span>
+          <span>Les chiffres</span>
           <span class="level-badge">MS-CP</span>
         </button>
       </div>
@@ -3283,6 +3289,26 @@
       ["hand", "foot", "ear", "eye", "nose", "mouth", "leg", "arm"],
       ["hand", "foot", "ear", "eye", "nose", "mouth", "leg", "arm", "tooth", "finger"],
       ["hand", "foot", "ear", "eye", "nose", "mouth", "leg", "arm", "tooth", "finger"]
+    ];
+
+    var NUMBER_DEFS = {
+      1: { en: "One" },
+      2: { en: "Two" },
+      3: { en: "Three" },
+      4: { en: "Four" },
+      5: { en: "Five" },
+      6: { en: "Six" },
+      7: { en: "Seven" },
+      8: { en: "Eight" },
+      9: { en: "Nine" },
+      10: { en: "Ten" }
+    };
+    var NUMBER_LEVEL_POOL = [
+      [1, 2, 3, 4],
+      [1, 2, 3, 4, 5, 6],
+      [1, 2, 3, 4, 5, 6, 7, 8],
+      [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     ];
 
     var BASE_LEVELS = {
@@ -4243,6 +4269,24 @@
       };
     }
 
+    // Anglais Malin — "Les chiffres" : le mot anglais du nombre est
+    // l'indice (même rendu partagé que couleurs/animaux/corps), les
+    // réponses sont simplement les chiffres eux-mêmes (rendu générique par
+    // défaut de renderAnswers, aucun rendu dédié requis).
+    function generateNumbersProblem(levelIdx) {
+      var pool = NUMBER_LEVEL_POOL[levelIdx];
+      var targetKey = pool[randInt(0, pool.length - 1)];
+      var distractors = shuffle(pool.filter(function (k) { return k !== targetKey; })).slice(0, 2);
+      var choices = shuffle(distractors.concat([targetKey]));
+      return {
+        kind: "numbers",
+        word: NUMBER_DEFS[targetKey].en,
+        numberKey: targetKey,
+        answer: targetKey,
+        choices: choices
+      };
+    }
+
     function generateInstrumentsProblem(levelIdx) {
       var pool = INSTRUMENT_LEVEL_POOL[levelIdx];
       var targetKey = drawFromBag(pool, "instrumentsBag", "instrumentsBagPool", "lastInstrumentKey");
@@ -4529,6 +4573,9 @@
       if (p1.kind === "body" || p2.kind === "body") {
         return p1.kind === "body" && p2.kind === "body" && p1.bodyKey === p2.bodyKey;
       }
+      if (p1.kind === "numbers" || p2.kind === "numbers") {
+        return p1.kind === "numbers" && p2.kind === "numbers" && p1.numberKey === p2.numberKey;
+      }
       if (p1.kind === "instruments" || p2.kind === "instruments") {
         return p1.kind === "instruments" && p2.kind === "instruments" && p1.instrumentKey === p2.instrumentKey;
       }
@@ -4606,6 +4653,9 @@
       }
       if (state.mode === "body") {
         return generateBodyProblem(levelIdx);
+      }
+      if (state.mode === "numbers") {
+        return generateNumbersProblem(levelIdx);
       }
       if (state.mode === "animalname") {
         return generateAnimalNameProblem(levelIdx);
@@ -4719,6 +4769,7 @@
       colorsCard: document.getElementById("colorsCard"),
       animalsCard: document.getElementById("animalsCard"),
       bodyCard: document.getElementById("bodyCard"),
+      numbersCard: document.getElementById("numbersCard"),
       readingCard: document.getElementById("readingCard"),
       lettersCard: document.getElementById("lettersCard"),
       syllablesCard: document.getElementById("syllablesCard"),
@@ -4928,7 +4979,7 @@
       els.problem.style.fontSize = "";
       els.problem.style.flexWrap = "";
 
-      if (p.kind === "colors" || p.kind === "animals" || p.kind === "body") {
+      if (p.kind === "colors" || p.kind === "animals" || p.kind === "body" || p.kind === "numbers") {
         els.problem.removeAttribute("data-terms");
         var wordBtn = document.createElement("button");
         wordBtn.type = "button";
@@ -7031,6 +7082,7 @@
     els.colorsCard.addEventListener("click", function () { selectMode("colors"); });
     els.animalsCard.addEventListener("click", function () { selectMode("animals"); });
     els.bodyCard.addEventListener("click", function () { selectMode("body"); });
+    els.numbersCard.addEventListener("click", function () { selectMode("numbers"); });
     els.readingCard.addEventListener("click", function () { selectMode("reading"); });
     els.lettersCard.addEventListener("click", function () { selectMode("letters"); });
     els.syllablesCard.addEventListener("click", function () { selectMode("syllables"); });
