@@ -1252,6 +1252,79 @@
 
   .fillforme-tap-hint[hidden] { display: none; }
 
+  /* Jeux de société : statut de tour partagé + bouton "Rejouer" partagés
+     entre les 4 jeux (Morpion/Puissance 4/Dames/Bataille navale). */
+  .boardgame-status {
+    margin: 0;
+    text-align: center;
+    font-weight: 800;
+    font-size: clamp(1.1rem, 4.6vw, 1.5rem);
+    color: var(--white);
+    text-shadow: 0 3px 0 rgba(31, 42, 60, 0.25);
+  }
+
+  .boardgame-replay-btn {
+    appearance: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 800;
+    font-size: clamp(1rem, 4vw, 1.25rem);
+    color: var(--ink);
+    background: var(--white);
+    padding: clamp(0.5rem, 2.2vw, 0.8rem) clamp(1.4rem, 5.5vw, 2.1rem);
+    border-radius: 999px;
+    border-bottom: clamp(3px, 1vw, 5px) solid rgba(31, 42, 60, 0.18);
+    box-shadow: 0 10px 20px -10px rgba(31, 42, 60, 0.4);
+    transition: transform 0.12s ease;
+  }
+
+  .boardgame-replay-btn:active { transform: translateY(2px); }
+
+  .morpion-screen {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.8rem, 3.5vh, 1.4rem);
+    min-height: 0;
+    width: 100%;
+  }
+
+  .morpion-screen[hidden] { display: none; }
+
+  .morpion-board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(0.4rem, 1.6vw, 0.7rem);
+    width: min(80vw, 60vh, 22rem);
+    aspect-ratio: 1;
+  }
+
+  .morpion-cell {
+    appearance: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    background: var(--white);
+    border-radius: clamp(0.6rem, 2.5vw, 1rem);
+    font-weight: 900;
+    font-size: clamp(2.4rem, 12vw, 3.6rem);
+    line-height: 1;
+    color: var(--ink);
+    box-shadow: 0 8px 16px -10px rgba(31, 42, 60, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.1s ease;
+  }
+
+  .morpion-cell:disabled { cursor: default; }
+  .morpion-cell.mark-x { color: #e63946; }
+  .morpion-cell.mark-o { color: #3d7fe0; }
+  .morpion-cell.win { background: #ffd400; }
+
   /* mobile portrait : on pousse encore les tailles pour profiter de l'écran étroit et haut */
   @media (max-width: 640px) and (orientation: portrait) {
     :root {
@@ -1928,6 +2001,10 @@
   .category-card-fillforme { background: linear-gradient(135deg, #ef5da8, #8e5ce6); }
   .category-card-intrus { background: linear-gradient(135deg, #ffc93c, #f2994a); }
   .category-card-puzzle { background: linear-gradient(135deg, #43b98a, #33c2c2); }
+  .category-card-morpion { background: linear-gradient(135deg, #e63946, #6a4c93); }
+  .category-card-puissance4 { background: linear-gradient(135deg, #3d7fe0, #1f2a3c); }
+  .category-card-dames { background: linear-gradient(135deg, #2a2a2a, #598ce6); }
+  .category-card-bataille { background: linear-gradient(135deg, #3d7fe0, #33c2c2); }
 
   #menuHome .category-grid {
     display: grid;
@@ -2269,6 +2346,12 @@
     <p class="fillforme-tap-hint" id="fillFormeHint">Touche et glisse pour colorier !</p>
   </section>
 
+  <section class="morpion-screen" id="morpionScreen" hidden>
+    <p class="boardgame-status" id="morpionStatus"></p>
+    <div class="morpion-board" id="morpionBoard"></div>
+    <button type="button" class="boardgame-replay-btn" id="morpionReplayBtn">Rejouer ↻</button>
+  </section>
+
   <div class="menu-overlay" id="menuOverlay">
     <div class="menu-brand">
       <svg class="menu-logo" viewBox="0 0 200 200" aria-hidden="true">
@@ -2433,6 +2516,24 @@
             </svg>
           </span>
           <span class="app-icon-label">Formes Malin</span>
+        </button>
+        <button class="category-card category-card-app" type="button" data-category="jeux">
+          <span class="app-icon-tile">
+            <svg viewBox="0 0 120 120" aria-hidden="true">
+              <rect x="4" y="4" width="112" height="112" rx="30" fill="#fff8ee" />
+              <rect x="14" y="14" width="46" height="46" rx="12" fill="#e63946" />
+              <circle cx="27" cy="27" r="5" fill="#fff8ee" />
+              <circle cx="47" cy="27" r="5" fill="#fff8ee" />
+              <circle cx="27" cy="47" r="5" fill="#fff8ee" />
+              <circle cx="47" cy="47" r="5" fill="#fff8ee" />
+              <circle cx="37" cy="37" r="5" fill="#fff8ee" />
+              <rect x="60" y="60" width="46" height="46" rx="12" fill="#3d7fe0" />
+              <circle cx="83" cy="83" r="6" fill="#fff8ee" />
+              <circle cx="70" cy="18" r="15" fill="#ffd400" />
+              <circle cx="26" cy="94" r="15" fill="#43b98a" />
+            </svg>
+          </span>
+          <span class="app-icon-label">Jeux de société</span>
         </button>
       </div>
       <div class="fox-walk-lane" aria-hidden="true">
@@ -2802,6 +2903,39 @@
           <span class="icon emoji">🧩</span>
           <span>Complète le puzzle</span>
           <span class="level-badge">CP-CE1</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="menu-panel" id="menuJeux" hidden>
+      <div class="menu-header">
+        <button class="menu-back" id="jeuxBackBtn" type="button" aria-label="Retour">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 4 L7 12 L15 20" fill="none" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+        <h1 class="menu-title">Jeux de société</h1>
+      </div>
+      <div class="category-grid">
+        <button class="category-card category-card-morpion" type="button" id="morpionCard">
+          <span class="icon emoji">❌</span>
+          <span>Morpion</span>
+          <span class="level-badge">2 joueurs</span>
+        </button>
+        <button class="category-card category-card-puissance4" type="button" id="puissance4Card">
+          <span class="icon emoji">🔴</span>
+          <span>Puissance 4</span>
+          <span class="level-badge">2 joueurs</span>
+        </button>
+        <button class="category-card category-card-dames" type="button" id="damesCard">
+          <span class="icon emoji">⚫</span>
+          <span>Dames simplifiées</span>
+          <span class="level-badge">2 joueurs</span>
+        </button>
+        <button class="category-card category-card-bataille" type="button" id="bataillenavaleCard">
+          <span class="icon emoji">🚢</span>
+          <span>Bataille navale</span>
+          <span class="level-badge">2 joueurs</span>
         </button>
       </div>
     </div>
@@ -4059,7 +4193,11 @@
       lastFillFormeKey: "",
       fillFormeBag: [],
       fillFormeBagPool: null,
-      musicInstrument: "piano"
+      musicInstrument: "piano",
+      morpionBoard: [],
+      morpionTurn: "X",
+      morpionWinner: null,
+      morpionWinLine: null
     };
 
     var PROGRESS_KEY = "calculMalinProgress";
@@ -4965,6 +5103,11 @@
       menuMemoire: document.getElementById("menuMemoire"),
       menuEcriture: document.getElementById("menuEcriture"),
       menuFormes: document.getElementById("menuFormes"),
+      menuJeux: document.getElementById("menuJeux"),
+      morpionScreen: document.getElementById("morpionScreen"),
+      morpionStatus: document.getElementById("morpionStatus"),
+      morpionBoard: document.getElementById("morpionBoard"),
+      morpionReplayBtn: document.getElementById("morpionReplayBtn"),
       categoryCards: document.querySelectorAll(".category-card"),
       calcBackBtn: document.getElementById("calcBackBtn"),
       terms2BackBtn: document.getElementById("terms2BackBtn"),
@@ -4977,6 +5120,11 @@
       memoireBackBtn: document.getElementById("memoireBackBtn"),
       ecritureBackBtn: document.getElementById("ecritureBackBtn"),
       formesBackBtn: document.getElementById("formesBackBtn"),
+      jeuxBackBtn: document.getElementById("jeuxBackBtn"),
+      morpionCard: document.getElementById("morpionCard"),
+      puissance4Card: document.getElementById("puissance4Card"),
+      damesCard: document.getElementById("damesCard"),
+      bataillenavaleCard: document.getElementById("bataillenavaleCard"),
       colorsCard: document.getElementById("colorsCard"),
       animalsCard: document.getElementById("animalsCard"),
       bodyCard: document.getElementById("bodyCard"),
@@ -5974,6 +6122,11 @@
     // de traçage : seul le guide affiché change (lettre ou forme).
     function isTraceMode(mode) {
       return mode === "trace" || mode === "traceforme";
+    }
+
+    // Jeux de société : parties à 2 joueurs en local (pas de niveaux/étoiles).
+    function isBoardGameMode(mode) {
+      return mode === "morpion" || mode === "puissance4" || mode === "dames" || mode === "bataillenavale";
     }
 
     // "Paires cachées" et "Paires cachées (drapeaux)" partagent le même
@@ -7144,6 +7297,69 @@
       }
     }
 
+    // Jeux de société — "Morpion" : grille 3x3 classique, 2 joueurs en
+    // local (❌ commence toujours). Pas de niveaux/étoiles : c'est une
+    // partie, pas un exercice.
+    var MORPION_WIN_LINES = [
+      [0, 1, 2], [3, 4, 5], [6, 7, 8],
+      [0, 3, 6], [1, 4, 7], [2, 5, 8],
+      [0, 4, 8], [2, 4, 6]
+    ];
+
+    function checkMorpionWinner(board) {
+      for (var i = 0; i < MORPION_WIN_LINES.length; i++) {
+        var line = MORPION_WIN_LINES[i];
+        var a = board[line[0]], b = board[line[1]], c = board[line[2]];
+        if (a && a === b && a === c) return { winner: a, line: line };
+      }
+      if (board.every(function (v) { return !!v; })) return { winner: "draw", line: null };
+      return null;
+    }
+
+    function startMorpion() {
+      state.morpionBoard = [null, null, null, null, null, null, null, null, null];
+      state.morpionTurn = "X";
+      state.morpionWinner = null;
+      state.morpionWinLine = null;
+      renderMorpionScreen();
+    }
+
+    function onMorpionCellTap(idx) {
+      if (state.morpionWinner || state.morpionBoard[idx]) return;
+      state.morpionBoard[idx] = state.morpionTurn;
+      var result = checkMorpionWinner(state.morpionBoard);
+      if (result) {
+        state.morpionWinner = result.winner;
+        state.morpionWinLine = result.line;
+      } else {
+        state.morpionTurn = state.morpionTurn === "X" ? "O" : "X";
+      }
+      renderMorpionScreen();
+    }
+
+    function renderMorpionScreen() {
+      els.morpionBoard.innerHTML = "";
+      state.morpionBoard.forEach(function (v, idx) {
+        var cell = document.createElement("button");
+        cell.type = "button";
+        cell.className = "morpion-cell";
+        if (v) cell.classList.add("filled", v === "X" ? "mark-x" : "mark-o");
+        if (state.morpionWinLine && state.morpionWinLine.indexOf(idx) !== -1) cell.classList.add("win");
+        cell.textContent = v || "";
+        cell.setAttribute("aria-label", v ? "Case " + (idx + 1) + " : " + v : "Case " + (idx + 1) + " vide");
+        cell.disabled = !!(state.morpionWinner || v);
+        cell.addEventListener("click", function () { onMorpionCellTap(idx); });
+        els.morpionBoard.appendChild(cell);
+      });
+      if (state.morpionWinner === "draw") {
+        els.morpionStatus.textContent = "Match nul !";
+      } else if (state.morpionWinner) {
+        els.morpionStatus.textContent = (state.morpionWinner === "X" ? "❌" : "⭕") + " a gagné !";
+      } else {
+        els.morpionStatus.textContent = "Au tour de " + (state.morpionTurn === "X" ? "❌" : "⭕");
+      }
+    }
+
     var THEME_COLOR_DEFAULT = "#4fb3e8";
     var THEME_COLOR_BAR = "#e5f4fc";
     var THEME_COLOR_CELEBRATE = "#ffd166";
@@ -7178,6 +7394,7 @@
       if (isMemoryMode(mode) || mode === "disparu" || mode === "ordre" || mode === "change" || mode === "suitelum") return "memoire";
       if (mode === "mot" || mode === "lettreman" || mode === "trace" || mode === "casse" || mode === "syllordre") return "ecriture";
       if (mode === "traceforme" || mode === "shapes" || mode === "fillforme" || mode === "intrus" || mode === "puzzle") return "formes";
+      if (mode === "morpion" || mode === "puissance4" || mode === "dames" || mode === "bataillenavale") return "jeux";
       return null;
     }
 
@@ -7194,6 +7411,7 @@
       els.menuMemoire.hidden = screen !== "memoire";
       els.menuEcriture.hidden = screen !== "ecriture";
       els.menuFormes.hidden = screen !== "formes";
+      els.menuJeux.hidden = screen !== "jeux";
     }
 
     // Vers quel écran de menu revenir avec le bouton retour Android, pour
@@ -7209,7 +7427,8 @@
       animaux: "home",
       memoire: "home",
       ecriture: "home",
-      formes: "home"
+      formes: "home",
+      jeux: "home"
     };
 
     function currentMenuScreen() {
@@ -7224,6 +7443,7 @@
       if (!els.menuMemoire.hidden) return "memoire";
       if (!els.menuEcriture.hidden) return "ecriture";
       if (!els.menuFormes.hidden) return "formes";
+      if (!els.menuJeux.hidden) return "jeux";
       return "home";
     }
 
@@ -7261,8 +7481,9 @@
       var spell = isSpellMode(mode);
       var trace = isTraceMode(mode);
       var fillforme = mode === "fillforme";
-      els.problemZone.hidden = paint || music || rhythm || memory || suitelum || ordre || spell || trace || fillforme;
-      els.answers.hidden = paint || music || rhythm || memory || suitelum || ordre || spell || trace || fillforme;
+      var morpion = mode === "morpion";
+      els.problemZone.hidden = paint || music || rhythm || memory || suitelum || ordre || spell || trace || fillforme || morpion;
+      els.answers.hidden = paint || music || rhythm || memory || suitelum || ordre || spell || trace || fillforme || morpion;
       els.paintScreen.hidden = !paint;
       els.musicScreen.hidden = !music;
       els.rhythmScreen.hidden = !rhythm;
@@ -7272,7 +7493,13 @@
       els.spellScreen.hidden = !spell;
       els.traceScreen.hidden = !trace;
       els.fillFormeScreen.hidden = !fillforme;
-      els.levelPill.hidden = mode === "dessine" || music;
+      els.morpionScreen.hidden = !morpion;
+      els.levelPill.hidden = mode === "dessine" || music || isBoardGameMode(mode);
+      if (morpion) {
+        state.problem = null;
+        startMorpion();
+        return;
+      }
       if (paint) {
         state.problem = null;
         state.eraserOn = false;
@@ -7378,6 +7605,11 @@
     els.fillFormeCard.addEventListener("click", function () { selectMode("fillforme"); });
     els.intrusCard.addEventListener("click", function () { selectMode("intrus"); });
     els.puzzleCard.addEventListener("click", function () { selectMode("puzzle"); });
+    els.morpionCard.addEventListener("click", function () { selectMode("morpion"); });
+    els.puissance4Card.addEventListener("click", function () { selectMode("puissance4"); });
+    els.damesCard.addEventListener("click", function () { selectMode("dames"); });
+    els.bataillenavaleCard.addEventListener("click", function () { selectMode("bataillenavale"); });
+    els.morpionReplayBtn.addEventListener("click", startMorpion);
     els.fillFormeCanvas.addEventListener("pointerdown", onFillFormeStrokeStart);
     els.fillFormeCanvas.addEventListener("pointermove", onFillFormeStrokeMove);
     els.fillFormeCanvas.addEventListener("pointerup", onFillFormeStrokeEnd);
@@ -7402,6 +7634,7 @@
     els.memoireBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
     els.ecritureBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
     els.formesBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
+    els.jeuxBackBtn.addEventListener("click", function () { showMenuScreen("home"); });
 
     els.levelNum.addEventListener("click", function () {
       if (!state.mode) return;
