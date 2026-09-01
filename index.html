@@ -2863,11 +2863,6 @@
           <span>Les mots qui riment</span>
           <span class="level-badge">MS-GS</span>
         </button>
-        <button class="category-card category-card-compose" type="button" id="composeCard">
-          <span class="icon emoji">🔡</span>
-          <span>Compose le mot</span>
-          <span class="level-badge">CP-CE1</span>
-        </button>
       </div>
     </div>
 
@@ -3027,6 +3022,11 @@
           <span class="icon emoji">🐱</span>
           <span>Reforme le mot</span>
           <span class="level-badge">MS-CP</span>
+        </button>
+        <button class="category-card category-card-compose" type="button" id="composeCard">
+          <span class="icon emoji">🔡</span>
+          <span>Compose le mot</span>
+          <span class="level-badge">CP-CE1</span>
         </button>
         <button class="category-card category-card-lettreman" type="button" id="lettremanCard">
           <span class="icon emoji">🧩</span>
@@ -5345,7 +5345,6 @@
       lettersCard: document.getElementById("lettersCard"),
       syllablesCard: document.getElementById("syllablesCard"),
       rhymesCard: document.getElementById("rhymesCard"),
-      composeCard: document.getElementById("composeCard"),
       coloriageCard: document.getElementById("coloriageCard"),
       modeleCard: document.getElementById("modeleCard"),
       dessineCard: document.getElementById("dessineCard"),
@@ -5365,6 +5364,7 @@
       changeCard: document.getElementById("changeCard"),
       suitelumCard: document.getElementById("suitelumCard"),
       motCard: document.getElementById("motCard"),
+      composeCard: document.getElementById("composeCard"),
       lettremanCard: document.getElementById("lettremanCard"),
       traceCard: document.getElementById("traceCard"),
       casseCard: document.getElementById("casseCard"),
@@ -7942,12 +7942,12 @@
       if (MODE_TO_OP_3[mode] || MIX_MODES_3[mode]) return "3";
       if (mode === "count" || mode === "compare" || mode === "sequence") return "calc";
       if (mode === "colors" || mode === "animals" || mode === "numbers" || mode === "body" || mode === "food") return "anglais";
-      if (mode === "reading" || mode === "letters" || mode === "syllables" || mode === "rhymes" || mode === "compose") return "lire";
+      if (mode === "reading" || mode === "letters" || mode === "syllables" || mode === "rhymes") return "lire";
       if (isPaintMode(mode)) return "peinture";
       if (mode === "musiquelibre" || mode === "instruments" || mode === "pitch" || mode === "rythme") return "musique";
       if (mode === "animalname" || mode === "babies" || mode === "habitat" || mode === "diet" || mode === "animalsound") return "animaux";
       if (isMemoryMode(mode) || mode === "disparu" || mode === "ordre" || mode === "change" || mode === "suitelum") return "memoire";
-      if (mode === "mot" || mode === "lettreman" || mode === "trace" || mode === "casse" || mode === "syllordre") return "ecriture";
+      if (mode === "mot" || mode === "compose" || mode === "lettreman" || mode === "trace" || mode === "casse" || mode === "syllordre") return "ecriture";
       if (mode === "traceforme" || mode === "shapes" || mode === "fillforme" || mode === "intrus" || mode === "puzzle") return "formes";
       if (mode === "morpion" || mode === "puissance4" || mode === "dames" || mode === "bataillenavale") return "jeux";
       return null;
@@ -8152,7 +8152,6 @@
     els.lettersCard.addEventListener("click", function () { selectMode("letters"); });
     els.syllablesCard.addEventListener("click", function () { selectMode("syllables"); });
     els.rhymesCard.addEventListener("click", function () { selectMode("rhymes"); });
-    els.composeCard.addEventListener("click", function () { selectMode("compose"); });
     els.coloriageCard.addEventListener("click", function () { selectMode("coloriage"); });
     els.modeleCard.addEventListener("click", function () { selectMode("modele"); });
     els.dessineCard.addEventListener("click", function () { selectMode("dessine"); });
@@ -8172,6 +8171,7 @@
     els.changeCard.addEventListener("click", function () { selectMode("change"); });
     els.suitelumCard.addEventListener("click", function () { selectMode("suitelum"); });
     els.motCard.addEventListener("click", function () { selectMode("mot"); });
+    els.composeCard.addEventListener("click", function () { selectMode("compose"); });
     els.lettremanCard.addEventListener("click", function () { selectMode("lettreman"); });
     els.traceCard.addEventListener("click", function () { selectMode("trace"); });
     els.casseCard.addEventListener("click", function () { selectMode("casse"); });
