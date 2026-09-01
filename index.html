@@ -63,6 +63,8 @@
     margin: 0;
     overflow: hidden;
     overscroll-behavior: none;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
   body {
@@ -2158,16 +2160,24 @@
 
   /* 4 colonnes fixes (plutôt qu'un auto-fill dont le nombre de colonnes
      dépend de la largeur) : garantit que les 12 icônes (3 rangées de 4)
-     tiennent sur un seul écran sans défiler, quelle que soit la largeur. */
+     tiennent sur un seul écran sans défiler, quelle que soit la largeur.
+     minmax(0, 1fr) plutôt que 1fr seul : un simple "1fr" a un minimum
+     implicite égal à la taille du contenu (min-content), donc une tuile
+     ou un libellé plus large que sa part de colonne peut pousser la
+     grille à ne plus tenir que 3 par ligne au lieu de 4 -- minmax(0, 1fr)
+     force les 4 colonnes à rester strictement égales, quitte à laisser le
+     contenu se tasser/passer à la ligne dans sa colonne plutôt que
+     d'agrandir la grille. */
   #menuHome .category-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     align-items: start;
     gap: clamp(0.4rem, 2vw, 0.8rem) clamp(0.2rem, 1.2vw, 0.5rem);
   }
 
   .category-card-app {
     width: auto;
+    min-width: 0;
     flex: 0 1 auto;
     background: none;
     box-shadow: none;
