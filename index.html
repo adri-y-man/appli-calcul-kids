@@ -1906,6 +1906,7 @@
   .category-card-babies { background: linear-gradient(135deg, #ffb648, #f2994a); }
   .category-card-habitat { background: linear-gradient(135deg, #598ce6, #3454d1); }
   .category-card-diet { background: linear-gradient(135deg, #ef5da8, #d9418c); }
+  .category-card-animalsound { background: linear-gradient(135deg, #33c2c2, #598ce6); }
   .category-card-animals { background: linear-gradient(135deg, #f2994a, #d9724c); }
   .category-card-numbers { background: linear-gradient(135deg, #4fb3e8, #3d7fe0); }
   .category-card-body { background: linear-gradient(135deg, #8e5ce6, #6a4c93); }
@@ -2678,6 +2679,11 @@
           <span>Que mange cet animal ?</span>
           <span class="level-badge">GS-CP</span>
         </button>
+        <button class="category-card category-card-animalsound" type="button" id="animalSoundCard">
+          <span class="icon emoji">🔊</span>
+          <span>Le cri de l'animal</span>
+          <span class="level-badge">PS-MS</span>
+        </button>
       </div>
     </div>
 
@@ -3354,6 +3360,40 @@
       ["vache", "lion", "lapin", "souris", "ours", "oiseau", "singe", "chat", "elephant", "ecureuil"],
       ["vache", "lion", "lapin", "souris", "ours", "oiseau", "singe", "chat", "elephant", "ecureuil", "poisson", "abeille",
         "ourspolaire"]
+    ];
+
+    // Animaux Malin — "Le cri de l'animal" : chaque cri est unique dans la
+    // liste, même logique que les 3 jeux ci-dessus.
+    var ANIMAL_SOUND_DEFS = {
+      chien: { emoji: "🐶", cry: "OUAF" },
+      chat: { emoji: "🐱", cry: "MIAOU" },
+      vache: { emoji: "🐮", cry: "MEUH" },
+      canard: { emoji: "🦆", cry: "COIN COIN" },
+      mouton: { emoji: "🐑", cry: "BÊÊÊ" },
+      cochon: { emoji: "🐷", cry: "GROIN GROIN" },
+      coq: { emoji: "🐓", cry: "COCORICO" },
+      poule: { emoji: "🐔", cry: "COT COT COT" },
+      ane: { emoji: "🫏", cry: "HI-HAN" },
+      grenouille: { emoji: "🐸", cry: "COAA COAA", photo: "grenouille" },
+      abeille: { emoji: "🐝", cry: "BZZZ", photo: "abeille" },
+      souris: { emoji: "🐭", cry: "COUIC COUIC", photo: "souris" },
+      loup: { emoji: "🐺", cry: "AOUUUU" },
+      hibou: { emoji: "🦉", cry: "HOUHOU" },
+      serpent: { emoji: "🐍", cry: "SSSSS" },
+      dinde: { emoji: "🦃", cry: "GLOU GLOU" },
+      chevre: { emoji: "🐐", cry: "MÊÊÊ" },
+      pigeon: { emoji: "🕊️", cry: "ROUCOU ROUCOU" },
+      lion: { emoji: "🦁", cry: "ROOAR" },
+      tigre: { emoji: "🐯", cry: "GRRR", photo: "tigre" }
+    };
+    var ANIMAL_SOUND_LEVEL_POOL = [
+      ["chien", "chat", "vache", "canard"],
+      ["chien", "chat", "vache", "canard", "mouton", "cochon", "coq", "poule"],
+      ["chien", "chat", "vache", "canard", "mouton", "cochon", "coq", "poule", "ane", "grenouille", "abeille", "souris"],
+      ["chien", "chat", "vache", "canard", "mouton", "cochon", "coq", "poule", "ane", "grenouille", "abeille", "souris",
+        "loup", "hibou", "serpent", "dinde"],
+      ["chien", "chat", "vache", "canard", "mouton", "cochon", "coq", "poule", "ane", "grenouille", "abeille", "souris",
+        "loup", "hibou", "serpent", "dinde", "chevre", "pigeon", "lion", "tigre"]
     ];
 
     var BODY_DEFS = {
@@ -4383,6 +4423,22 @@
       };
     }
 
+    function generateAnimalSoundProblem(levelIdx) {
+      var pool = ANIMAL_SOUND_LEVEL_POOL[levelIdx];
+      var targetKey = pool[randInt(0, pool.length - 1)];
+      var targetCry = ANIMAL_SOUND_DEFS[targetKey].cry;
+      var otherCries = shuffle(pool.filter(function (k) { return k !== targetKey; }).map(function (k) { return ANIMAL_SOUND_DEFS[k].cry; })).slice(0, 2);
+      var choices = shuffle(otherCries.concat([targetCry]));
+      return {
+        kind: "animalsound",
+        pictureKey: targetKey,
+        emoji: ANIMAL_SOUND_DEFS[targetKey].emoji,
+        photo: ANIMAL_SOUND_DEFS[targetKey].photo,
+        answer: targetCry,
+        choices: choices
+      };
+    }
+
     function generateBodyProblem(levelIdx) {
       var pool = BODY_LEVEL_POOL[levelIdx];
       var targetKey = pool[randInt(0, pool.length - 1)];
@@ -4759,6 +4815,9 @@
       if (p1.kind === "diet" || p2.kind === "diet") {
         return p1.kind === "diet" && p2.kind === "diet" && p1.pictureKey === p2.pictureKey;
       }
+      if (p1.kind === "animalsound" || p2.kind === "animalsound") {
+        return p1.kind === "animalsound" && p2.kind === "animalsound" && p1.pictureKey === p2.pictureKey;
+      }
       if (p1.kind === "lettreman" || p2.kind === "lettreman") {
         return p1.kind === "lettreman" && p2.kind === "lettreman" && p1.wordKey === p2.wordKey;
       }
@@ -4817,6 +4876,9 @@
       }
       if (state.mode === "diet") {
         return generateDietProblem(levelIdx);
+      }
+      if (state.mode === "animalsound") {
+        return generateAnimalSoundProblem(levelIdx);
       }
       if (state.mode === "instruments") {
         return generateInstrumentsProblem(levelIdx);
@@ -4936,6 +4998,7 @@
       babiesCard: document.getElementById("babiesCard"),
       habitatCard: document.getElementById("habitatCard"),
       dietCard: document.getElementById("dietCard"),
+      animalSoundCard: document.getElementById("animalSoundCard"),
       pairesCard: document.getElementById("pairesCard"),
       pairesDrapeauxCard: document.getElementById("pairesDrapeauxCard"),
       disparuCard: document.getElementById("disparuCard"),
@@ -5335,7 +5398,7 @@
         return;
       }
 
-      if (p.kind === "letters" || p.kind === "syllables" || p.kind === "animalname" || p.kind === "babies" || p.kind === "habitat" || p.kind === "diet") {
+      if (p.kind === "letters" || p.kind === "syllables" || p.kind === "animalname" || p.kind === "babies" || p.kind === "habitat" || p.kind === "diet" || p.kind === "animalsound") {
         els.problem.removeAttribute("data-terms");
         var pic;
         var photoList = p.photo ? ANIMAL_PHOTOS[p.photo] : null;
@@ -5762,7 +5825,7 @@
         return;
       }
 
-      if (state.problem.kind === "animalname" || state.problem.kind === "babies" || state.problem.kind === "habitat" || state.problem.kind === "diet") {
+      if (state.problem.kind === "animalname" || state.problem.kind === "babies" || state.problem.kind === "habitat" || state.problem.kind === "diet" || state.problem.kind === "animalsound") {
         var animauxPalette = shuffle(CANDY_COLORS.slice());
         // On mesure fitButtonText() seulement une fois les 3 colonnes en
         // place : mesurée trop tôt (pendant qu'elle est encore seule dans
@@ -7111,7 +7174,7 @@
       if (mode === "reading" || mode === "letters" || mode === "syllables" || mode === "rhymes" || mode === "compose") return "lire";
       if (isPaintMode(mode)) return "peinture";
       if (mode === "musiquelibre" || mode === "instruments" || mode === "pitch" || mode === "rythme") return "musique";
-      if (mode === "animalname" || mode === "babies" || mode === "habitat" || mode === "diet") return "animaux";
+      if (mode === "animalname" || mode === "babies" || mode === "habitat" || mode === "diet" || mode === "animalsound") return "animaux";
       if (isMemoryMode(mode) || mode === "disparu" || mode === "ordre" || mode === "change" || mode === "suitelum") return "memoire";
       if (mode === "mot" || mode === "lettreman" || mode === "trace" || mode === "casse" || mode === "syllordre") return "ecriture";
       if (mode === "traceforme" || mode === "shapes" || mode === "fillforme" || mode === "intrus" || mode === "puzzle") return "formes";
@@ -7298,6 +7361,7 @@
     els.babiesCard.addEventListener("click", function () { selectMode("babies"); });
     els.habitatCard.addEventListener("click", function () { selectMode("habitat"); });
     els.dietCard.addEventListener("click", function () { selectMode("diet"); });
+    els.animalSoundCard.addEventListener("click", function () { selectMode("animalsound"); });
     els.pairesCard.addEventListener("click", function () { selectMode("paires"); });
     els.pairesDrapeauxCard.addEventListener("click", function () { selectMode("pairesdrapeaux"); });
     els.disparuCard.addEventListener("click", function () { selectMode("disparu"); });
