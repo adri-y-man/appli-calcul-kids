@@ -1909,6 +1909,7 @@
   .category-card-numbers { background: linear-gradient(135deg, #4fb3e8, #3d7fe0); }
   .category-card-body { background: linear-gradient(135deg, #8e5ce6, #6a4c93); }
   .category-card-numbers { background: linear-gradient(135deg, #3d7fe0, #33c2c2); }
+  .category-card-food { background: linear-gradient(135deg, #ff5a5f, #8bc34a); }
   .category-card-paires { background: linear-gradient(135deg, #33c2c2, #598ce6); }
   .category-card-pairesdrapeaux { background: linear-gradient(135deg, #3d7fe0, #e63946); }
   .category-card-disparu { background: linear-gradient(135deg, #ffc93c, #f2994a); }
@@ -2537,6 +2538,11 @@
         <button class="category-card category-card-numbers" type="button" id="numbersCard">
           <span class="icon emoji">🔢</span>
           <span>Les chiffres</span>
+          <span class="level-badge">MS-CP</span>
+        </button>
+        <button class="category-card category-card-food" type="button" id="foodCard">
+          <span class="icon emoji">🍎</span>
+          <span>La nourriture</span>
           <span class="level-badge">MS-CP</span>
         </button>
       </div>
@@ -3322,6 +3328,42 @@
       ["hand", "foot", "ear", "eye", "nose", "mouth", "leg", "arm"],
       ["hand", "foot", "ear", "eye", "nose", "mouth", "leg", "arm", "tooth", "finger"],
       ["hand", "foot", "ear", "eye", "nose", "mouth", "leg", "arm", "tooth", "finger"]
+    ];
+
+    // Anglais Malin — "La nourriture" : même forme que couleurs/corps/chiffres
+    // (mot anglais à écouter comme indice, réponses en images -- ici des
+    // emojis d'aliments). Le lot d'aliments s'agrandit à chaque niveau.
+    var FOOD_DEFS = {
+      apple: { en: "Apple", emoji: "🍎" },
+      bread: { en: "Bread", emoji: "🍞" },
+      milk: { en: "Milk", emoji: "🥛" },
+      egg: { en: "Egg", emoji: "🥚" },
+      banana: { en: "Banana", emoji: "🍌" },
+      cheese: { en: "Cheese", emoji: "🧀" },
+      water: { en: "Water", emoji: "💧" },
+      carrot: { en: "Carrot", emoji: "🥕" },
+      orange: { en: "Orange", emoji: "🍊" },
+      grape: { en: "Grape", emoji: "🍇" },
+      strawberry: { en: "Strawberry", emoji: "🍓" },
+      tomato: { en: "Tomato", emoji: "🍅" },
+      potato: { en: "Potato", emoji: "🥔" },
+      rice: { en: "Rice", emoji: "🍚" },
+      pasta: { en: "Pasta", emoji: "🍝" },
+      fish: { en: "Fish", emoji: "🐟" },
+      chicken: { en: "Chicken", emoji: "🍗" },
+      cake: { en: "Cake", emoji: "🎂" },
+      icecream: { en: "Ice Cream", emoji: "🍦" },
+      honey: { en: "Honey", emoji: "🍯" }
+    };
+    var FOOD_LEVEL_POOL = [
+      ["apple", "bread", "milk", "egg"],
+      ["apple", "bread", "milk", "egg", "banana", "cheese"],
+      ["apple", "bread", "milk", "egg", "banana", "cheese", "water", "carrot"],
+      ["apple", "bread", "milk", "egg", "banana", "cheese", "water", "carrot",
+        "orange", "grape", "strawberry", "tomato", "potato", "rice"],
+      ["apple", "bread", "milk", "egg", "banana", "cheese", "water", "carrot",
+        "orange", "grape", "strawberry", "tomato", "potato", "rice",
+        "pasta", "fish", "chicken", "cake", "icecream", "honey"]
     ];
 
     var NUMBER_DEFS = {
@@ -4305,6 +4347,20 @@
       };
     }
 
+    function generateFoodProblem(levelIdx) {
+      var pool = FOOD_LEVEL_POOL[levelIdx];
+      var targetKey = pool[randInt(0, pool.length - 1)];
+      var distractors = shuffle(pool.filter(function (k) { return k !== targetKey; })).slice(0, 2);
+      var choices = shuffle(distractors.concat([targetKey]));
+      return {
+        kind: "food",
+        word: FOOD_DEFS[targetKey].en,
+        foodKey: targetKey,
+        answer: targetKey,
+        choices: choices
+      };
+    }
+
     // Anglais Malin — "Les chiffres" : le mot anglais du nombre est
     // l'indice (même rendu partagé que couleurs/animaux/corps), les
     // réponses sont simplement les chiffres eux-mêmes (rendu générique par
@@ -4610,6 +4666,9 @@
       if (p1.kind === "body" || p2.kind === "body") {
         return p1.kind === "body" && p2.kind === "body" && p1.bodyKey === p2.bodyKey;
       }
+      if (p1.kind === "food" || p2.kind === "food") {
+        return p1.kind === "food" && p2.kind === "food" && p1.foodKey === p2.foodKey;
+      }
       if (p1.kind === "numbers" || p2.kind === "numbers") {
         return p1.kind === "numbers" && p2.kind === "numbers" && p1.numberKey === p2.numberKey;
       }
@@ -4690,6 +4749,9 @@
       }
       if (state.mode === "body") {
         return generateBodyProblem(levelIdx);
+      }
+      if (state.mode === "food") {
+        return generateFoodProblem(levelIdx);
       }
       if (state.mode === "numbers") {
         return generateNumbersProblem(levelIdx);
@@ -4807,6 +4869,7 @@
       animalsCard: document.getElementById("animalsCard"),
       bodyCard: document.getElementById("bodyCard"),
       numbersCard: document.getElementById("numbersCard"),
+      foodCard: document.getElementById("foodCard"),
       readingCard: document.getElementById("readingCard"),
       lettersCard: document.getElementById("lettersCard"),
       syllablesCard: document.getElementById("syllablesCard"),
@@ -5018,7 +5081,7 @@
       els.problem.style.flexWrap = "";
       els.pitchConfirmBtn.hidden = true;
 
-      if (p.kind === "colors" || p.kind === "animals" || p.kind === "body" || p.kind === "numbers") {
+      if (p.kind === "colors" || p.kind === "animals" || p.kind === "body" || p.kind === "numbers" || p.kind === "food") {
         els.problem.removeAttribute("data-terms");
         var wordBtn = document.createElement("button");
         wordBtn.type = "button";
@@ -5483,6 +5546,22 @@
           var btn = document.createElement("button");
           btn.type = "button";
           btn.className = "answer-btn picture-btn emoji " + bodyPalette[idx % bodyPalette.length];
+          btn.textContent = def.emoji;
+          btn.setAttribute("data-value", key);
+          btn.setAttribute("aria-label", "Répondre " + def.en);
+          btn.addEventListener("click", function () { onAnswer(key, btn); });
+          els.answers.appendChild(btn);
+        });
+        return;
+      }
+
+      if (state.problem.kind === "food") {
+        var foodPalette = shuffle(CANDY_COLORS.slice());
+        state.problem.choices.forEach(function (key, idx) {
+          var def = FOOD_DEFS[key];
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "answer-btn picture-btn emoji " + foodPalette[idx % foodPalette.length];
           btn.textContent = def.emoji;
           btn.setAttribute("data-value", key);
           btn.setAttribute("aria-label", "Répondre " + def.en);
@@ -6960,7 +7039,7 @@
       if (mode === "add" || mode === "sub" || mode === "mul" || mode === "div" || MIX_MODES[mode]) return "2";
       if (MODE_TO_OP_3[mode] || MIX_MODES_3[mode]) return "3";
       if (mode === "count" || mode === "compare" || mode === "sequence") return "calc";
-      if (mode === "colors" || mode === "animals" || mode === "numbers" || mode === "body") return "anglais";
+      if (mode === "colors" || mode === "animals" || mode === "numbers" || mode === "body" || mode === "food") return "anglais";
       if (mode === "reading" || mode === "letters" || mode === "syllables" || mode === "rhymes") return "lire";
       if (isPaintMode(mode)) return "peinture";
       if (mode === "musiquelibre" || mode === "instruments" || mode === "pitch" || mode === "rythme") return "musique";
@@ -7134,6 +7213,7 @@
     els.animalsCard.addEventListener("click", function () { selectMode("animals"); });
     els.bodyCard.addEventListener("click", function () { selectMode("body"); });
     els.numbersCard.addEventListener("click", function () { selectMode("numbers"); });
+    els.foodCard.addEventListener("click", function () { selectMode("food"); });
     els.readingCard.addEventListener("click", function () { selectMode("reading"); });
     els.lettersCard.addEventListener("click", function () { selectMode("letters"); });
     els.syllablesCard.addEventListener("click", function () { selectMode("syllables"); });
