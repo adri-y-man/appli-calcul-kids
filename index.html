@@ -1894,6 +1894,7 @@
   .category-card-letters { background: linear-gradient(135deg, #43b98a, #2a9d6f); }
   .category-card-syllables { background: linear-gradient(135deg, #598ce6, #3454d1); }
   .category-card-rhymes { background: linear-gradient(135deg, #ef5da8, #d9418c); }
+  .category-card-compose { background: linear-gradient(135deg, #ffb703, #fb8500); }
   .category-card-coloriage { background: linear-gradient(135deg, #ff8c3d, #e63946); }
   .category-card-modele { background: linear-gradient(135deg, #8e5ce6, #3454d1); }
   .category-card-dessine { background: linear-gradient(135deg, #43b98a, #2a9d6f); }
@@ -2578,6 +2579,11 @@
           <span>Les mots qui riment</span>
           <span class="level-badge">MS-GS</span>
         </button>
+        <button class="category-card category-card-compose" type="button" id="composeCard">
+          <span class="icon emoji">🔡</span>
+          <span>Compose le mot</span>
+          <span class="level-badge">CP-CE1</span>
+        </button>
       </div>
     </div>
 
@@ -3011,6 +3017,46 @@
     ];
 
     var ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+    // Lecture Malin — "Compose le mot" : façon Scrabble, l'enfant pioche les
+    // bonnes lettres dans un lot plus grand que le mot lui-même (des lettres
+    // "intrus" qui n'en font pas partie sont mélangées avec les vraies).
+    // Contrairement à "Reforme le mot" (Écriture Malin), qui ne mélange que
+    // les lettres du mot, ici il faut d'abord repérer les bonnes lettres
+    // parmi des leurres. Mots plus longs + plus de leurres à mesure que le
+    // niveau monte.
+    var COMPOSE_WORDS = {
+      chat: { word: "chat", emoji: "🐱" },
+      lune: { word: "lune", emoji: "🌙" },
+      ours: { word: "ours", emoji: "🐻" },
+      velo: { word: "vélo", emoji: "🚲" },
+      tigre: { word: "tigre", emoji: "🐯" },
+      zebre: { word: "zèbre", emoji: "🦓" },
+      pomme: { word: "pomme", emoji: "🍎" },
+      lapin: { word: "lapin", emoji: "🐰" },
+      cheval: { word: "cheval", emoji: "🐴" },
+      bateau: { word: "bateau", emoji: "⛵" },
+      cochon: { word: "cochon", emoji: "🐷" },
+      cactus: { word: "cactus", emoji: "🌵" },
+      dauphin: { word: "dauphin", emoji: "🐬" },
+      chateau: { word: "château", emoji: "🏰" },
+      taureau: { word: "taureau", emoji: "🐂" },
+      poisson: { word: "poisson", emoji: "🐟" },
+      elephant: { word: "éléphant", emoji: "🐘" },
+      papillon: { word: "papillon", emoji: "🦋" },
+      tournesol: { word: "tournesol", emoji: "🌻" },
+      dinosaure: { word: "dinosaure", emoji: "🦖" }
+    };
+    var COMPOSE_LEVEL_POOL = [
+      ["chat", "lune", "ours", "velo"],
+      ["chat", "lune", "ours", "velo", "tigre", "zebre", "pomme", "lapin"],
+      ["chat", "lune", "ours", "velo", "tigre", "zebre", "pomme", "lapin", "cheval", "bateau", "cochon", "cactus"],
+      ["chat", "lune", "ours", "velo", "tigre", "zebre", "pomme", "lapin", "cheval", "bateau", "cochon", "cactus",
+        "dauphin", "chateau", "taureau", "poisson"],
+      ["chat", "lune", "ours", "velo", "tigre", "zebre", "pomme", "lapin", "cheval", "bateau", "cochon", "cactus",
+        "dauphin", "chateau", "taureau", "poisson", "elephant", "papillon", "tournesol", "dinosaure"]
+    ];
+    var COMPOSE_DISTRACTOR_COUNT = [3, 3, 4, 4, 5];
 
     var LETTER_WORDS = {
       chat: { emoji: "🐱", letter: "C" },
@@ -3941,15 +3987,19 @@
       ordreLocked: true,
       spellKey: "",
       spellUnits: [],
+      spellTilePool: null,
       spellFillIndex: 0,
       spellEmoji: "",
       lastMotKey: "",
       lastSyllordreKey: "",
+      lastComposeKey: "",
       lastInstrumentKey: "",
       motBag: [],
       motBagPool: null,
       syllordreBag: [],
       syllordreBagPool: null,
+      composeBag: [],
+      composeBagPool: null,
       instrumentsBag: [],
       instrumentsBagPool: null,
       traceLetter: "",
@@ -4874,6 +4924,7 @@
       lettersCard: document.getElementById("lettersCard"),
       syllablesCard: document.getElementById("syllablesCard"),
       rhymesCard: document.getElementById("rhymesCard"),
+      composeCard: document.getElementById("composeCard"),
       coloriageCard: document.getElementById("coloriageCard"),
       modeleCard: document.getElementById("modeleCard"),
       dessineCard: document.getElementById("dessineCard"),
@@ -5853,7 +5904,7 @@
     }
 
     function isSpellMode(mode) {
-      return mode === "mot" || mode === "syllordre";
+      return mode === "mot" || mode === "syllordre" || mode === "compose";
     }
 
     // "Trace la lettre" et "Trace la forme" partagent le même écran/canevas
@@ -6608,9 +6659,22 @@
     // "Reforme le mot" / "Remets les syllabes" (Écriture Malin) : une image
     // s'affiche avec des cases vides, et des tuiles mélangées (lettres ou
     // syllabes selon le mode) qu'il faut toucher dans le bon ordre pour
-    // reconstituer le mot.
+    // reconstituer le mot. "Compose le mot" (Lecture Malin) partage le même
+    // écran, mais mélange aussi des lettres intrus (state.spellTilePool) au
+    // lot de tuiles -- voir startSpellProblem.
     function currentSpellPool(levelIdx) {
-      return state.mode === "syllordre" ? SYLLORDRE_LEVEL_POOL[levelIdx] : WORD_LEVEL_POOL[levelIdx];
+      if (state.mode === "syllordre") return SYLLORDRE_LEVEL_POOL[levelIdx];
+      if (state.mode === "compose") return COMPOSE_LEVEL_POOL[levelIdx];
+      return WORD_LEVEL_POOL[levelIdx];
+    }
+
+    // Tire des lettres qui ne font pas partie du mot cible, pour servir de
+    // leurres dans "Compose le mot" (voir startSpellProblem).
+    function pickComposeDistractors(word, count) {
+      var used = {};
+      word.toUpperCase().split("").forEach(function (ch) { used[ch] = true; });
+      var pool = ALPHABET.filter(function (ch) { return !used[ch]; });
+      return shuffle(pool).slice(0, count);
     }
 
     function renderSpellScreen() {
@@ -6621,7 +6685,7 @@
         slot.className = "spell-slot";
         els.spellSlots.appendChild(slot);
       });
-      var shuffledUnits = shuffleDifferent(state.spellUnits);
+      var shuffledUnits = state.spellTilePool ? state.spellTilePool : shuffleDifferent(state.spellUnits);
       els.spellTiles.innerHTML = "";
       shuffledUnits.forEach(function (unit, idx) {
         var tile = document.createElement("button");
@@ -6659,16 +6723,20 @@
       var levelIdx = Math.min(Math.max(state.level, MIN_LEVEL), MAX_LEVEL) - 1;
       var pool = currentSpellPool(levelIdx);
       var isSyll = state.mode === "syllordre";
-      var lastKeyField = isSyll ? "lastSyllordreKey" : "lastMotKey";
-      var key = isSyll
-        ? drawFromBag(pool, "syllordreBag", "syllordreBagPool", lastKeyField)
-        : drawFromBag(pool, "motBag", "motBagPool", lastKeyField);
+      var isCompose = state.mode === "compose";
+      var lastKeyField = isSyll ? "lastSyllordreKey" : isCompose ? "lastComposeKey" : "lastMotKey";
+      var bagField = isSyll ? "syllordreBag" : isCompose ? "composeBag" : "motBag";
+      var bagPoolField = isSyll ? "syllordreBagPool" : isCompose ? "composeBagPool" : "motBagPool";
+      var key = drawFromBag(pool, bagField, bagPoolField, lastKeyField);
       state[lastKeyField] = key;
-      var def = isSyll ? SYLLORDRE_WORDS[key] : WORD_DEFS[key];
+      var def = isSyll ? SYLLORDRE_WORDS[key] : isCompose ? COMPOSE_WORDS[key] : WORD_DEFS[key];
       state.spellKey = key;
       state.spellUnits = isSyll ? def.syllables.slice() : def.word.toUpperCase().split("");
       state.spellFillIndex = 0;
       state.spellEmoji = def.emoji;
+      state.spellTilePool = isCompose
+        ? shuffle(state.spellUnits.concat(pickComposeDistractors(def.word, COMPOSE_DISTRACTOR_COUNT[levelIdx])))
+        : null;
       renderSpellScreen();
       saveProgress();
     }
@@ -7040,7 +7108,7 @@
       if (MODE_TO_OP_3[mode] || MIX_MODES_3[mode]) return "3";
       if (mode === "count" || mode === "compare" || mode === "sequence") return "calc";
       if (mode === "colors" || mode === "animals" || mode === "numbers" || mode === "body" || mode === "food") return "anglais";
-      if (mode === "reading" || mode === "letters" || mode === "syllables" || mode === "rhymes") return "lire";
+      if (mode === "reading" || mode === "letters" || mode === "syllables" || mode === "rhymes" || mode === "compose") return "lire";
       if (isPaintMode(mode)) return "peinture";
       if (mode === "musiquelibre" || mode === "instruments" || mode === "pitch" || mode === "rythme") return "musique";
       if (mode === "animalname" || mode === "babies" || mode === "habitat" || mode === "diet") return "animaux";
@@ -7218,6 +7286,7 @@
     els.lettersCard.addEventListener("click", function () { selectMode("letters"); });
     els.syllablesCard.addEventListener("click", function () { selectMode("syllables"); });
     els.rhymesCard.addEventListener("click", function () { selectMode("rhymes"); });
+    els.composeCard.addEventListener("click", function () { selectMode("compose"); });
     els.coloriageCard.addEventListener("click", function () { selectMode("coloriage"); });
     els.modeleCard.addEventListener("click", function () { selectMode("modele"); });
     els.dessineCard.addEventListener("click", function () { selectMode("dessine"); });
