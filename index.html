@@ -556,35 +556,6 @@
     max-width: 85vw;
   }
 
-  /* ---------- jeu "aigu ou grave ?" : 3 boutons pour écouter chaque son
-     avant de répondre (contrairement aux nombres, un son ne reste pas
-     visible : il faut pouvoir le réécouter autant de fois que nécessaire) ---------- */
-
-  .pitch-listen-row {
-    display: flex;
-    gap: clamp(0.6rem, 3vw, 1rem);
-    justify-content: center;
-    margin-top: clamp(0.8rem, 3vw, 1.3rem);
-  }
-
-  .pitch-listen-btn {
-    appearance: none;
-    border: none;
-    cursor: pointer;
-    font-family: inherit;
-    font-weight: 800;
-    font-size: clamp(1rem, 4vw, 1.3rem);
-    color: var(--white);
-    background: var(--candy-blue);
-    border-radius: 999px;
-    padding: clamp(0.6rem, 2.5vw, 0.9rem) clamp(1rem, 4vw, 1.4rem);
-    border-bottom: clamp(3px, 1vw, 4px) solid rgba(0, 0, 0, 0.22);
-    box-shadow: 0 8px 16px -10px rgba(31, 42, 60, 0.45);
-  }
-
-  .pitch-listen-btn:active { transform: translateY(2px); border-bottom-width: 2px; }
-  .pitch-listen-btn:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
-
   /* ---------- jeu "complète la suite" : virgules entre les nombres connus ---------- */
 
   .seq-comma {
@@ -1358,6 +1329,42 @@
     opacity: 0.4;
     filter: saturate(0.7);
   }
+
+  /* ---------- "Aigu ou grave ?" : un bouton = écouter ET choisir, plus de
+     rangée séparée pour écouter (voir .pitch-confirm-btn ci-dessous) ---------- */
+
+  .answer-btn.selected {
+    outline: clamp(3px, 0.9vw, 5px) solid var(--ink);
+    outline-offset: 3px;
+    transform: translateY(-2px);
+  }
+
+  .pitch-confirm-btn {
+    flex: 0 0 auto;
+    align-self: center;
+    appearance: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 800;
+    font-size: clamp(1rem, 4vw, 1.3rem);
+    color: var(--white);
+    background: var(--correct);
+    padding: clamp(0.6rem, 2.6vw, 0.9rem) clamp(1.6rem, 6vw, 2.4rem);
+    border-radius: 999px;
+    border-bottom: clamp(4px, 1.2vw, 7px) solid rgba(0, 0, 0, 0.22);
+    box-shadow: 0 10px 20px -10px rgba(31, 42, 60, 0.5);
+    transition: transform 0.12s ease, opacity 0.2s ease;
+  }
+
+  .pitch-confirm-btn:disabled {
+    background: #9aa1ab;
+    opacity: 0.6;
+    cursor: default;
+  }
+
+  .pitch-confirm-btn:active:not(:disabled) { transform: translateY(2px); }
+  .pitch-confirm-btn[hidden] { display: none; }
 
   /* ---------- rangée de réponse avec bouton "écouter" (Animaux Malin) ---------- */
 
@@ -2195,6 +2202,8 @@
   </main>
 
   <section class="answers" id="answers" aria-label="Choix de réponses"></section>
+
+  <button type="button" class="pitch-confirm-btn" id="pitchConfirmBtn" hidden disabled>Valider ✓</button>
 
   <section class="paint-screen" id="paintScreen" hidden>
     <div class="paint-reference" id="paintReference" hidden>
@@ -4072,9 +4081,13 @@
       };
     }
 
-    // "Aigu ou grave ?" : 3 sons à écouter (boutons "Son 1/2/3"), il faut
-    // retrouver le plus aigu (ou le plus grave, tiré au hasard) des trois.
-    // Les 3 hauteurs sont plus rapprochées à mesure que le niveau monte.
+    // "Aigu ou grave ?" : 3 sons à écouter (un seul bouton par son : taper
+    // joue ET sélectionne, "Valider" confirme -- voir renderAnswers). Il
+    // faut retrouver le plus aigu (ou le plus grave, tiré au hasard) des
+    // trois. Les 3 hauteurs sont plus rapprochées à mesure que le niveau
+    // monte.
+    var pitchSelectedIdx = null;
+    var pitchSelectedBtn = null;
     var PITCH_LEVELS = [
       [196.0, 392.0, 783.99],
       [246.94, 440.0, 783.99],
@@ -4837,6 +4850,7 @@
       feedbackLine1: document.getElementById("feedbackLine1"),
       feedbackLine2: document.getElementById("feedbackLine2"),
       answers: document.getElementById("answers"),
+      pitchConfirmBtn: document.getElementById("pitchConfirmBtn"),
       paintScreen: document.getElementById("paintScreen"),
       paintStage: document.getElementById("paintStage"),
       paintReference: document.getElementById("paintReference"),
@@ -5002,6 +5016,7 @@
       els.problem.innerHTML = "";
       els.problem.style.fontSize = "";
       els.problem.style.flexWrap = "";
+      els.pitchConfirmBtn.hidden = true;
 
       if (p.kind === "colors" || p.kind === "animals" || p.kind === "body" || p.kind === "numbers") {
         els.problem.removeAttribute("data-terms");
@@ -5281,21 +5296,13 @@
         pitchInstr.className = "instruction-prompt";
         pitchInstr.textContent = p.compareMode === "aigu" ? "Quel son est le plus aigu ?" : "Quel son est le plus grave ?";
         els.problem.appendChild(pitchInstr);
-        var pitchRow = document.createElement("div");
-        pitchRow.className = "pitch-listen-row";
-        p.pitches.forEach(function (freq, idx) {
-          var listenBtn = document.createElement("button");
-          listenBtn.type = "button";
-          listenBtn.className = "pitch-listen-btn";
-          listenBtn.textContent = "🔊 " + (idx + 1);
-          listenBtn.setAttribute("aria-label", "Écouter le son " + (idx + 1));
-          listenBtn.addEventListener("click", function () { playMusicNote(freq); });
-          pitchRow.appendChild(listenBtn);
-        });
-        els.problem.appendChild(pitchRow);
         els.problem.classList.remove("pop");
         void els.problem.offsetWidth;
         els.problem.classList.add("pop");
+        pitchSelectedIdx = null;
+        pitchSelectedBtn = null;
+        els.pitchConfirmBtn.hidden = false;
+        els.pitchConfirmBtn.disabled = true;
         return;
       }
 
@@ -5599,15 +5606,27 @@
       }
 
       if (state.problem.kind === "pitch") {
+        // Un seul bouton par son : taper joue le son ET le sélectionne (au
+        // lieu d'une rangée à écouter séparée de la rangée à répondre,
+        // difficile à relier pour un enfant). "Valider" confirme le choix,
+        // pour pouvoir ré-écouter/comparer sans répondre par accident.
         var pitchPalette = shuffle(CANDY_COLORS.slice());
         state.problem.choices.forEach(function (idx, i) {
           var btn = document.createElement("button");
           btn.type = "button";
           btn.className = "answer-btn " + pitchPalette[i % pitchPalette.length];
-          btn.textContent = "Son " + (idx + 1);
+          btn.textContent = "🔊 Son " + (idx + 1);
           btn.setAttribute("data-value", idx);
-          btn.setAttribute("aria-label", "Répondre son " + (idx + 1));
-          btn.addEventListener("click", function () { onAnswer(idx, btn); });
+          btn.setAttribute("aria-label", "Écouter et choisir le son " + (idx + 1));
+          btn.addEventListener("click", function () {
+            playMusicNote(state.problem.pitches[idx]);
+            var allBtns = els.answers.querySelectorAll(".answer-btn");
+            for (var j = 0; j < allBtns.length; j++) allBtns[j].classList.remove("selected");
+            btn.classList.add("selected");
+            pitchSelectedIdx = idx;
+            pitchSelectedBtn = btn;
+            els.pitchConfirmBtn.disabled = false;
+          });
           els.answers.appendChild(btn);
         });
         return;
@@ -7150,6 +7169,11 @@
     els.fillFormeCanvas.addEventListener("pointermove", onFillFormeStrokeMove);
     els.fillFormeCanvas.addEventListener("pointerup", onFillFormeStrokeEnd);
     els.fillFormeCanvas.addEventListener("pointercancel", onFillFormeStrokeEnd);
+    els.pitchConfirmBtn.addEventListener("click", function () {
+      if (state.locked || pitchSelectedIdx === null || !pitchSelectedBtn) return;
+      onAnswer(pitchSelectedIdx, pitchSelectedBtn);
+      els.pitchConfirmBtn.disabled = true;
+    });
     els.traceClearBtn.addEventListener("click", function () { clearTraceCanvas(); });
     els.traceDoneBtn.addEventListener("click", onTraceDone);
     traceCtx = els.traceCanvas.getContext && els.traceCanvas.getContext("2d");
