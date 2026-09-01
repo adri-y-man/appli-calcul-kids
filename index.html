@@ -1365,6 +1365,57 @@
   .p4-cell.mark-y { background: #ffd400; box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.25), 0 2px 4px rgba(0, 0, 0, 0.2); }
   .p4-cell.win { outline: clamp(3px, 1vw, 5px) solid #43b98a; outline-offset: -3px; }
 
+  .dames-screen {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.8rem, 3.5vh, 1.4rem);
+    min-height: 0;
+    width: 100%;
+  }
+
+  .dames-screen[hidden] { display: none; }
+
+  .dames-board {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    width: min(88vw, 62vh, 26rem);
+    aspect-ratio: 1;
+    border-radius: clamp(0.6rem, 2.5vw, 1rem);
+    overflow: hidden;
+    box-shadow: 0 12px 24px -12px rgba(31, 42, 60, 0.55);
+  }
+
+  .dames-cell {
+    appearance: none;
+    border: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .dames-cell.light { background: #fff8ee; cursor: default; }
+  .dames-cell.dark { background: #6a4c93; cursor: pointer; }
+  .dames-cell.dark.selected { background: #ffd400; }
+  .dames-cell.dark.legal-move { background: #43b98a; cursor: pointer; }
+
+  .dames-piece {
+    width: 76%;
+    height: 76%;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(0.9rem, 4vw, 1.3rem);
+    box-shadow: inset 0 -5px 8px rgba(0, 0, 0, 0.28), 0 3px 6px rgba(0, 0, 0, 0.3);
+  }
+
+  .dames-piece.piece-b { background: #2a2a2a; color: #ffd400; }
+  .dames-piece.piece-w { background: #fff8ee; color: #6a4c93; border: 2px solid #d8c9a8; }
+
   /* mobile portrait : on pousse encore les tailles pour profiter de l'écran étroit et haut */
   @media (max-width: 640px) and (orientation: portrait) {
     :root {
@@ -2398,6 +2449,12 @@
     <button type="button" class="boardgame-replay-btn" id="p4ReplayBtn">Rejouer ↻</button>
   </section>
 
+  <section class="dames-screen" id="damesScreen" hidden>
+    <p class="boardgame-status" id="damesStatus"></p>
+    <div class="dames-board" id="damesBoard"></div>
+    <button type="button" class="boardgame-replay-btn" id="damesReplayBtn">Rejouer ↻</button>
+  </section>
+
   <div class="menu-overlay" id="menuOverlay">
     <div class="menu-brand">
       <svg class="menu-logo" viewBox="0 0 200 200" aria-hidden="true">
@@ -2974,7 +3031,7 @@
           <span class="level-badge">2 joueurs</span>
         </button>
         <button class="category-card category-card-dames" type="button" id="damesCard">
-          <span class="icon emoji">⚫</span>
+          <span class="icon emoji">⚫️</span>
           <span>Dames simplifiées</span>
           <span class="level-badge">2 joueurs</span>
         </button>
@@ -4247,7 +4304,11 @@
       p4Board: [],
       p4Turn: "R",
       p4Winner: null,
-      p4WinCells: null
+      p4WinCells: null,
+      damesBoard: [],
+      damesTurn: "b",
+      damesWinner: null,
+      damesSelected: null
     };
 
     var PROGRESS_KEY = "calculMalinProgress";
@@ -5162,6 +5223,10 @@
       p4Status: document.getElementById("p4Status"),
       p4Board: document.getElementById("p4Board"),
       p4ReplayBtn: document.getElementById("p4ReplayBtn"),
+      damesScreen: document.getElementById("damesScreen"),
+      damesStatus: document.getElementById("damesStatus"),
+      damesBoard: document.getElementById("damesBoard"),
+      damesReplayBtn: document.getElementById("damesReplayBtn"),
       categoryCards: document.querySelectorAll(".category-card"),
       calcBackBtn: document.getElementById("calcBackBtn"),
       terms2BackBtn: document.getElementById("terms2BackBtn"),
@@ -7498,6 +7563,145 @@
       }
     }
 
+    // Jeux de société — "Dames simplifiées" : plateau réduit 6x6 (au lieu
+    // de 8x8), 6 pions par joueur (au lieu de 12), une seule prise par
+    // tour (pas d'enchaînement de sauts), pas de prise obligatoire --
+    // volontairement allégé pour rester simple à suivre pour un enfant.
+    // Toucher un pion le sélectionne et surligne ses coups possibles ;
+    // toucher une case surlignée déplace le pion (ou capture, si un
+    // ennemi est sauté). Une dame (case d'arrivée) peut avancer ET
+    // reculer en diagonale ; un pion simple ne peut qu'avancer.
+    var DAMES_SIZE = 6;
+
+    function damesPlayerOf(piece) { return piece ? piece.toLowerCase() : null; }
+    function damesIsKing(piece) { return piece === "B" || piece === "W"; }
+    function damesInBounds(r, c) { return r >= 0 && r < DAMES_SIZE && c >= 0 && c < DAMES_SIZE; }
+
+    function damesDirections(piece) {
+      if (damesIsKing(piece)) return [[-1, -1], [-1, 1], [1, -1], [1, 1]];
+      var fwd = damesPlayerOf(piece) === "b" ? 1 : -1;
+      return [[fwd, -1], [fwd, 1]];
+    }
+
+    function damesLegalMovesFor(board, row, col) {
+      var piece = board[row][col];
+      if (!piece) return [];
+      var player = damesPlayerOf(piece);
+      var moves = [];
+      damesDirections(piece).forEach(function (d) {
+        var r1 = row + d[0], c1 = col + d[1];
+        if (!damesInBounds(r1, c1)) return;
+        if (!board[r1][c1]) {
+          moves.push({ to: [r1, c1], capture: null });
+        } else if (damesPlayerOf(board[r1][c1]) !== player) {
+          var r2 = row + d[0] * 2, c2 = col + d[1] * 2;
+          if (damesInBounds(r2, c2) && !board[r2][c2]) {
+            moves.push({ to: [r2, c2], capture: [r1, c1] });
+          }
+        }
+      });
+      return moves;
+    }
+
+    function damesCountPieces(board, player) {
+      var n = 0;
+      board.forEach(function (row) {
+        row.forEach(function (p) { if (p && damesPlayerOf(p) === player) n++; });
+      });
+      return n;
+    }
+
+    function startDames() {
+      var board = [];
+      for (var r = 0; r < DAMES_SIZE; r++) board.push(new Array(DAMES_SIZE).fill(null));
+      for (var r0 = 0; r0 < 2; r0++) {
+        for (var c0 = 0; c0 < DAMES_SIZE; c0++) {
+          if ((r0 + c0) % 2 === 1) board[r0][c0] = "b";
+        }
+      }
+      for (var r1 = DAMES_SIZE - 2; r1 < DAMES_SIZE; r1++) {
+        for (var c1 = 0; c1 < DAMES_SIZE; c1++) {
+          if ((r1 + c1) % 2 === 1) board[r1][c1] = "w";
+        }
+      }
+      state.damesBoard = board;
+      state.damesTurn = "b";
+      state.damesWinner = null;
+      state.damesSelected = null;
+      renderDamesScreen();
+    }
+
+    function onDamesCellTap(row, col) {
+      if (state.damesWinner) return;
+      var piece = state.damesBoard[row][col];
+      if (state.damesSelected) {
+        var sel = state.damesSelected;
+        var moves = damesLegalMovesFor(state.damesBoard, sel[0], sel[1]);
+        var chosen = moves.filter(function (m) { return m.to[0] === row && m.to[1] === col; })[0];
+        if (chosen) {
+          var movedPiece = state.damesBoard[sel[0]][sel[1]];
+          state.damesBoard[sel[0]][sel[1]] = null;
+          if (chosen.capture) state.damesBoard[chosen.capture[0]][chosen.capture[1]] = null;
+          if (movedPiece === "b" && row === DAMES_SIZE - 1) movedPiece = "B";
+          if (movedPiece === "w" && row === 0) movedPiece = "W";
+          state.damesBoard[row][col] = movedPiece;
+          state.damesSelected = null;
+          var opponent = state.damesTurn === "b" ? "w" : "b";
+          if (damesCountPieces(state.damesBoard, opponent) === 0) {
+            state.damesWinner = state.damesTurn;
+          } else {
+            state.damesTurn = opponent;
+          }
+          renderDamesScreen();
+          return;
+        }
+        state.damesSelected = (piece && damesPlayerOf(piece) === state.damesTurn) ? [row, col] : null;
+        renderDamesScreen();
+        return;
+      }
+      if (piece && damesPlayerOf(piece) === state.damesTurn) {
+        state.damesSelected = [row, col];
+        renderDamesScreen();
+      }
+    }
+
+    function renderDamesScreen() {
+      els.damesBoard.innerHTML = "";
+      var legalMoves = state.damesSelected
+        ? damesLegalMovesFor(state.damesBoard, state.damesSelected[0], state.damesSelected[1])
+        : [];
+      for (var r = 0; r < DAMES_SIZE; r++) {
+        for (var c = 0; c < DAMES_SIZE; c++) {
+          var cell = document.createElement("button");
+          cell.type = "button";
+          var dark = (r + c) % 2 === 1;
+          var piece = state.damesBoard[r][c];
+          var cls = "dames-cell " + (dark ? "dark" : "light");
+          var isSelected = !!(state.damesSelected && state.damesSelected[0] === r && state.damesSelected[1] === c);
+          var isLegalTarget = legalMoves.some(function (m) { return m.to[0] === r && m.to[1] === c; });
+          if (isSelected) cls += " selected";
+          if (isLegalTarget) cls += " legal-move";
+          cell.className = cls;
+          if (piece) {
+            var disc = document.createElement("span");
+            disc.className = "dames-piece " + (damesPlayerOf(piece) === "b" ? "piece-b" : "piece-w");
+            disc.textContent = damesIsKing(piece) ? "★" : "";
+            cell.appendChild(disc);
+          }
+          cell.setAttribute("aria-label", piece
+            ? "Ligne " + (r + 1) + " colonne " + (c + 1) + " : " + (damesPlayerOf(piece) === "b" ? "pion noir" : "pion blanc") + (damesIsKing(piece) ? " (dame)" : "")
+            : "Ligne " + (r + 1) + " colonne " + (c + 1) + ", case vide");
+          cell.addEventListener("click", (function (rr, cc) { return function () { onDamesCellTap(rr, cc); }; }(r, c)));
+          els.damesBoard.appendChild(cell);
+        }
+      }
+      if (state.damesWinner) {
+        els.damesStatus.textContent = (state.damesWinner === "b" ? "⚫️" : "⚪️") + " a gagné !";
+      } else {
+        els.damesStatus.textContent = "Au tour de " + (state.damesTurn === "b" ? "⚫️" : "⚪️");
+      }
+    }
+
     var THEME_COLOR_DEFAULT = "#4fb3e8";
     var THEME_COLOR_BAR = "#e5f4fc";
     var THEME_COLOR_CELEBRATE = "#ffd166";
@@ -7621,8 +7825,9 @@
       var fillforme = mode === "fillforme";
       var morpion = mode === "morpion";
       var puissance4 = mode === "puissance4";
-      els.problemZone.hidden = paint || music || rhythm || memory || suitelum || ordre || spell || trace || fillforme || morpion || puissance4;
-      els.answers.hidden = paint || music || rhythm || memory || suitelum || ordre || spell || trace || fillforme || morpion || puissance4;
+      var dames = mode === "dames";
+      els.problemZone.hidden = paint || music || rhythm || memory || suitelum || ordre || spell || trace || fillforme || morpion || puissance4 || dames;
+      els.answers.hidden = paint || music || rhythm || memory || suitelum || ordre || spell || trace || fillforme || morpion || puissance4 || dames;
       els.paintScreen.hidden = !paint;
       els.musicScreen.hidden = !music;
       els.rhythmScreen.hidden = !rhythm;
@@ -7634,6 +7839,7 @@
       els.fillFormeScreen.hidden = !fillforme;
       els.morpionScreen.hidden = !morpion;
       els.puissance4Screen.hidden = !puissance4;
+      els.damesScreen.hidden = !dames;
       els.levelPill.hidden = mode === "dessine" || music || isBoardGameMode(mode);
       if (morpion) {
         state.problem = null;
@@ -7643,6 +7849,11 @@
       if (puissance4) {
         state.problem = null;
         startPuissance4();
+        return;
+      }
+      if (dames) {
+        state.problem = null;
+        startDames();
         return;
       }
       if (paint) {
@@ -7756,6 +7967,7 @@
     els.bataillenavaleCard.addEventListener("click", function () { selectMode("bataillenavale"); });
     els.morpionReplayBtn.addEventListener("click", startMorpion);
     els.p4ReplayBtn.addEventListener("click", startPuissance4);
+    els.damesReplayBtn.addEventListener("click", startDames);
     els.fillFormeCanvas.addEventListener("pointerdown", onFillFormeStrokeStart);
     els.fillFormeCanvas.addEventListener("pointermove", onFillFormeStrokeMove);
     els.fillFormeCanvas.addEventListener("pointerup", onFillFormeStrokeEnd);
