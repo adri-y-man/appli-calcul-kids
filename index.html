@@ -1416,6 +1416,61 @@
   .dames-piece.piece-b { background: #2a2a2a; color: #ffd400; }
   .dames-piece.piece-w { background: #fff8ee; color: #6a4c93; border: 2px solid #d8c9a8; }
 
+  .bn-screen {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.8rem, 3.5vh, 1.4rem);
+    min-height: 0;
+    width: 100%;
+  }
+
+  .bn-screen[hidden] { display: none; }
+
+  .bn-handoff-hint {
+    margin: 0;
+    text-align: center;
+    font-weight: 700;
+    font-size: clamp(0.95rem, 3.8vw, 1.2rem);
+    color: var(--white);
+    text-shadow: 0 2px 0 rgba(31, 42, 60, 0.25);
+  }
+
+  .bn-handoff-hint[hidden] { display: none; }
+
+  .bn-board {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: clamp(0.25rem, 1.1vw, 0.5rem);
+    width: min(88vw, 62vh, 26rem);
+    aspect-ratio: 1;
+    background: #2f5fc4;
+    padding: clamp(0.4rem, 1.8vw, 0.7rem);
+    border-radius: clamp(0.7rem, 2.5vw, 1.1rem);
+    box-shadow: 0 12px 24px -12px rgba(31, 42, 60, 0.55);
+  }
+
+  .bn-board[hidden] { display: none; }
+
+  .bn-cell {
+    appearance: none;
+    border: none;
+    cursor: pointer;
+    border-radius: clamp(0.3rem, 1.2vw, 0.5rem);
+    background: rgba(255, 255, 255, 0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(1rem, 4.5vw, 1.5rem);
+    line-height: 1;
+  }
+
+  .bn-cell.shot-miss { background: rgba(255, 255, 255, 0.55); }
+  .bn-cell.shot-hit { background: #e63946; }
+  .bn-cell:disabled { cursor: default; }
+
   /* mobile portrait : on pousse encore les tailles pour profiter de l'écran étroit et haut */
   @media (max-width: 640px) and (orientation: portrait) {
     :root {
@@ -2453,6 +2508,14 @@
     <p class="boardgame-status" id="damesStatus"></p>
     <div class="dames-board" id="damesBoard"></div>
     <button type="button" class="boardgame-replay-btn" id="damesReplayBtn">Rejouer ↻</button>
+  </section>
+
+  <section class="bn-screen" id="bnScreen" hidden>
+    <p class="boardgame-status" id="bnStatus"></p>
+    <p class="bn-handoff-hint" id="bnHandoffHint" hidden>🙈 Ne regarde pas la grille de l'autre joueur !</p>
+    <div class="bn-board" id="bnBoard"></div>
+    <button type="button" class="boardgame-replay-btn" id="bnReadyBtn" hidden>Je suis prêt ✓</button>
+    <button type="button" class="boardgame-replay-btn" id="bnReplayBtn">Rejouer ↻</button>
   </section>
 
   <div class="menu-overlay" id="menuOverlay">
@@ -4308,7 +4371,14 @@
       damesBoard: [],
       damesTurn: "b",
       damesWinner: null,
-      damesSelected: null
+      damesSelected: null,
+      bnShips1: [],
+      bnShips2: [],
+      bnShots1: [],
+      bnShots2: [],
+      bnTurn: "1",
+      bnPhase: "handoff",
+      bnWinner: null
     };
 
     var PROGRESS_KEY = "calculMalinProgress";
@@ -5227,6 +5297,12 @@
       damesStatus: document.getElementById("damesStatus"),
       damesBoard: document.getElementById("damesBoard"),
       damesReplayBtn: document.getElementById("damesReplayBtn"),
+      bnScreen: document.getElementById("bnScreen"),
+      bnStatus: document.getElementById("bnStatus"),
+      bnHandoffHint: document.getElementById("bnHandoffHint"),
+      bnBoard: document.getElementById("bnBoard"),
+      bnReadyBtn: document.getElementById("bnReadyBtn"),
+      bnReplayBtn: document.getElementById("bnReplayBtn"),
       categoryCards: document.querySelectorAll(".category-card"),
       calcBackBtn: document.getElementById("calcBackBtn"),
       terms2BackBtn: document.getElementById("terms2BackBtn"),
@@ -7702,6 +7778,127 @@
       }
     }
 
+    // Jeux de société — "Bataille navale simplifiée" : grille réduite 6x6,
+    // 3 bateaux par joueur (tailles 3/2/2) placés au hasard automatiquement
+    // (pas de phase de placement manuel, pour rester simple). Les 2 joueurs
+    // jouent à tour de rôle sur le même appareil ; un écran "passe
+    // l'appareil" s'affiche avant chaque tir pour éviter de voir la grille
+    // de l'autre en préparant son tir.
+    var BN_SIZE = 6;
+    var BN_SHIPS = [3, 2, 2];
+
+    function bnPlaceShips() {
+      var occupied = {};
+      var ships = [];
+      BN_SHIPS.forEach(function (len) {
+        var placed = false;
+        var guard = 0;
+        while (!placed && guard < 500) {
+          guard++;
+          var horizontal = Math.random() < 0.5;
+          var r = randInt(0, BN_SIZE - 1);
+          var c = randInt(0, BN_SIZE - 1);
+          var cells = [];
+          var ok = true;
+          for (var i = 0; i < len; i++) {
+            var rr = horizontal ? r : r + i;
+            var cc = horizontal ? c + i : c;
+            if (rr >= BN_SIZE || cc >= BN_SIZE || occupied[rr + "," + cc]) { ok = false; break; }
+            cells.push([rr, cc]);
+          }
+          if (ok) {
+            cells.forEach(function (cell) { occupied[cell[0] + "," + cell[1]] = true; });
+            ships.push(cells);
+            placed = true;
+          }
+        }
+      });
+      return ships;
+    }
+
+    function bnEmptyShotsGrid() {
+      var grid = [];
+      for (var r = 0; r < BN_SIZE; r++) grid.push(new Array(BN_SIZE).fill(null));
+      return grid;
+    }
+
+    function bnAllSunk(ships, shots) {
+      return ships.every(function (ship) {
+        return ship.every(function (cell) { return shots[cell[0]][cell[1]] === "hit"; });
+      });
+    }
+
+    function startBatailleNavale() {
+      state.bnShips1 = bnPlaceShips();
+      state.bnShips2 = bnPlaceShips();
+      state.bnShots1 = bnEmptyShotsGrid();
+      state.bnShots2 = bnEmptyShotsGrid();
+      state.bnTurn = "1";
+      state.bnPhase = "handoff";
+      state.bnWinner = null;
+      renderBatailleNavaleScreen();
+    }
+
+    function bnReady() {
+      state.bnPhase = "firing";
+      renderBatailleNavaleScreen();
+    }
+
+    function bnFireAt(row, col) {
+      if (state.bnWinner || state.bnPhase !== "firing") return;
+      var targetShips = state.bnTurn === "1" ? state.bnShips2 : state.bnShips1;
+      var shotsGrid = state.bnTurn === "1" ? state.bnShots2 : state.bnShots1;
+      if (shotsGrid[row][col]) return;
+      var hitShip = targetShips.some(function (ship) {
+        return ship.some(function (cell) { return cell[0] === row && cell[1] === col; });
+      });
+      shotsGrid[row][col] = hitShip ? "hit" : "miss";
+      if (hitShip && bnAllSunk(targetShips, shotsGrid)) {
+        state.bnWinner = state.bnTurn;
+      } else {
+        state.bnTurn = state.bnTurn === "1" ? "2" : "1";
+        state.bnPhase = "handoff";
+      }
+      renderBatailleNavaleScreen();
+    }
+
+    function renderBatailleNavaleScreen() {
+      var otherPlayer = state.bnTurn === "1" ? "2" : "1";
+      if (state.bnWinner) {
+        els.bnStatus.textContent = "Joueur " + state.bnWinner + " a gagné !";
+        els.bnHandoffHint.hidden = true;
+        els.bnBoard.hidden = true;
+        els.bnReadyBtn.hidden = true;
+        return;
+      }
+      if (state.bnPhase === "handoff") {
+        els.bnStatus.textContent = "Au tour de Joueur " + state.bnTurn + " -- passe l'appareil !";
+        els.bnHandoffHint.hidden = true;
+        els.bnBoard.hidden = true;
+        els.bnReadyBtn.hidden = false;
+        return;
+      }
+      els.bnStatus.textContent = "Joueur " + state.bnTurn + ", vise sur la grille de Joueur " + otherPlayer;
+      els.bnHandoffHint.hidden = false;
+      els.bnReadyBtn.hidden = true;
+      els.bnBoard.hidden = false;
+      els.bnBoard.innerHTML = "";
+      var shotsGrid = state.bnTurn === "1" ? state.bnShots2 : state.bnShots1;
+      for (var r = 0; r < BN_SIZE; r++) {
+        for (var c = 0; c < BN_SIZE; c++) {
+          var cell = document.createElement("button");
+          cell.type = "button";
+          var shot = shotsGrid[r][c];
+          cell.className = "bn-cell" + (shot === "hit" ? " shot-hit" : shot === "miss" ? " shot-miss" : "");
+          cell.textContent = shot === "hit" ? "💥" : shot === "miss" ? "•" : "";
+          cell.disabled = !!shot;
+          cell.setAttribute("aria-label", "Ligne " + (r + 1) + " colonne " + (c + 1) + (shot ? (shot === "hit" ? " : touché" : " : dans l'eau") : ", tirer ici"));
+          cell.addEventListener("click", (function (rr, cc) { return function () { bnFireAt(rr, cc); }; }(r, c)));
+          els.bnBoard.appendChild(cell);
+        }
+      }
+    }
+
     var THEME_COLOR_DEFAULT = "#4fb3e8";
     var THEME_COLOR_BAR = "#e5f4fc";
     var THEME_COLOR_CELEBRATE = "#ffd166";
@@ -7826,8 +8023,9 @@
       var morpion = mode === "morpion";
       var puissance4 = mode === "puissance4";
       var dames = mode === "dames";
-      els.problemZone.hidden = paint || music || rhythm || memory || suitelum || ordre || spell || trace || fillforme || morpion || puissance4 || dames;
-      els.answers.hidden = paint || music || rhythm || memory || suitelum || ordre || spell || trace || fillforme || morpion || puissance4 || dames;
+      var bataillenavale = mode === "bataillenavale";
+      els.problemZone.hidden = paint || music || rhythm || memory || suitelum || ordre || spell || trace || fillforme || morpion || puissance4 || dames || bataillenavale;
+      els.answers.hidden = paint || music || rhythm || memory || suitelum || ordre || spell || trace || fillforme || morpion || puissance4 || dames || bataillenavale;
       els.paintScreen.hidden = !paint;
       els.musicScreen.hidden = !music;
       els.rhythmScreen.hidden = !rhythm;
@@ -7840,6 +8038,7 @@
       els.morpionScreen.hidden = !morpion;
       els.puissance4Screen.hidden = !puissance4;
       els.damesScreen.hidden = !dames;
+      els.bnScreen.hidden = !bataillenavale;
       els.levelPill.hidden = mode === "dessine" || music || isBoardGameMode(mode);
       if (morpion) {
         state.problem = null;
@@ -7854,6 +8053,11 @@
       if (dames) {
         state.problem = null;
         startDames();
+        return;
+      }
+      if (bataillenavale) {
+        state.problem = null;
+        startBatailleNavale();
         return;
       }
       if (paint) {
@@ -7968,6 +8172,8 @@
     els.morpionReplayBtn.addEventListener("click", startMorpion);
     els.p4ReplayBtn.addEventListener("click", startPuissance4);
     els.damesReplayBtn.addEventListener("click", startDames);
+    els.bnReadyBtn.addEventListener("click", bnReady);
+    els.bnReplayBtn.addEventListener("click", startBatailleNavale);
     els.fillFormeCanvas.addEventListener("pointerdown", onFillFormeStrokeStart);
     els.fillFormeCanvas.addEventListener("pointermove", onFillFormeStrokeMove);
     els.fillFormeCanvas.addEventListener("pointerup", onFillFormeStrokeEnd);
