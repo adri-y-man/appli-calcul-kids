@@ -640,6 +640,25 @@
     gap: clamp(0.4rem, 1.8vw, 0.8rem);
   }
 
+  /* ---------- "Aigu ou grave ?" (Musique Malin) : les 3 boutons son
+     restent côte à côte même en portrait mobile, avec "Valider" en
+     dessous (voir .pitch-confirm-btn) -- align-items: center plutôt que
+     le stretch par défaut, sinon les boutons s'étirent sur toute la
+     hauteur disponible de .answers (même bug que .answers en rangée sur
+     tablette/ordinateur, voir plus bas). ---------- */
+  .answers.answers-row {
+    flex-direction: row;
+    align-items: center;
+    width: 92%;
+    gap: clamp(0.4rem, 2vw, 0.8rem);
+  }
+
+  .answer-btn.pitch-answer-btn {
+    font-size: clamp(0.8rem, 4vw, 1.2rem);
+    padding: 0.3rem 0.2rem;
+    min-height: 4rem;
+  }
+
   .shape-icon-btn {
     width: min(34vw, 10rem);
     height: min(34vw, 10rem);
@@ -5980,6 +5999,7 @@
       els.answers.innerHTML = "";
       els.answers.classList.remove("answers-grid-2");
       els.answers.classList.remove("answers-grid-3");
+      els.answers.classList.remove("answers-row");
 
       if (state.problem.kind === "colors") {
         state.problem.choices.forEach(function (key) {
@@ -6188,12 +6208,16 @@
         // Un seul bouton par son : taper joue le son ET le sélectionne (au
         // lieu d'une rangée à écouter séparée de la rangée à répondre,
         // difficile à relier pour un enfant). "Valider" confirme le choix,
-        // pour pouvoir ré-écouter/comparer sans répondre par accident.
+        // pour pouvoir ré-écouter/comparer sans répondre par accident. Les
+        // 3 boutons restent côte à côte même en portrait mobile (au lieu
+        // d'empiler comme les autres réponses, plus longues) : le texte
+        // "Son N" est court, ça tient bien sur une seule rangée.
+        els.answers.classList.add("answers-row");
         var pitchPalette = shuffle(CANDY_COLORS.slice());
         state.problem.choices.forEach(function (idx, i) {
           var btn = document.createElement("button");
           btn.type = "button";
-          btn.className = "answer-btn " + pitchPalette[i % pitchPalette.length];
+          btn.className = "answer-btn pitch-answer-btn " + pitchPalette[i % pitchPalette.length];
           btn.textContent = "🔊 Son " + (idx + 1);
           btn.setAttribute("data-value", idx);
           btn.setAttribute("aria-label", "Écouter et choisir le son " + (idx + 1));
