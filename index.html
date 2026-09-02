@@ -1756,6 +1756,30 @@
 
   .confirm-overlay[hidden] { display: none; }
 
+  /* "Appuie encore pour quitter" : petit rappel en bas d'écran affiché sur
+     un premier retour Android depuis l'accueil, plutôt que de fermer
+     l'appli directement -- évite une sortie accidentelle sur un double
+     retour trop rapide (voir handleBackPress). */
+  .exit-toast {
+    position: fixed;
+    left: 50%;
+    bottom: max(1.4rem, calc(env(safe-area-inset-bottom) + 1rem));
+    transform: translateX(-50%);
+    z-index: 40;
+    max-width: calc(100vw - 2.4rem);
+    padding: clamp(0.65rem, 2.6vw, 0.9rem) clamp(1.1rem, 4vw, 1.5rem);
+    border-radius: 999px;
+    background: rgba(31, 42, 60, 0.88);
+    color: var(--white);
+    font-weight: 700;
+    font-size: clamp(0.85rem, 3.6vw, 1rem);
+    text-align: center;
+    box-shadow: 0 10px 24px -8px rgba(31, 42, 60, 0.6);
+    pointer-events: none;
+  }
+
+  .exit-toast[hidden] { display: none; }
+
   .confetti {
     position: absolute;
     inset: 0;
@@ -3235,6 +3259,8 @@
       </div>
     </div>
   </div>
+
+  <div class="exit-toast" id="exitToast" hidden>Appuie encore sur retour pour quitter</div>
 </div>
 
 <script>
@@ -5430,7 +5456,8 @@
       winMenuBtn: document.getElementById("winMenuBtn"),
       resetOverlay: document.getElementById("resetOverlay"),
       resetCancelBtn: document.getElementById("resetCancelBtn"),
-      resetConfirmBtn: document.getElementById("resetConfirmBtn")
+      resetConfirmBtn: document.getElementById("resetConfirmBtn"),
+      exitToast: document.getElementById("exitToast")
     };
 
     var STAR_PATH = "M12 2 L14.9 8.6 L22 9.3 L16.5 14 L18.2 21 L12 17.3 L5.8 21 L7.5 14 L2 9.3 L9.1 8.6 Z";
@@ -8285,6 +8312,26 @@
       history.pushState({ petitMalinBack: true }, "");
     }
 
+    // Sur l'accueil du menu, un enfant qui appuie deux fois de suite sur
+    // "retour" (par exemple en redescendant tout un sous-menu) fermait
+    // l'appli directement au 2e appui. On ajoute un cran de sécurité façon
+    // "appuie encore pour quitter" : le premier retour depuis l'accueil
+    // affiche juste un rappel (et re-piège l'historique), il faut un
+    // second retour rapproché pour vraiment quitter.
+    var EXIT_CONFIRM_WINDOW_MS = 2000;
+    var exitConfirmArmed = false;
+    var exitToastTimer = null;
+
+    function armExitConfirm() {
+      exitConfirmArmed = true;
+      els.exitToast.hidden = false;
+      if (exitToastTimer) window.clearTimeout(exitToastTimer);
+      exitToastTimer = window.setTimeout(function () {
+        els.exitToast.hidden = true;
+        exitConfirmArmed = false;
+      }, EXIT_CONFIRM_WINDOW_MS);
+    }
+
     function handleBackPress() {
       if (!els.resetOverlay.hidden) {
         els.resetOverlay.hidden = true;
@@ -8302,9 +8349,19 @@
         if (screen !== "home") {
           showMenuScreen(MENU_BACK_TARGET[screen]);
           armBackTrap();
+          return;
         }
-        // Sur l'accueil du menu : plus rien à quoi revenir dans l'appli,
-        // on laisse le retour suivant fermer l'appli normalement.
+        // Sur l'accueil du menu : un premier retour ne fait qu'avertir
+        // (voir armExitConfirm) ; seul un second retour rapproché laisse
+        // celui-ci fermer l'appli normalement (pas de ré-armement).
+        if (exitConfirmArmed) {
+          if (exitToastTimer) window.clearTimeout(exitToastTimer);
+          els.exitToast.hidden = true;
+          exitConfirmArmed = false;
+          return;
+        }
+        armExitConfirm();
+        armBackTrap();
         return;
       }
       // En train de jouer, menu fermé : le retour rouvre le menu plutôt que
