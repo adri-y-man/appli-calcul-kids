@@ -3467,16 +3467,23 @@
     function generateWordgridProblem(levelIdx) {
       var pool = WORDGRID_LEVEL_POOL[levelIdx];
       var targetKey = pool[randInt(0, pool.length - 1)];
-      // Le mot à trouver apparaît 2 fois dans la grille (parmi les autres
-      // mots, chacun une seule fois) : plus facile à repérer d'un coup
-      // d'œil pour un jeune lecteur, et toucher l'une ou l'autre case
-      // valide la réponse.
+      // Le mot à trouver apparaît entre 1 et 3 fois au hasard dans la
+      // grille (les autres mots, chacun une seule fois). S'il apparaît
+      // plusieurs fois, il faut toucher TOUTES ses occurrences avant que
+      // la réponse ne soit validée -- voir onWordgridTap, qui compte les
+      // occurrences trouvées dans state.problem.foundCount avant
+      // d'appeler onAnswer().
+      var occurrences = randInt(1, 3);
+      var choices = pool.slice();
+      for (var i = 1; i < occurrences; i++) choices.push(targetKey);
       return {
         kind: "wordgrid",
         word: WORDGRID_DAYS[targetKey],
         dayKey: targetKey,
         answer: targetKey,
-        choices: shuffle(pool.concat([targetKey]))
+        occurrences: occurrences,
+        foundCount: 0,
+        choices: shuffle(choices)
       };
     }
 
@@ -6272,7 +6279,7 @@
           btn.appendChild(btnText);
           btn.setAttribute("data-value", key);
           btn.setAttribute("aria-label", "Répondre " + WORDGRID_DAYS[key]);
-          btn.addEventListener("click", function () { onAnswer(key, btn); });
+          btn.addEventListener("click", function () { onWordgridTap(key, btn); });
           els.answers.appendChild(btn);
           pendingWordgridFits.push([btn, btnText]);
         });
@@ -6404,6 +6411,28 @@
         btn.addEventListener("click", function () { onAnswer(value, btn); });
         els.answers.appendChild(btn);
       });
+    }
+
+    // "Trouve le mot" : quand le mot cible apparaît plusieurs fois (voir
+    // generateWordgridProblem), il faut toucher CHAQUE occurrence avant
+    // que la réponse ne soit validée -- un tapon correct sur une case pas
+    // encore trouvée la marque juste comme trouvée (sans verrouiller le
+    // tour), et seule la dernière occurrence trouvée déclenche onAnswer().
+    // Toucher un mot qui n'est pas la cible reste une vraie erreur,
+    // immédiate, comme dans n'importe quel autre jeu de quiz.
+    function onWordgridTap(key, btn) {
+      if (state.locked) return;
+      if (key !== state.problem.answer) {
+        onAnswer(key, btn);
+        return;
+      }
+      if (btn.disabled) return;
+      btn.disabled = true;
+      btn.classList.add("is-correct");
+      state.problem.foundCount++;
+      if (state.problem.foundCount >= state.problem.occurrences) {
+        onAnswer(key, btn);
+      }
     }
 
     function onAnswer(value, btn) {
