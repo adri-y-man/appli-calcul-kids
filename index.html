@@ -2923,6 +2923,11 @@
           <span>Trouve le mot</span>
           <span class="level-badge">CP-CE1</span>
         </button>
+        <button class="category-card category-card-casse" type="button" id="casseCard">
+          <span class="icon emoji">Aa</span>
+          <span>Majuscule ou minuscule ?</span>
+          <span class="level-badge">PS-MS</span>
+        </button>
       </div>
     </div>
 
@@ -3096,11 +3101,6 @@
         <button class="category-card category-card-trace" type="button" id="traceCard">
           <span class="icon emoji">✏️</span>
           <span>Trace la lettre</span>
-          <span class="level-badge">PS-MS</span>
-        </button>
-        <button class="category-card category-card-casse" type="button" id="casseCard">
-          <span class="icon emoji">Aa</span>
-          <span>Majuscule ou minuscule ?</span>
           <span class="level-badge">PS-MS</span>
         </button>
         <button class="category-card category-card-syllordre" type="button" id="syllordreCard">
@@ -5100,7 +5100,7 @@
       };
     }
 
-    // "Majuscule ou minuscule ?" (Écriture Malin) : une lettre s'affiche
+    // "Majuscule ou minuscule ?" (Lecture Malin) : une lettre s'affiche
     // dans une casse (choisie au hasard), il faut retrouver sa jumelle
     // dans l'autre casse. Les 2 mauvaises réponses sont dans la MÊME casse
     // que la bonne réponse, pour que le jeu porte vraiment sur la lettre
@@ -5459,6 +5459,7 @@
       syllablesCard: document.getElementById("syllablesCard"),
       rhymesCard: document.getElementById("rhymesCard"),
       wordgridCard: document.getElementById("wordgridCard"),
+      casseCard: document.getElementById("casseCard"),
       coloriageCard: document.getElementById("coloriageCard"),
       modeleCard: document.getElementById("modeleCard"),
       dessineCard: document.getElementById("dessineCard"),
@@ -5481,7 +5482,6 @@
       composeCard: document.getElementById("composeCard"),
       lettremanCard: document.getElementById("lettremanCard"),
       traceCard: document.getElementById("traceCard"),
-      casseCard: document.getElementById("casseCard"),
       syllordreCard: document.getElementById("syllordreCard"),
       traceformeCard: document.getElementById("traceformeCard"),
       shapesCard: document.getElementById("shapesCard"),
@@ -8129,12 +8129,12 @@
       if (MODE_TO_OP_3[mode] || MIX_MODES_3[mode]) return "3";
       if (mode === "count" || mode === "compare" || mode === "sequence") return "calc";
       if (mode === "colors" || mode === "animals" || mode === "numbers" || mode === "body" || mode === "food") return "anglais";
-      if (mode === "reading" || mode === "letters" || mode === "syllables" || mode === "rhymes" || mode === "wordgrid") return "lire";
+      if (mode === "reading" || mode === "letters" || mode === "syllables" || mode === "rhymes" || mode === "wordgrid" || mode === "casse") return "lire";
       if (isPaintMode(mode)) return "peinture";
       if (mode === "musiquelibre" || mode === "instruments" || mode === "pitch" || mode === "rythme") return "musique";
       if (mode === "animalname" || mode === "babies" || mode === "habitat" || mode === "diet" || mode === "animalsound") return "animaux";
       if (isMemoryMode(mode) || mode === "disparu" || mode === "ordre" || mode === "change" || mode === "suitelum") return "memoire";
-      if (mode === "mot" || mode === "compose" || mode === "lettreman" || mode === "trace" || mode === "casse" || mode === "syllordre") return "ecriture";
+      if (mode === "mot" || mode === "compose" || mode === "lettreman" || mode === "trace" || mode === "syllordre") return "ecriture";
       if (mode === "traceforme" || mode === "shapes" || mode === "fillforme" || mode === "intrus" || mode === "puzzle") return "formes";
       if (mode === "morpion" || mode === "puissance4" || mode === "dames" || mode === "bataillenavale") return "jeux";
       return null;
@@ -8340,6 +8340,7 @@
     els.syllablesCard.addEventListener("click", function () { selectMode("syllables"); });
     els.rhymesCard.addEventListener("click", function () { selectMode("rhymes"); });
     els.wordgridCard.addEventListener("click", function () { selectMode("wordgrid"); });
+    els.casseCard.addEventListener("click", function () { selectMode("casse"); });
     els.coloriageCard.addEventListener("click", function () { selectMode("coloriage"); });
     els.modeleCard.addEventListener("click", function () { selectMode("modele"); });
     els.dessineCard.addEventListener("click", function () { selectMode("dessine"); });
@@ -8362,7 +8363,6 @@
     els.composeCard.addEventListener("click", function () { selectMode("compose"); });
     els.lettremanCard.addEventListener("click", function () { selectMode("lettreman"); });
     els.traceCard.addEventListener("click", function () { selectMode("trace"); });
-    els.casseCard.addEventListener("click", function () { selectMode("casse"); });
     els.syllordreCard.addEventListener("click", function () { selectMode("syllordre"); });
     els.traceformeCard.addEventListener("click", function () { selectMode("traceforme"); });
     els.shapesCard.addEventListener("click", function () { selectMode("shapes"); });
