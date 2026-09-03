@@ -3467,12 +3467,16 @@
     function generateWordgridProblem(levelIdx) {
       var pool = WORDGRID_LEVEL_POOL[levelIdx];
       var targetKey = pool[randInt(0, pool.length - 1)];
+      // Le mot à trouver apparaît 2 fois dans la grille (parmi les autres
+      // mots, chacun une seule fois) : plus facile à repérer d'un coup
+      // d'œil pour un jeune lecteur, et toucher l'une ou l'autre case
+      // valide la réponse.
       return {
         kind: "wordgrid",
         word: WORDGRID_DAYS[targetKey],
         dayKey: targetKey,
         answer: targetKey,
-        choices: shuffle(pool.slice())
+        choices: shuffle(pool.concat([targetKey]))
       };
     }
 
