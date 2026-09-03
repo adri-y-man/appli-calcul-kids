@@ -1160,6 +1160,75 @@
 
   .spell-tile:disabled { opacity: 0; pointer-events: none; }
 
+  /* ---------- Lecture Malin : "Cherche le mot caché" ---------- */
+
+  .wordsearch-screen {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.8rem, 3.5vh, 1.4rem);
+    min-height: 0;
+    width: 100%;
+  }
+
+  .wordsearch-screen[hidden] { display: none; }
+
+  .wordsearch-target {
+    appearance: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    background: rgba(255, 255, 255, 0.85);
+    color: var(--ink);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.1rem;
+    border-radius: 999px;
+    box-shadow: 0 6px 0 rgba(31, 42, 60, 0.15);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+
+  .wordsearch-target:active { transform: translateY(2px); box-shadow: 0 3px 0 rgba(31, 42, 60, 0.15); }
+  .wordsearch-target:focus-visible { outline: 3px solid var(--candy-blue); outline-offset: 3px; }
+
+  .wordsearch-target-text {
+    font-weight: 900;
+    font-size: clamp(1.3rem, 6.5vw, 2.1rem);
+    letter-spacing: 0.04em;
+    line-height: 1;
+  }
+
+  .wordsearch-target-icon { font-size: 1.15rem; }
+
+  .wordsearch-grid {
+    display: grid;
+    gap: clamp(0.15rem, 0.8vw, 0.35rem);
+    width: min(92vw, 62vh, 30rem);
+    aspect-ratio: 1;
+  }
+
+  .wordsearch-cell {
+    appearance: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    border-radius: clamp(0.2rem, 1vw, 0.4rem);
+    background: var(--white);
+    font-weight: 800;
+    font-size: clamp(0.65rem, 3.4vw, 1.3rem);
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 8px -6px rgba(31, 42, 60, 0.4);
+    transition: transform 0.1s ease;
+  }
+
+  .wordsearch-cell.solved { background: var(--correct); color: var(--white); }
+
   /* ---------- Écriture Malin : "Trace la lettre" ---------- */
 
   .trace-screen {
@@ -2162,6 +2231,7 @@
   .category-card-letters { background: linear-gradient(135deg, #43b98a, #2a9d6f); }
   .category-card-syllables { background: linear-gradient(135deg, #598ce6, #3454d1); }
   .category-card-rhymes { background: linear-gradient(135deg, #ef5da8, #d9418c); }
+  .category-card-wordsearch { background: linear-gradient(135deg, #43b98a, #598ce6); }
   .category-card-compose { background: linear-gradient(135deg, #ffb703, #fb8500); }
   .category-card-coloriage { background: linear-gradient(135deg, #ff8c3d, #e63946); }
   .category-card-modele { background: linear-gradient(135deg, #8e5ce6, #3454d1); }
@@ -2529,6 +2599,14 @@
     <span class="spell-pic emoji" id="spellPic"></span>
     <div class="spell-slots" id="spellSlots"></div>
     <div class="spell-tiles" id="spellTiles"></div>
+  </section>
+
+  <section class="wordsearch-screen" id="wordsearchScreen" hidden>
+    <button type="button" class="wordsearch-target" id="wordsearchTargetBtn" aria-label="Écouter le mot à chercher">
+      <span class="wordsearch-target-text" id="wordsearchTargetText"></span>
+      <span class="wordsearch-target-icon">🔊</span>
+    </button>
+    <div class="wordsearch-grid" id="wordsearchGrid"></div>
   </section>
 
   <section class="trace-screen" id="traceScreen" hidden>
@@ -2905,6 +2983,11 @@
           <span class="icon emoji">🎵</span>
           <span>Les mots qui riment</span>
           <span class="level-badge">MS-GS</span>
+        </button>
+        <button class="category-card category-card-wordsearch" type="button" id="wordsearchCard">
+          <span class="icon emoji">🔍</span>
+          <span>Cherche le mot caché</span>
+          <span class="level-badge">CP-CE1</span>
         </button>
       </div>
     </div>
@@ -3424,6 +3507,70 @@
         "dauphin", "chateau", "taureau", "poisson", "elephant", "papillon", "tournesol", "dinosaure"]
     ];
     var COMPOSE_DISTRACTOR_COUNT = [3, 3, 4, 4, 5];
+
+    // Lecture Malin — "Cherche le mot caché" : grille de lettres façon
+    // mots mêlés, un seul mot caché à la fois (les jours de la semaine).
+    // Le mot est placé en ligne droite (horizontale, verticale, ou les
+    // deux sens selon le niveau), le reste de la grille est rempli de
+    // lettres au hasard. L'enfant touche les lettres dans l'ordre pour
+    // suivre le chemin du mot cible.
+    var WORDSEARCH_WORDS = {
+      lundi: "LUNDI",
+      mardi: "MARDI",
+      jeudi: "JEUDI",
+      samedi: "SAMEDI",
+      dimanche: "DIMANCHE",
+      mercredi: "MERCREDI",
+      vendredi: "VENDREDI"
+    };
+    var WORDSEARCH_LEVEL_POOL = [
+      ["lundi", "mardi", "jeudi"],
+      ["lundi", "mardi", "jeudi", "samedi"],
+      ["lundi", "mardi", "jeudi", "samedi", "dimanche"],
+      ["lundi", "mardi", "jeudi", "samedi", "dimanche", "mercredi", "vendredi"],
+      ["lundi", "mardi", "jeudi", "samedi", "dimanche", "mercredi", "vendredi"]
+    ];
+    var WORDSEARCH_GRID_SIZE = [6, 7, 8, 8, 9];
+    // Direction(s) autorisée(s) pour placer le mot, par niveau : seulement
+    // vers la droite au niveau 1 (le plus facile à suivre du doigt),
+    // droite/bas ensuite, puis les 4 directions cardinales (pas de
+    // diagonale, trop difficile à repérer pour un jeune lecteur).
+    var WORDSEARCH_DIRECTIONS = [
+      [[0, 1]],
+      [[0, 1], [1, 0]],
+      [[0, 1], [1, 0]],
+      [[0, 1], [1, 0], [0, -1], [-1, 0]],
+      [[0, 1], [1, 0], [0, -1], [-1, 0]]
+    ];
+
+    function wordsearchBuildGrid(word, size, directions) {
+      var grid = [];
+      for (var r = 0; r < size; r++) grid.push(new Array(size).fill(null));
+      var path = null;
+      var guard = 0;
+      while (!path && guard < 500) {
+        guard++;
+        var dir = directions[randInt(0, directions.length - 1)];
+        var dr = dir[0], dc = dir[1];
+        var startR = randInt(0, size - 1);
+        var startC = randInt(0, size - 1);
+        var cells = [];
+        var ok = true;
+        for (var i = 0; i < word.length; i++) {
+          var rr = startR + dr * i, cc = startC + dc * i;
+          if (rr < 0 || rr >= size || cc < 0 || cc >= size) { ok = false; break; }
+          cells.push([rr, cc]);
+        }
+        if (ok) path = cells;
+      }
+      path.forEach(function (cell, i) { grid[cell[0]][cell[1]] = word[i]; });
+      for (var r2 = 0; r2 < size; r2++) {
+        for (var c2 = 0; c2 < size; c2++) {
+          if (!grid[r2][c2]) grid[r2][c2] = ALPHABET[randInt(0, ALPHABET.length - 1)];
+        }
+      }
+      return { grid: grid, path: path };
+    }
 
     var LETTER_WORDS = {
       chat: { emoji: "🐱", letter: "C" },
@@ -4439,7 +4586,14 @@
       bnShots2: [],
       bnTurn: "1",
       bnPhase: "handoff",
-      bnWinner: null
+      bnWinner: null,
+      wordsearchGrid: [],
+      wordsearchPath: [],
+      wordsearchWord: "",
+      wordsearchProgress: 0,
+      lastWordsearchKey: "",
+      wordsearchBag: [],
+      wordsearchBagPool: null
     };
 
     var PROGRESS_KEY = "calculMalinProgress";
@@ -5390,6 +5544,7 @@
       lettersCard: document.getElementById("lettersCard"),
       syllablesCard: document.getElementById("syllablesCard"),
       rhymesCard: document.getElementById("rhymesCard"),
+      wordsearchCard: document.getElementById("wordsearchCard"),
       coloriageCard: document.getElementById("coloriageCard"),
       modeleCard: document.getElementById("modeleCard"),
       dessineCard: document.getElementById("dessineCard"),
@@ -5454,6 +5609,10 @@
       spellPic: document.getElementById("spellPic"),
       spellSlots: document.getElementById("spellSlots"),
       spellTiles: document.getElementById("spellTiles"),
+      wordsearchScreen: document.getElementById("wordsearchScreen"),
+      wordsearchTargetBtn: document.getElementById("wordsearchTargetBtn"),
+      wordsearchTargetText: document.getElementById("wordsearchTargetText"),
+      wordsearchGrid: document.getElementById("wordsearchGrid"),
       traceScreen: document.getElementById("traceScreen"),
       traceStage: document.getElementById("traceStage"),
       traceGuidePath: document.getElementById("traceGuidePath"),
@@ -7261,6 +7420,90 @@
       }
     }
 
+    // Lecture Malin — "Cherche le mot caché" : voir wordsearchBuildGrid
+    // (données/algorithme) plus haut pour la génération de la grille.
+    function startWordsearchProblem() {
+      var levelIdx = Math.min(Math.max(state.level, MIN_LEVEL), MAX_LEVEL) - 1;
+      var pool = WORDSEARCH_LEVEL_POOL[levelIdx];
+      var key = drawFromBag(pool, "wordsearchBag", "wordsearchBagPool", "lastWordsearchKey");
+      state.lastWordsearchKey = key;
+      var word = WORDSEARCH_WORDS[key];
+      var built = wordsearchBuildGrid(word, WORDSEARCH_GRID_SIZE[levelIdx], WORDSEARCH_DIRECTIONS[levelIdx]);
+      state.wordsearchGrid = built.grid;
+      state.wordsearchPath = built.path;
+      state.wordsearchWord = word;
+      state.wordsearchProgress = 0;
+      renderWordsearchScreen();
+      saveProgress();
+    }
+
+    function onWordsearchCellTap(row, col, btn) {
+      if (state.wordsearchProgress >= state.wordsearchPath.length) return;
+      var expected = state.wordsearchPath[state.wordsearchProgress];
+      if (expected[0] === row && expected[1] === col) {
+        state.wordsearchProgress++;
+        if (state.wordsearchProgress === state.wordsearchPath.length) {
+          renderWordsearchScreen();
+          onWordsearchWin();
+        } else {
+          renderWordsearchScreen();
+        }
+      } else {
+        // Pas de pénalité, comme "Compose le mot" : une mauvaise case secoue
+        // juste, la progression déjà acquise reste intacte.
+        btn.classList.add("shake");
+        window.setTimeout(function () { btn.classList.remove("shake"); }, 400);
+      }
+    }
+
+    function onWordsearchWin() {
+      state.wrongStreak = 0;
+      state.correctStreak++;
+      var leveledUp = false;
+      var justWon = false;
+      if (state.correctStreak >= starsToLevelUp(state.mode)) {
+        if (state.level < MAX_LEVEL) {
+          state.level++;
+          leveledUp = true;
+        } else {
+          justWon = true;
+        }
+        state.correctStreak = 0;
+      }
+      if (!leveledUp && !justWon) renderLevel();
+      saveProgress();
+      if (leveledUp) {
+        window.setTimeout(function () { showLevelUp(state.level); }, 900);
+      } else if (justWon) {
+        window.setTimeout(showWin, 900);
+      } else {
+        window.setTimeout(startWordsearchProblem, 1200);
+      }
+    }
+
+    function renderWordsearchScreen() {
+      els.wordsearchTargetText.textContent = state.wordsearchWord;
+      var size = state.wordsearchGrid.length;
+      els.wordsearchGrid.style.gridTemplateColumns = "repeat(" + size + ", 1fr)";
+      els.wordsearchGrid.innerHTML = "";
+      var solvedSet = {};
+      for (var i = 0; i < state.wordsearchProgress; i++) {
+        var solvedCell = state.wordsearchPath[i];
+        solvedSet[solvedCell[0] + "," + solvedCell[1]] = true;
+      }
+      state.wordsearchGrid.forEach(function (rowArr, r) {
+        rowArr.forEach(function (letter, c) {
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "wordsearch-cell" + (solvedSet[r + "," + c] ? " solved" : "");
+          btn.textContent = letter;
+          btn.setAttribute("aria-label", "Ligne " + (r + 1) + " colonne " + (c + 1) + " : lettre " + letter);
+          btn.addEventListener("click", (function (rr, cc, b) { return function () { onWordsearchCellTap(rr, cc, b); }; }(r, c, btn)));
+          els.wordsearchGrid.appendChild(btn);
+        });
+      });
+    }
+
     // "Trace la lettre" (Écriture Malin) : une grande lettre en pointillés
     // sert de guide, et l'enfant la suit du doigt sur un canevas superposé
     // — reprend le geste de dessin libre de Peinture Malin, sans validation
@@ -7993,7 +8236,7 @@
       if (MODE_TO_OP_3[mode] || MIX_MODES_3[mode]) return "3";
       if (mode === "count" || mode === "compare" || mode === "sequence") return "calc";
       if (mode === "colors" || mode === "animals" || mode === "numbers" || mode === "body" || mode === "food") return "anglais";
-      if (mode === "reading" || mode === "letters" || mode === "syllables" || mode === "rhymes") return "lire";
+      if (mode === "reading" || mode === "letters" || mode === "syllables" || mode === "rhymes" || mode === "wordsearch") return "lire";
       if (isPaintMode(mode)) return "peinture";
       if (mode === "musiquelibre" || mode === "instruments" || mode === "pitch" || mode === "rythme") return "musique";
       if (mode === "animalname" || mode === "babies" || mode === "habitat" || mode === "diet" || mode === "animalsound") return "animaux";
@@ -8091,8 +8334,9 @@
       var puissance4 = mode === "puissance4";
       var dames = mode === "dames";
       var bataillenavale = mode === "bataillenavale";
-      els.problemZone.hidden = paint || music || rhythm || memory || suitelum || ordre || spell || trace || fillforme || morpion || puissance4 || dames || bataillenavale;
-      els.answers.hidden = paint || music || rhythm || memory || suitelum || ordre || spell || trace || fillforme || morpion || puissance4 || dames || bataillenavale;
+      var wordsearch = mode === "wordsearch";
+      els.problemZone.hidden = paint || music || rhythm || memory || suitelum || ordre || spell || trace || fillforme || morpion || puissance4 || dames || bataillenavale || wordsearch;
+      els.answers.hidden = paint || music || rhythm || memory || suitelum || ordre || spell || trace || fillforme || morpion || puissance4 || dames || bataillenavale || wordsearch;
       els.paintScreen.hidden = !paint;
       els.musicScreen.hidden = !music;
       els.rhythmScreen.hidden = !rhythm;
@@ -8106,6 +8350,7 @@
       els.puissance4Screen.hidden = !puissance4;
       els.damesScreen.hidden = !dames;
       els.bnScreen.hidden = !bataillenavale;
+      els.wordsearchScreen.hidden = !wordsearch;
       els.levelPill.hidden = mode === "dessine" || music || isBoardGameMode(mode);
       if (morpion) {
         state.problem = null;
@@ -8125,6 +8370,11 @@
       if (bataillenavale) {
         state.problem = null;
         startBatailleNavale();
+        return;
+      }
+      if (wordsearch) {
+        state.problem = null;
+        startWordsearchProblem();
         return;
       }
       if (paint) {
@@ -8203,6 +8453,8 @@
     els.lettersCard.addEventListener("click", function () { selectMode("letters"); });
     els.syllablesCard.addEventListener("click", function () { selectMode("syllables"); });
     els.rhymesCard.addEventListener("click", function () { selectMode("rhymes"); });
+    els.wordsearchCard.addEventListener("click", function () { selectMode("wordsearch"); });
+    els.wordsearchTargetBtn.addEventListener("click", function () { speakWord(state.wordsearchWord, "fr-FR"); });
     els.coloriageCard.addEventListener("click", function () { selectMode("coloriage"); });
     els.modeleCard.addEventListener("click", function () { selectMode("modele"); });
     els.dessineCard.addEventListener("click", function () { selectMode("dessine"); });
