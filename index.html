@@ -631,9 +631,10 @@
     grid-template-columns: repeat(2, 1fr);
     grid-auto-rows: 1fr;
     width: 90%;
+    overflow-y: auto;
   }
 
-  /* ---------- Formes Malin : "Trouve l'intrus" — grille de 4 à 9 formes
+  /* ---------- Formes Malin : "Trouve l'intrus" — grille de 4 à 12 formes
      tactiles, 3 colonnes (2 au niveau 1, qui n'a que 4 cases : .answers-grid-2
      ci-dessus donne alors une grille 2x2 bien carrée) ---------- */
 
@@ -643,6 +644,11 @@
     grid-auto-rows: 1fr;
     width: 92%;
     gap: clamp(0.4rem, 1.8vw, 0.8rem);
+    /* Les niveaux élevés de "Trouve l'intrus" empilent jusqu'à 4 rangées :
+       sur un écran bas (téléphone en paysage, petite tablette), ça peut
+       dépasser la hauteur disponible -- on fait défiler la grille plutôt
+       que de laisser les dernières cases déborder hors de l'écran. */
+    overflow-y: auto;
   }
 
   /* ---------- "Aigu ou grave ?" (Musique Malin) : les 3 boutons son
@@ -4351,7 +4357,10 @@
       etoile: { fr: "Étoile", type: "polygon", points: "100,20 117.6,75.8 176,75.2 128.6,109.2 147,164.8 100,130 53,164.8 71.4,109.2 24,75.2 82.4,75.8" },
       hexagone: { fr: "Hexagone", type: "polygon", points: "100,20 169.2,60 169.2,140 100,180 30.8,140 30.8,60" },
       pentagone: { fr: "Pentagone", type: "polygon", points: "100,20 176,75.2 147,164.8 53,164.8 24,75.2" },
-      coeur: { fr: "Cœur", type: "path", d: "M100 164 C40 120 16 80 16 52 C16 24 40 8 64 8 C84 8 100 24 100 44 C100 24 116 8 136 8 C160 8 184 24 184 52 C184 80 160 120 100 164 Z" }
+      coeur: { fr: "Cœur", type: "path", d: "M100 164 C40 120 16 80 16 52 C16 24 40 8 64 8 C84 8 100 24 100 44 C100 24 116 8 136 8 C160 8 184 24 184 52 C184 80 160 120 100 164 Z" },
+      trapeze: { fr: "Trapèze", type: "polygon", points: "60,32 140,32 172,168 28,168" },
+      croix: { fr: "Croix", type: "polygon", points: "70,20 130,20 130,70 180,70 180,130 130,130 130,180 70,180 70,130 20,130 20,70 70,70" },
+      fleche: { fr: "Flèche", type: "polygon", points: "20,82 110,82 110,40 180,100 110,160 110,118 20,118" }
     };
 
     // Rectangle, ovale et losange ont un sens "large" par défaut dans
@@ -4422,13 +4431,15 @@
 
     // Progression partagée par les 5 jeux de Formes Malin : au moins 3
     // formes dès le niveau 1 (2 distracteurs + la bonne réponse pour les
-    // quiz à 3 choix), jusqu'aux 10 formes définies au niveau 5.
+    // quiz à 3 choix), jusqu'aux 13 formes définies aux niveaux les plus
+    // élevés (trapèze, croix et flèche s'ajoutent aux niveaux 4-5 pour
+    // complexifier davantage la fin de la progression).
     var SHAPE_LEVEL_POOL = [
       ["rond", "carre", "triangle"],
       ["rond", "carre", "triangle", "rectangle"],
       ["rond", "carre", "triangle", "rectangle", "losange", "ovale"],
-      ["rond", "carre", "triangle", "rectangle", "losange", "ovale", "etoile", "hexagone"],
-      ["rond", "carre", "triangle", "rectangle", "losange", "ovale", "etoile", "hexagone", "pentagone", "coeur"]
+      ["rond", "carre", "triangle", "rectangle", "losange", "ovale", "etoile", "hexagone", "trapeze"],
+      ["rond", "carre", "triangle", "rectangle", "losange", "ovale", "etoile", "hexagone", "trapeze", "pentagone", "coeur", "croix", "fleche"]
     ];
 
     var SHAPE_QUIZ_COLORS = ["#e63946", "#3d7fe0", "#43b98a", "#f2994a", "#8e5ce6", "#ef5da8", "#33c2c2", "#ffd400"];
@@ -4438,8 +4449,11 @@
     // tirage de couleur, sinon la forme se voit à peine sur ce fond clair.
     var SHAPE_ICON_BTN_COLORS = SHAPE_QUIZ_COLORS.filter(function (c) { return c !== "#ffd400"; });
 
-    // "Trouve l'intrus" : nombre de cases dans la grille pour chaque niveau.
-    var INTRUS_GRID_SIZE = [4, 6, 6, 8, 9];
+    // "Trouve l'intrus" : nombre de cases dans la grille et nombre maximum
+    // d'intrus (formes différentes) pour chaque niveau -- les niveaux
+    // élevés ont beaucoup plus de cases, et jusqu'à 3 intrus à la fois.
+    var INTRUS_GRID_SIZE = [4, 6, 9, 12, 12];
+    var INTRUS_MAX_ODD = [1, 1, 2, 2, 3];
 
     // "Remplis la forme" : l'enfant colorie au doigt (glisser = peindre),
     // le trait est automatiquement retenu à l'intérieur du contour. Part de
@@ -5003,11 +5017,14 @@
     }
 
     // "Trouve l'intrus" : une grille de formes identiques (même forme, même
-    // couleur) sauf une seule, qui a une forme différente — l'enfant doit
-    // taper dessus. La position de l'intrus et la position tirées à part
-    // (pas de pile mélangée ici : la grille change de toute façon à chaque
-    // manche, forme principale ou pas, donc pas le même risque de
-    // répétition perçue que "le même mot deux fois de suite").
+    // couleur) sauf entre 1 et INTRUS_MAX_ODD[niveau] d'entre elles (même
+    // forme différente, la même partout), que l'enfant doit toutes taper
+    // avant que la réponse ne soit validée -- voir onIntrusTap, qui compte
+    // les intrus trouvés dans state.problem.foundCount avant d'appeler
+    // onAnswer(). La position des intrus est tirée à part (pas de pile
+    // mélangée ici : la grille change de toute façon à chaque manche,
+    // forme principale ou pas, donc pas le même risque de répétition
+    // perçue que "le même mot deux fois de suite").
     function generateIntrusProblem(levelIdx) {
       var pool = SHAPE_LEVEL_POOL[levelIdx];
       var gridSize = INTRUS_GRID_SIZE[levelIdx];
@@ -5015,14 +5032,20 @@
       var mainKey = pool[randInt(0, pool.length - 1)];
       var others = pool.filter(function (k) { return k !== mainKey; });
       var oddKey = others[randInt(0, others.length - 1)];
-      var oddIndex = randInt(0, gridSize - 1);
+      var oddCount = randInt(1, INTRUS_MAX_ODD[levelIdx]);
+      var allIndexes = [];
+      for (var i = 0; i < gridSize; i++) allIndexes.push(i);
+      var oddIndexes = shuffle(allIndexes).slice(0, oddCount).sort(function (a, b) { return a - b; });
       var cells = [];
-      for (var i = 0; i < gridSize; i++) cells.push(i === oddIndex ? oddKey : mainKey);
+      for (var j = 0; j < gridSize; j++) cells.push(oddIndexes.indexOf(j) !== -1 ? oddKey : mainKey);
       return {
         kind: "intrus",
         cells: cells,
         color: color,
-        answer: oddIndex,
+        oddIndexes: oddIndexes,
+        oddCount: oddCount,
+        foundCount: 0,
+        answer: "odd",
         choices: cells.map(function (_, idx) { return idx; })
       };
     }
@@ -6280,13 +6303,14 @@
       if (state.problem.kind === "intrus") {
         els.answers.classList.add(state.problem.cells.length === 4 ? "answers-grid-2" : "answers-grid-3");
         state.problem.cells.forEach(function (key, idx) {
+          var isOdd = state.problem.oddIndexes.indexOf(idx) !== -1;
           var btn = document.createElement("button");
           btn.type = "button";
           btn.className = "answer-btn shape-icon-btn shape-icon-btn-small";
           btn.innerHTML = '<svg viewBox="0 0 200 200" aria-hidden="true">' + shapeFillSvgInner(key, state.problem.color) + "</svg>";
-          btn.setAttribute("data-value", idx);
+          btn.setAttribute("data-value", isOdd ? "odd" : "main");
           btn.setAttribute("aria-label", "Case " + (idx + 1));
-          btn.addEventListener("click", function () { onAnswer(idx, btn); });
+          btn.addEventListener("click", function () { onIntrusTap(idx, btn); });
           els.answers.appendChild(btn);
         });
         return;
@@ -6474,6 +6498,28 @@
       state.problem.foundCount++;
       if (state.problem.foundCount >= state.problem.occurrences) {
         onAnswer(key, btn);
+      }
+    }
+
+    // "Trouve l'intrus" : quand il y a plusieurs intrus (voir
+    // generateIntrusProblem), il faut toucher CHACUN avant que la réponse
+    // ne soit validée -- même logique que onWordgridTap. Toutes les cases
+    // intrus partagent le même data-value ("odd") : le passage générique
+    // de marquage d'onAnswer() les met donc toutes en évidence d'un coup
+    // dès que la dernière est trouvée, sans qu'il faille suivre chaque
+    // position individuellement.
+    function onIntrusTap(idx, btn) {
+      if (state.locked) return;
+      if (state.problem.oddIndexes.indexOf(idx) === -1) {
+        onAnswer("main", btn);
+        return;
+      }
+      if (btn.disabled) return;
+      btn.disabled = true;
+      btn.classList.add("is-correct");
+      state.problem.foundCount++;
+      if (state.problem.foundCount >= state.problem.oddCount) {
+        onAnswer("odd", btn);
       }
     }
 
