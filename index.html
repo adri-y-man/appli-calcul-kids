@@ -710,6 +710,15 @@
     .answer-listen-btn { width: 100%; flex: 0 0 auto; min-height: 3rem; }
   }
 
+  /* Tablette (portrait ou paysage) : le texte des réponses (chiffres,
+     lettres, syllabes...) restait plafonné à la même taille max qu'un
+     téléphone alors que les boutons, eux, ont bien plus de place. */
+  @media (min-width: 640px) {
+    :root {
+      --fs-button: clamp(2.3rem, 12vw, 4.3rem);
+    }
+  }
+
   /* ---------- Peinture Malin ---------- */
 
   .paint-screen {
