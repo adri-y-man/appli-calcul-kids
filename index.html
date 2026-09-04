@@ -615,7 +615,12 @@
     align-self: center;
   }
 
-  .answers[hidden] { display: none; }
+  /* !important : sans ça, un ancien jeu qui laisse .answers-grid-2/3 sur
+     #answers (ces jeux ne rappellent pas renderAnswers() en quittant)
+     gagne le conflit de spécificité à égalité contre cette règle -- et
+     "hidden" perd, donc les réponses du jeu précédent restent visibles
+     par-dessus un écran custom (Remplis la forme, Peinture, etc.). */
+  .answers[hidden] { display: none !important; }
 
   /* ---------- jeu "Animaux" (Anglais Malin) : 4 réponses en photo,
      disposées en grille 2x2 plutôt qu'en colonne/rangée, pour que chaque
