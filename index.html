@@ -3463,19 +3463,30 @@
       ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"],
       ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
     ];
+    // Nombre de cases de la grille par niveau -- toujours un multiple de 3
+    // pour rester sur 3 colonnes (2, 3 puis 4 rangées).
+    var WORDGRID_CELL_COUNT = [6, 6, 9, 9, 12];
 
     function generateWordgridProblem(levelIdx) {
       var pool = WORDGRID_LEVEL_POOL[levelIdx];
       var targetKey = pool[randInt(0, pool.length - 1)];
       // Le mot à trouver apparaît entre 1 et 3 fois au hasard dans la
-      // grille (les autres mots, chacun une seule fois). S'il apparaît
-      // plusieurs fois, il faut toucher TOUTES ses occurrences avant que
-      // la réponse ne soit validée -- voir onWordgridTap, qui compte les
-      // occurrences trouvées dans state.problem.foundCount avant
-      // d'appeler onAnswer().
+      // grille. S'il apparaît plusieurs fois, il faut toucher TOUTES ses
+      // occurrences avant que la réponse ne soit validée -- voir
+      // onWordgridTap, qui compte les occurrences trouvées dans
+      // state.problem.foundCount avant d'appeler onAnswer().
       var occurrences = randInt(1, 3);
-      var choices = pool.slice();
-      for (var i = 1; i < occurrences; i++) choices.push(targetKey);
+      var totalCells = WORDGRID_CELL_COUNT[levelIdx];
+      var otherKeys = pool.filter(function (k) { return k !== targetKey; });
+      // Remplit le reste de la grille en piochant dans les autres mots du
+      // niveau, mélangés par "paquets" complets (comme drawFromBag) pour
+      // une répartition équilibrée plutôt qu'un tirage totalement libre.
+      var fillers = [];
+      while (fillers.length < totalCells - occurrences) {
+        fillers = fillers.concat(shuffle(otherKeys.slice()));
+      }
+      fillers.length = totalCells - occurrences;
+      var choices = fillers.concat(new Array(occurrences).fill(targetKey));
       return {
         kind: "wordgrid",
         word: WORDGRID_DAYS[targetKey],
@@ -6266,7 +6277,7 @@
       }
 
       if (state.problem.kind === "wordgrid") {
-        els.answers.classList.add(state.problem.choices.length === 4 ? "answers-grid-2" : "answers-grid-3");
+        els.answers.classList.add("answers-grid-3");
         var wordgridPalette = shuffle(CANDY_COLORS.slice());
         var pendingWordgridFits = [];
         state.problem.choices.forEach(function (key, idx) {
