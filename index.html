@@ -689,7 +689,13 @@
     padding: 0.3rem;
   }
 
-  @media (min-width: 640px) {
+  /* "orientation: landscape" ici : en portrait (téléphone ET tablette),
+     la hauteur disponible n'est pas démesurée -- les boutons empilés en
+     colonne (comme en mobile portrait, cf. plus bas) restent bien
+     proportionnés et hauts. Sans cette condition, une tablette en
+     portrait (largeur >= 640px) passait par erreur en rangée horizontale
+     comme le paysage, avec des boutons ridiculement plats. */
+  @media (min-width: 640px) and (orientation: landscape) {
     /* sans "align-items: center", les réponses s'étirent pour remplir
        toute la hauteur disponible de .answers (qui grandit librement dans
        .scene) : sur tablette/ordinateur, où cette hauteur est grande, les
